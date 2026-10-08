@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@media print {
+  nav, footer, button, select {
+    display: none !important;
+  }
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  table {
+    border: 1px solid #cbd5e1 !important;
+  }
+  th, td {
+    border: 1px solid #cbd5e1 !important;
+    color: black !important;
+  }
+}
