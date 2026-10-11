@@ -98,7 +98,14 @@ const SAMPLE_BENCHMARK_DATA = {
 };
 
 export default function SchedulePage() {
-  const { loading, error, currentSchedule, generateSchedule, rescheduleConflicts, getScheduleById } = useSchedule();
+  const {
+    loading,
+    error,
+    currentSchedule,
+    setCurrentSchedule,
+    generateSchedule,
+    rescheduleConflicts,
+  } = useSchedule();
   const [datasetJson, setDatasetJson] = useState(JSON.stringify(SAMPLE_BENCHMARK_DATA, null, 2));
   const [activeTab, setActiveTab] = useState<'views' | 'grid' | 'export' | 'feedback' | 'analytics' | 'editor'>('views');
   const [rescheduleSlotId, setRescheduleSlotId] = useState<number>(0);
@@ -189,13 +196,21 @@ export default function SchedulePage() {
         <div className="lg:col-span-5">
           <CsvUploader
             onScheduleGenerated={(data) => {
+              setCurrentSchedule(data);
               setActiveScheduleId(data.schedule_id);
               setActiveTab('views');
             }}
           />
         </div>
         <div className="lg:col-span-7">
-          <ChatBot scheduleId={effectiveScheduleId} />
+          <ChatBot
+            scheduleId={effectiveScheduleId}
+            onScheduleGenerated={(data) => {
+              setCurrentSchedule(data);
+              setActiveScheduleId(data.schedule_id);
+              setActiveTab('views');
+            }}
+          />
         </div>
       </div>
 

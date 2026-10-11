@@ -3,10 +3,15 @@
 import { useState, useRef } from 'react';
 import { Upload, FileSpreadsheet, Download, CheckCircle2, RefreshCw } from 'lucide-react';
 import { TimetableResponse } from '../types';
+import {
+  parseCsvLocally,
+  solveLocally,
+  saveLocalSchedule,
+} from '../utils/localFallbackSolver';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-const SAMPLE_CSV = `teacher,course,code,hours,preferred_time,department,capacity
+export const SAMPLE_CSV = `teacher,course,code,hours,preferred_time,department,capacity
 Ahmad Ali,Data Structures & Algorithms,CS301,3,Morning,Computer Science,60
 Fatima Khan,Database Management Systems,CS302,4,Afternoon,Computer Science,50
 Hassan Raza,Operating Systems,SE205,3,Morning,Software Engineering,45
@@ -42,9 +47,18 @@ export default function CsvUploader({ onScheduleGenerated }: CsvUploaderProps) {
         throw new Error(errData.detail || 'CSV upload failed');
       }
       const data: TimetableResponse = await res.json();
+      saveLocalSchedule(data);
       onScheduleGenerated(data);
     } catch (err: any) {
-      setError(err.message);
+      // Fallback to in-browser CSV parsing & solving if backend is unreachable
+      try {
+        const text = await file.text();
+        const parsed = parseCsvLocally(text);
+        const localData = solveLocally(parsed);
+        onScheduleGenerated(localData);
+      } catch (fallbackErr: any) {
+        setError(fallbackErr.message || err.message);
+      }
     } finally {
       setUploading(false);
     }

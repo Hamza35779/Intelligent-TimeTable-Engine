@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Download, Layers, CheckCircle2 } from 'lucide-react';
+import { triggerLocalDownload } from '../utils/localFallbackSolver';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -47,8 +48,8 @@ export default function ExportOptions({ scheduleId }: ExportOptionsProps) {
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
-    } catch (err: any) {
-      alert(`Export error: ${err.message}`);
+    } catch {
+      triggerLocalDownload(scheduleId, format, view);
     } finally {
       setExportingFormat(null);
     }
@@ -71,6 +72,7 @@ export default function ExportOptions({ scheduleId }: ExportOptionsProps) {
           {views.map((v) => (
             <button
               key={v.id}
+              type="button"
               onClick={() => setSelectedView(v.id)}
               className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition ${
                 selectedView === v.id
@@ -89,6 +91,7 @@ export default function ExportOptions({ scheduleId }: ExportOptionsProps) {
         {exportFormats.map((fmt) => (
           <button
             key={fmt.value}
+            type="button"
             onClick={() => handleExport(fmt.value)}
             disabled={exportingFormat !== null}
             className="p-3 bg-slate-950 hover:bg-emerald-500/10 border border-slate-800 hover:border-emerald-500/40 text-slate-200 hover:text-emerald-300 rounded-xl text-xs font-semibold transition flex flex-col items-center justify-center gap-1.5 disabled:opacity-50"

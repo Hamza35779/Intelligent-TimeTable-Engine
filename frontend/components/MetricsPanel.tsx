@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Scale, Sparkles, Eye, Utensils, Users, GraduationCap, Wrench } from 'lucide-react';
+import { getLocalSchedule, buildLocalTableView } from '../utils/localFallbackSolver';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -39,11 +40,19 @@ export default function MetricsPanel({
     if (!scheduleId) return;
     setLoadingView(true);
     fetch(`${API_BASE}/schedule/${scheduleId}/table?view=${selectedView}`)
-      .then((res) => (res.ok ? res.json() : null))
+      .then((res) => {
+        if (!res.ok) throw new Error('Backend table endpoint failed');
+        return res.json();
+      })
       .then((data) => {
         if (data) setTableData(data);
       })
-      .catch(console.error)
+      .catch(() => {
+        const local = getLocalSchedule(scheduleId);
+        if (local) {
+          setTableData(buildLocalTableView(local.schedule, selectedView));
+        }
+      })
       .finally(() => setLoadingView(false));
   }, [scheduleId, selectedView]);
 
@@ -115,6 +124,7 @@ export default function MetricsPanel({
               return (
                 <button
                   key={tab.id}
+                  type="button"
                   onClick={() => setSelectedView(tab.id)}
                   className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition ${
                     active

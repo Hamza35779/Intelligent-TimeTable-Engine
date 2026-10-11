@@ -82,7 +82,21 @@ export default function HomePage() {
           <MLStatus />
         </div>
         <div className="lg:col-span-7">
-          <ChatBot scheduleId={recentSchedules[0]?.id} />
+          <ChatBot
+            scheduleId={recentSchedules[0]?.id}
+            onScheduleGenerated={(data) => {
+              setRecentSchedules((prev) => [
+                {
+                  id: data.schedule_id,
+                  generated_at: data.generated_at,
+                  status: data.status,
+                  total_courses_scheduled: data.stats.total_courses_scheduled,
+                  solver_time_ms: data.stats.solver_time_ms,
+                },
+                ...prev.filter((item) => item.id !== data.schedule_id),
+              ]);
+            }}
+          />
         </div>
       </div>
 
