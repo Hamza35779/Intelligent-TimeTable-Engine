@@ -7,6 +7,10 @@ import { useSchedule } from '../../../hooks/useSchedule';
 import TimetableGrid from '../../../components/TimetableGrid';
 import SolverStatus from '../../../components/SolverStatus';
 import Analytics from '../../../components/Analytics';
+import MetricsPanel from '../../../components/MetricsPanel';
+import ExportOptions from '../../../components/ExportOptions';
+import FeedbackForm from '../../../components/FeedbackForm';
+import ChatBot from '../../../components/ChatBot';
 import { ScheduleRunDetail } from '../../../types';
 import { ArrowLeft, RefreshCw, AlertCircle, Calendar } from 'lucide-react';
 
@@ -15,7 +19,7 @@ export default function ViewScheduleDetailPage() {
   const scheduleId = Number(params?.id);
   const { getScheduleById, loading, error } = useSchedule();
   const [scheduleData, setScheduleData] = useState<ScheduleRunDetail | null>(null);
-  const [activeTab, setActiveTab] = useState<'grid' | 'analytics'>('grid');
+  const [activeTab, setActiveTab] = useState<'views' | 'grid' | 'export' | 'feedback' | 'analytics'>('views');
 
   useEffect(() => {
     if (scheduleId) {
@@ -84,37 +88,58 @@ export default function ViewScheduleDetailPage() {
           </div>
         </div>
 
-        <div className="flex space-x-2">
-          <button
-            onClick={() => setActiveTab('grid')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
-              activeTab === 'grid'
-                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            Timetable Grid
-          </button>
-          <button
-            onClick={() => setActiveTab('analytics')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
-              activeTab === 'analytics'
-                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            Analytics & Metrics
-          </button>
+        <div className="flex flex-wrap gap-2">
+          {[
+            { id: 'views', label: '5-Audience Multi-View' },
+            { id: 'grid', label: 'Timetable Grid' },
+            { id: 'export', label: 'Export (7 Formats)' },
+            { id: 'feedback', label: 'Teacher Feedback' },
+            { id: 'analytics', label: 'Analytics' },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+                activeTab === tab.id
+                  ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
       </div>
 
       <SolverStatus stats={solverStats} />
 
-      {activeTab === 'grid' ? (
-        <TimetableGrid entries={scheduleData.entries} />
-      ) : (
-        <Analytics analyticsData={scheduleData.metrics || {}} />
+      {activeTab === 'views' && (
+        <MetricsPanel
+          scheduleId={scheduleData.id}
+          analytics={scheduleData.metrics}
+          conflictCount={scheduleData.conflict_count}
+        />
       )}
+
+      {activeTab === 'grid' && <TimetableGrid entries={scheduleData.entries} />}
+
+      {activeTab === 'export' && <ExportOptions scheduleId={scheduleData.id} />}
+
+      {activeTab === 'feedback' && (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="lg:col-span-6">
+            <FeedbackForm
+              scheduleId={scheduleData.id}
+              facultyNames={Array.from(new Set(scheduleData.entries.map((e) => e.faculty_name)))}
+            />
+          </div>
+          <div className="lg:col-span-6">
+            <ChatBot scheduleId={scheduleData.id} />
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'analytics' && <Analytics analyticsData={scheduleData.metrics || {}} />}
     </div>
   );
 }

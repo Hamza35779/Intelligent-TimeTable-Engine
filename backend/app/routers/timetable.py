@@ -1,5 +1,5 @@
 from typing import List, Dict, Any
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session, joinedload
 from app.database import get_db
 from app.models.timetable import ScheduleRun, TimetableEntry
@@ -8,27 +8,13 @@ from app.schemas.timetable import (
     TimetableEntryResponse,
     TimetableAnalyticsResponse,
 )
+from solver.fairness import calculate_fairness_score, calculate_preference_satisfaction
+from utils.timetable_formatter import build_table_rows, generate_multi_views
 
 router = APIRouter(tags=["Timetable"])
 
 
-@router.get("/schedules", response_model=List[Dict[str, Any]])
-def list_schedules(db: Session = Depends(get_db)):
-    runs = db.query(ScheduleRun).order_by(ScheduleRun.id.desc()).limit(20).all()
-    return [
-        {
-            "id": r.id,
-            "generated_at": r.generated_at,
-            "status": r.status,
-            "total_courses_scheduled": r.total_courses_scheduled,
-            "solver_time_ms": r.solver_time_ms,
-        }
-        for r in runs
-    ]
-
-
-@router.get("/schedule/{schedule_id}", response_model=TimetableDetailResponse)
-def get_schedule(schedule_id: int, db: Session = Depends(get_db)):
+def _load_run_entries(schedule_id: int, db: Session):
     run = (
         db.query(ScheduleRun)
         .options(
@@ -48,22 +34,63 @@ def get_schedule(schedule_id: int, db: Session = Depends(get_db)):
         )
 
     formatted_entries = []
+    entry_dicts = []
+    teachers = set()
+    prefs_map: Dict[str, Dict[str, Any]] = dict(
+        (run.metrics or {}).get("ml_predicted_preferences") or {}
+    )
+
     for e in run.entries:
-        formatted_entries.append(
-            TimetableEntryResponse(
-                id=e.id,
-                course_id=e.course_id,
-                course_name=e.course.name if e.course else f"Course {e.course_id}",
-                course_code=e.course.code if e.course else f"C{e.course_id}",
-                faculty_id=e.faculty_id,
-                faculty_name=e.faculty.name if e.faculty else f"Faculty {e.faculty_id}",
-                venue_id=e.venue_id,
-                venue_name=e.venue.name if e.venue else f"Venue {e.venue_id}",
-                slot_id=e.slot_id,
-                day_of_week=e.slot.day_of_week if e.slot else "Monday",
-                start_time=e.slot.start_time if e.slot else "09:00",
-                end_time=e.slot.end_time if e.slot else "10:00",
-            )
+        f_name = e.faculty.name if e.faculty else f"Faculty {e.faculty_id}"
+        teachers.add(f_name)
+        if e.faculty and e.faculty.preferences and f_name not in prefs_map:
+            prefs_map[f_name] = e.faculty.preferences
+
+        item = {
+            "id": e.id,
+            "course_id": e.course_id,
+            "course_name": e.course.name if e.course else f"Course {e.course_id}",
+            "course_code": e.course.code if e.course else f"C{e.course_id}",
+            "faculty_id": e.faculty_id,
+            "faculty_name": f_name,
+            "venue_id": e.venue_id,
+            "venue_name": e.venue.name if e.venue else f"Venue {e.venue_id}",
+            "slot_id": e.slot_id,
+            "day_of_week": e.slot.day_of_week if e.slot else "Monday",
+            "start_time": e.slot.start_time if e.slot else "09:00",
+            "end_time": e.slot.end_time if e.slot else "10:00",
+        }
+        entry_dicts.append(item)
+        formatted_entries.append(TimetableEntryResponse(**item))
+
+    return run, formatted_entries, entry_dicts, len(teachers), prefs_map
+
+
+@router.get("/schedules", response_model=List[Dict[str, Any]])
+def list_schedules(db: Session = Depends(get_db)):
+    runs = db.query(ScheduleRun).order_by(ScheduleRun.id.desc()).limit(20).all()
+    return [
+        {
+            "id": r.id,
+            "generated_at": r.generated_at,
+            "status": r.status,
+            "total_courses_scheduled": r.total_courses_scheduled,
+            "solver_time_ms": r.solver_time_ms,
+        }
+        for r in runs
+    ]
+
+
+@router.get("/schedule/{schedule_id}", response_model=TimetableDetailResponse)
+def get_schedule(schedule_id: int, db: Session = Depends(get_db)):
+    run, formatted_entries, entry_dicts, _, prefs_map = _load_run_entries(schedule_id, db)
+
+    metrics = dict(run.metrics or {})
+    if "fairness_score" not in metrics:
+        metrics["fairness_score"] = calculate_fairness_score(entry_dicts)
+    if "preference_satisfaction" not in metrics:
+        metrics["preference_satisfaction"] = calculate_preference_satisfaction(
+            entry_dicts, prefs_map
         )
 
     return TimetableDetailResponse(
@@ -76,9 +103,60 @@ def get_schedule(schedule_id: int, db: Session = Depends(get_db)):
         total_courses_scheduled=run.total_courses_scheduled,
         conflict_count=run.conflict_count,
         conflicts_resolved=run.conflicts_resolved,
-        metrics=run.metrics or {},
+        metrics=metrics,
         entries=formatted_entries,
     )
+
+
+@router.get("/schedule/{schedule_id}/table")
+def get_schedule_table(
+    schedule_id: int,
+    view: str = Query(
+        default="master",
+        description="View perspective: master, teacher, student, staff, canteen",
+    ),
+    db: Session = Depends(get_db),
+):
+    run, _, entry_dicts, teacher_count, prefs_map = _load_run_entries(schedule_id, db)
+    rows = build_table_rows(entry_dicts, view_type=view.lower())
+    stored_metrics = run.metrics or {}
+    fairness = stored_metrics.get("fairness_score") or calculate_fairness_score(entry_dicts)
+    pref_sat = stored_metrics.get("preference_satisfaction") or calculate_preference_satisfaction(
+        entry_dicts, prefs_map
+    )
+
+    return {
+        "format": "tabular",
+        "view": view.lower(),
+        "headers": rows[0] if rows else [],
+        "rows": rows[1:] if len(rows) > 1 else [],
+        "metadata": {
+            "schedule_id": run.id,
+            "total_courses": len(entry_dicts),
+            "total_teachers": teacher_count,
+            "fairness_score": fairness,
+            "preference_satisfaction": pref_sat,
+        },
+    }
+
+
+@router.get("/schedule/{schedule_id}/views")
+def get_schedule_multi_views(schedule_id: int, db: Session = Depends(get_db)):
+    run, _, entry_dicts, teacher_count, prefs_map = _load_run_entries(schedule_id, db)
+    stored_metrics = run.metrics or {}
+    metadata = {
+        "schedule_id": run.id,
+        "total_courses": len(entry_dicts),
+        "total_teachers": teacher_count,
+        "fairness_score": stored_metrics.get("fairness_score")
+        or calculate_fairness_score(entry_dicts),
+        "preference_satisfaction": stored_metrics.get("preference_satisfaction")
+        or calculate_preference_satisfaction(entry_dicts, prefs_map),
+    }
+    return {
+        "schedule_id": run.id,
+        "views": generate_multi_views(entry_dicts, metadata),
+    }
 
 
 @router.get("/analytics/schedule/{schedule_id}", response_model=TimetableAnalyticsResponse)
@@ -95,7 +173,9 @@ def get_schedule_analytics(schedule_id: int, db: Session = Depends(get_db)):
         schedule_id=run.id,
         faculty_workload=metrics.get("faculty_workload", {}),
         venue_utilization=metrics.get("venue_utilization", {}),
-        preference_satisfaction_percentage=metrics.get("preference_satisfaction_percentage", 100.0),
+        preference_satisfaction_percentage=metrics.get(
+            "preference_satisfaction_percentage", 90.0
+        ),
         time_slot_fill_rate_percentage=metrics.get("time_slot_fill_rate_percentage", 0.0),
         conflicts_resolved_count=run.conflicts_resolved,
         solver_efficiency=metrics.get(

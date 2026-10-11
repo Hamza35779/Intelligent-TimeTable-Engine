@@ -61,10 +61,13 @@ class TimetableSolver:
             for f_idx, fac in enumerate(faculty)
         }
 
-        # Venue available slots lookup
-        venue_avail = {
-            v_idx: (set(v.get("available_slots")) if v.get("available_slots") else None)
-            for v_idx, v in enumerate(venues)
+        # Identify explicit BREAK or disabled slots so no courses are placed there
+        break_slot_indices = {
+            s_idx
+            for s_idx, sl in enumerate(slots)
+            if str(sl.get("start_time", "")).upper() == "BREAK"
+            or str(sl.get("day_of_week", "")).upper() == "BREAK"
+            or sl.get("is_unseated", False)
         }
 
         self.slot_vars = []
@@ -74,17 +77,18 @@ class TimetableSolver:
         for c_idx, course in enumerate(courses):
             req_cap = course.get("capacity_required", 30)
             f_idx = course.get("faculty_id", 0)
-            f_unavail = faculty_unavail.get(f_idx, set())
+            f_unavail = faculty_unavail.get(f_idx, set()) | break_slot_indices
 
             # Valid slots for this course
             valid_slots = [s for s in range(num_slots) if s not in f_unavail]
 
-            # Valid venues for this course
-            valid_venues = [
-                v_idx
-                for v_idx, v in enumerate(venues)
-                if v.get("capacity", 0) >= req_cap
-            ]
+            # Valid venues for this course (respecting capacity and venue availability)
+            valid_venues = []
+            for v_idx, v in enumerate(venues):
+                if v.get("is_unavailable", False):
+                    continue
+                if v.get("capacity", 0) >= req_cap:
+                    valid_venues.append(v_idx)
 
             if not valid_slots or not valid_venues:
                 # Impossible to schedule this course
@@ -100,9 +104,31 @@ class TimetableSolver:
                 cp_model.Domain.FromValues(valid_venues), f"v_{c_idx}"
             )
 
-            # Combined spatio-temporal coordinate
-            # grid = slot * num_venues + venue
-            g_var = self.model.NewIntVar(0, num_slots * num_venues - 1, f"g_{c_idx}")
+            # Combined spatio-temporal coordinate: grid = slot * num_venues + venue
+            # Filter allowed grid coordinates if any venue restricts available_slots
+            allowed_grids = []
+            has_venue_slot_restrictions = any(
+                bool(venues[v_i].get("available_slots"))
+                and len(venues[v_i].get("available_slots", [])) < num_slots
+                for v_i in valid_venues
+            )
+            if has_venue_slot_restrictions:
+                for s_i in valid_slots:
+                    for v_i in valid_venues:
+                        v_avail = venues[v_i].get("available_slots")
+                        if not v_avail or s_i in v_avail:
+                            allowed_grids.append(s_i * num_venues + v_i)
+                if not allowed_grids:
+                    dummy = self.model.NewBoolVar(f"infeasible_grid_{c_idx}")
+                    self.model.Add(dummy == 1)
+                    self.model.Add(dummy == 0)
+                    continue
+                g_var = self.model.NewIntVarFromDomain(
+                    cp_model.Domain.FromValues(allowed_grids), f"g_{c_idx}"
+                )
+            else:
+                g_var = self.model.NewIntVar(0, num_slots * num_venues - 1, f"g_{c_idx}")
+
             self.model.Add(g_var == s_var * num_venues + v_var)
 
             self.slot_vars.append(s_var)
@@ -111,22 +137,53 @@ class TimetableSolver:
 
     def add_constraints(self, custom_constraints: Optional[List[Dict[str, Any]]] = None):
         self.constraints_list = custom_constraints or []
-        num_slots = len(self.slots)
         num_venues = len(self.venues)
 
         if len(self.grid_vars) < len(self.courses):
-            # Already marked infeasible in add_variables
             return
+
+        # Extract any global overrides from custom hard constraints
+        hard_max_daily_hours: Optional[int] = None
+        hard_max_days_week: Optional[int] = None
+        hard_prefer_morning: bool = False
+        soft_morning_bonus: int = 0
+        soft_afternoon_bonus: int = 0
+        soft_preferred_days: Dict[str, int] = defaultdict(int)
+
+        for cc in self.constraints_list:
+            c_type = str(cc.get("type", "soft")).lower()
+            c_weight = float(cc.get("weight", 1.0))
+            c_data = cc.get("constraint_data") or {}
+
+            if c_type == "hard":
+                if c_data.get("max_hours_per_day"):
+                    val = int(c_data["max_hours_per_day"])
+                    hard_max_daily_hours = (
+                        min(hard_max_daily_hours, val) if hard_max_daily_hours is not None else val
+                    )
+                if c_data.get("max_days_per_week"):
+                    val = int(c_data["max_days_per_week"])
+                    hard_max_days_week = (
+                        min(hard_max_days_week, val) if hard_max_days_week is not None else val
+                    )
+                if c_data.get("prefer_morning") is True:
+                    hard_prefer_morning = True
+            else:
+                scaled_w = max(5, int(round(c_weight * 10)))
+                if c_data.get("prefer_morning") is True:
+                    soft_morning_bonus += scaled_w
+                if c_data.get("prefer_afternoon") is True:
+                    soft_afternoon_bonus += scaled_w
+                for d in c_data.get("preferred_days", []):
+                    soft_preferred_days[d] += scaled_w
 
         # -------------------------------------------------------------
         # HARD CONSTRAINT 1: No Venue Double-Booking
-        # All assigned (venue, slot) pairs must be unique
         # -------------------------------------------------------------
         self.model.AddAllDifferent(self.grid_vars)
 
         # -------------------------------------------------------------
         # HARD CONSTRAINT 2: No Faculty Double-Booking
-        # All courses taught by the same faculty must have different slots
         # -------------------------------------------------------------
         faculty_course_map = defaultdict(list)
         for c_idx, course in enumerate(self.courses):
@@ -137,7 +194,7 @@ class TimetableSolver:
                 self.model.AddAllDifferent([self.slot_vars[ci] for ci in c_indices])
 
         # -------------------------------------------------------------
-        # HARD CONSTRAINT 3: Faculty Daily Maximum Hours Limit
+        # HARD CONSTRAINT 3: Faculty Daily Maximum Hours & Max Days/Week
         # -------------------------------------------------------------
         slots_by_day = defaultdict(list)
         for s_idx, slot in enumerate(self.slots):
@@ -145,9 +202,19 @@ class TimetableSolver:
 
         for f_idx, c_indices in faculty_course_map.items():
             fac = self.faculty[f_idx] if 0 <= f_idx < len(self.faculty) else {}
-            max_daily_hrs = fac.get("max_hours_per_day", 6)
+            max_daily_hrs = int(fac.get("max_hours_per_day", 6))
+            if hard_max_daily_hours is not None:
+                max_daily_hrs = min(max_daily_hrs, hard_max_daily_hours)
 
-            if len(c_indices) > max_daily_hrs:
+            max_days_wk = int(fac.get("max_days_per_week", 5))
+            if hard_max_days_week is not None:
+                max_days_wk = min(max_days_wk, hard_max_days_week)
+
+            need_daily_check = len(c_indices) > max_daily_hrs
+            need_weekly_days_check = len(c_indices) > max_days_wk and max_days_wk < len(slots_by_day)
+
+            if need_daily_check or need_weekly_days_check:
+                day_active_bools = []
                 for day, day_slot_indices in slots_by_day.items():
                     day_domain = cp_model.Domain.FromValues(day_slot_indices)
                     course_in_day_bools = []
@@ -161,38 +228,78 @@ class TimetableSolver:
                         ).OnlyEnforceIf(b_day.Not())
                         course_in_day_bools.append(b_day)
 
-                    self.model.Add(
-                        cp_model.LinearExpr.Sum(course_in_day_bools) <= max_daily_hrs
-                    )
+                    if need_daily_check:
+                        self.model.Add(
+                            cp_model.LinearExpr.Sum(course_in_day_bools) <= max_daily_hrs
+                        )
+
+                    if need_weekly_days_check:
+                        b_day_active = self.model.NewBoolVar(f"f{f_idx}_active_{day}")
+                        self.model.AddMaxEquality(b_day_active, course_in_day_bools)
+                        day_active_bools.append(b_day_active)
+
+                if need_weekly_days_check and day_active_bools:
+                    self.model.Add(cp_model.LinearExpr.Sum(day_active_bools) <= max_days_wk)
 
         # -------------------------------------------------------------
-        # SOFT CONSTRAINTS (Objective Function Terms)
+        # SOFT & CUSTOM CONSTRAINTS (Objective Function + ML Preference Weights)
         # -------------------------------------------------------------
         self.objective_terms = []
+
+        morning_slots = []
+        afternoon_slots = []
+        evening_slots = []
+        for s, sl in enumerate(self.slots):
+            try:
+                start_h = int(str(sl.get("start_time", "09:00")).split(":")[0])
+            except Exception:
+                start_h = 9
+            if start_h < 12:
+                morning_slots.append(s)
+            elif start_h < 16:
+                afternoon_slots.append(s)
+            else:
+                evening_slots.append(s)
+
+        if hard_prefer_morning and morning_slots and len(morning_slots) * num_venues >= len(self.courses):
+            m_dom_hard = cp_model.Domain.FromValues(morning_slots)
+            for s_var in self.slot_vars:
+                self.model.AddLinearExpressionInDomain(s_var, m_dom_hard)
 
         for c_idx, course in enumerate(self.courses):
             s_var = self.slot_vars[c_idx]
             g_var = self.grid_vars[c_idx]
             f_idx = course.get("faculty_id", 0)
             fac_info = self.faculty[f_idx] if 0 <= f_idx < len(self.faculty) else {}
-            preferences = fac_info.get("preferences", {})
+            preferences = fac_info.get("preferences", {}) or {}
 
-            # 1. Morning preference bonus
-            if preferences.get("prefer_morning", False):
-                morning_slots = [
-                    s
-                    for s, sl in enumerate(self.slots)
-                    if int(sl.get("start_time", "12:00").split(":")[0]) < 12
-                ]
-                if morning_slots:
-                    b_m = self.model.NewBoolVar(f"pref_morning_{c_idx}")
-                    m_dom = cp_model.Domain.FromValues(morning_slots)
-                    self.model.AddLinearExpressionInDomain(s_var, m_dom).OnlyEnforceIf(b_m)
-                    self.model.AddLinearExpressionInDomain(s_var, m_dom.complement()).OnlyEnforceIf(b_m.Not())
-                    self.objective_terms.append((b_m, 20))
+            # 1. ML / Explicit Morning-Afternoon-Evening Preference Score
+            m_prob = float(
+                preferences.get("Morning", 0.8 if preferences.get("prefer_morning", False) else 0.4)
+            )
+            a_prob = float(preferences.get("Afternoon", 0.5))
+
+            if (m_prob >= a_prob or soft_morning_bonus > 0) and morning_slots:
+                b_m = self.model.NewBoolVar(f"pref_morning_{c_idx}")
+                m_dom = cp_model.Domain.FromValues(morning_slots)
+                self.model.AddLinearExpressionInDomain(s_var, m_dom).OnlyEnforceIf(b_m)
+                self.model.AddLinearExpressionInDomain(s_var, m_dom.complement()).OnlyEnforceIf(
+                    b_m.Not()
+                )
+                self.objective_terms.append((b_m, max(10, int(m_prob * 20)) + soft_morning_bonus))
+            elif (a_prob > m_prob or soft_afternoon_bonus > 0) and afternoon_slots:
+                b_a = self.model.NewBoolVar(f"pref_afternoon_{c_idx}")
+                a_dom = cp_model.Domain.FromValues(afternoon_slots)
+                self.model.AddLinearExpressionInDomain(s_var, a_dom).OnlyEnforceIf(b_a)
+                self.model.AddLinearExpressionInDomain(s_var, a_dom.complement()).OnlyEnforceIf(
+                    b_a.Not()
+                )
+                self.objective_terms.append((b_a, max(10, int(a_prob * 20)) + soft_afternoon_bonus))
 
             # 2. Preferred days bonus
-            preferred_days = preferences.get("preferred_days", [])
+            preferred_days = set(preferences.get("preferred_days", [])) | set(
+                soft_preferred_days.keys()
+            )
             if preferred_days:
                 pref_slots = [
                     s
@@ -203,8 +310,11 @@ class TimetableSolver:
                     b_d = self.model.NewBoolVar(f"pref_day_{c_idx}")
                     d_dom = cp_model.Domain.FromValues(pref_slots)
                     self.model.AddLinearExpressionInDomain(s_var, d_dom).OnlyEnforceIf(b_d)
-                    self.model.AddLinearExpressionInDomain(s_var, d_dom.complement()).OnlyEnforceIf(b_d.Not())
-                    self.objective_terms.append((b_d, 15))
+                    self.model.AddLinearExpressionInDomain(s_var, d_dom.complement()).OnlyEnforceIf(
+                        b_d.Not()
+                    )
+                    extra_w = max(soft_preferred_days.values(), default=0)
+                    self.objective_terms.append((b_d, 15 + extra_w))
 
             # 3. Delta rescheduling stability bonus
             if c_idx in self.previous_assignments_map:
@@ -223,8 +333,9 @@ class TimetableSolver:
 
     def solve(self, timeout_seconds: Optional[int] = None) -> Tuple[bool, str, Dict[str, Any]]:
         start_time = time.perf_counter()
-        if timeout_seconds:
-            self.solver.parameters.max_time_in_seconds = float(timeout_seconds)
+        limit = float(timeout_seconds if timeout_seconds is not None else self.time_limit_seconds)
+        # Reserve 0.4s headroom so total wall clock strictly honors < limit
+        self.solver.parameters.max_time_in_seconds = max(0.5, limit - 0.4)
 
         status = self.solver.Solve(self.model)
         elapsed_ms = (time.perf_counter() - start_time) * 1000.0

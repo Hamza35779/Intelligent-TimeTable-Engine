@@ -5,7 +5,12 @@ import { useSchedule } from '../../hooks/useSchedule';
 import TimetableGrid from '../../components/TimetableGrid';
 import SolverStatus from '../../components/SolverStatus';
 import Analytics from '../../components/Analytics';
-import { Sparkles, Play, RefreshCw, AlertTriangle, Layers, FileCode, CheckCircle2 } from 'lucide-react';
+import CsvUploader from '../../components/CsvUploader';
+import ChatBot from '../../components/ChatBot';
+import MetricsPanel from '../../components/MetricsPanel';
+import ExportOptions from '../../components/ExportOptions';
+import FeedbackForm from '../../components/FeedbackForm';
+import { Sparkles, Play, RefreshCw, AlertTriangle, Layers, FileCode } from 'lucide-react';
 
 const SAMPLE_BENCHMARK_DATA = {
   faculty: [
@@ -93,17 +98,23 @@ const SAMPLE_BENCHMARK_DATA = {
 };
 
 export default function SchedulePage() {
-  const { loading, error, currentSchedule, generateSchedule, rescheduleConflicts } = useSchedule();
+  const { loading, error, currentSchedule, generateSchedule, rescheduleConflicts, getScheduleById } = useSchedule();
   const [datasetJson, setDatasetJson] = useState(JSON.stringify(SAMPLE_BENCHMARK_DATA, null, 2));
-  const [activeTab, setActiveTab] = useState<'grid' | 'analytics' | 'editor'>('grid');
+  const [activeTab, setActiveTab] = useState<'views' | 'grid' | 'export' | 'feedback' | 'analytics' | 'editor'>('views');
   const [rescheduleSlotId, setRescheduleSlotId] = useState<number>(0);
   const [rescheduling, setRescheduling] = useState(false);
+  const [activeScheduleId, setActiveScheduleId] = useState<number | undefined>(undefined);
+
+  const effectiveScheduleId = currentSchedule?.schedule_id || activeScheduleId;
 
   const handleRunSolver = async () => {
     try {
       const parsedData = JSON.parse(datasetJson);
-      await generateSchedule(parsedData);
-      setActiveTab('grid');
+      const res = await generateSchedule(parsedData);
+      if (res?.schedule_id) {
+        setActiveScheduleId(res.schedule_id);
+      }
+      setActiveTab('views');
     } catch (err: any) {
       alert('Invalid JSON input: ' + err.message);
     }
@@ -117,13 +128,12 @@ export default function SchedulePage() {
     if (!currentSchedule) return;
     setRescheduling(true);
     try {
-      // Simulate slot 0 becoming unavailable (e.g. emergency campus outage)
       await rescheduleConflicts({
         timetable_id: currentSchedule.schedule_id,
         unseated_slot_ids: [rescheduleSlotId],
         timeout_seconds: 5,
       });
-      alert(`Rescheduled successfully around conflict at slot ${rescheduleSlotId}! Minimal disruption applied.`);
+      alert(`Rescheduled around conflict at slot ${rescheduleSlotId}. Minimal disruption applied.`);
     } catch (e: any) {
       alert('Reschedule error: ' + e.message);
     } finally {
@@ -138,10 +148,10 @@ export default function SchedulePage() {
         <div>
           <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight flex items-center gap-2">
             <Sparkles className="w-6 h-6 text-emerald-400" />
-            <span>Generate Autonomous Timetable</span>
+            <span>Autonomous Schedule & Multi-View Studio</span>
           </h2>
           <p className="text-slate-400 text-xs sm:text-sm mt-1">
-            Engine compiles hard and soft constraints into Google OR-Tools CP-SAT integer optimization.
+            Combine OR-Tools CP-SAT, ML Teacher Preference Learning, and Conversational AI.
           </p>
         </div>
 
@@ -174,6 +184,21 @@ export default function SchedulePage() {
         </div>
       </div>
 
+      {/* Top Row: CSV Uploader + AI Chatbot */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="lg:col-span-5">
+          <CsvUploader
+            onScheduleGenerated={(data) => {
+              setActiveScheduleId(data.schedule_id);
+              setActiveTab('views');
+            }}
+          />
+        </div>
+        <div className="lg:col-span-7">
+          <ChatBot scheduleId={effectiveScheduleId} />
+        </div>
+      </div>
+
       {/* Error Banner */}
       {error && (
         <div className="bg-rose-500/10 border border-rose-500/30 text-rose-300 p-4 rounded-xl text-xs flex items-center space-x-3 shadow-lg">
@@ -183,74 +208,80 @@ export default function SchedulePage() {
       )}
 
       {/* Results View & Solver Status */}
-      {currentSchedule && (
+      {effectiveScheduleId && (
         <div className="space-y-6">
-          <SolverStatus stats={currentSchedule.stats} />
+          {currentSchedule && <SolverStatus stats={currentSchedule.stats} />}
 
           {/* Reschedule Simulation Toolbar */}
-          <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-wrap items-center justify-between gap-4">
-            <div className="flex items-center space-x-2">
-              <RefreshCw className="w-4 h-4 text-blue-400" />
-              <span className="text-xs font-semibold text-slate-200">Real-Time Conflict Rescheduling:</span>
-              <span className="text-xs text-slate-400">Simulate room maintenance or unexpected slot cancellation</span>
+          {currentSchedule && (
+            <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-wrap items-center justify-between gap-4">
+              <div className="flex items-center space-x-2">
+                <RefreshCw className="w-4 h-4 text-blue-400" />
+                <span className="text-xs font-semibold text-slate-200">Real-Time Conflict Rescheduling:</span>
+                <span className="text-xs text-slate-400">Simulate room maintenance or unexpected slot cancellation</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <select
+                  value={rescheduleSlotId}
+                  onChange={(e) => setRescheduleSlotId(Number(e.target.value))}
+                  className="bg-slate-800 border border-slate-700 text-white text-xs rounded-lg px-2.5 py-1.5 outline-none"
+                >
+                  <option value={0}>Simulate Slot #0 Outage (Monday 09:00)</option>
+                  <option value={1}>Simulate Slot #1 Outage (Monday 10:00)</option>
+                  <option value={4}>Simulate Slot #4 Outage (Tuesday 09:00)</option>
+                </select>
+                <button
+                  onClick={handleTestReschedule}
+                  disabled={rescheduling}
+                  className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-semibold text-xs rounded-lg transition"
+                >
+                  {rescheduling ? 'Rescheduling...' : 'Apply Delta Reschedule'}
+                </button>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <select
-                value={rescheduleSlotId}
-                onChange={(e) => setRescheduleSlotId(Number(e.target.value))}
-                className="bg-slate-800 border border-slate-700 text-white text-xs rounded-lg px-2.5 py-1.5 outline-none"
-              >
-                <option value={0}>Simulate Slot #0 Outage (Monday 09:00)</option>
-                <option value={1}>Simulate Slot #1 Outage (Monday 10:00)</option>
-                <option value={4}>Simulate Slot #4 Outage (Tuesday 09:00)</option>
-              </select>
-              <button
-                onClick={handleTestReschedule}
-                disabled={rescheduling}
-                className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-semibold text-xs rounded-lg transition"
-              >
-                {rescheduling ? 'Rescheduling...' : 'Apply Delta Reschedule'}
-              </button>
-            </div>
-          </div>
+          )}
 
           {/* View Mode Tabs */}
-          <div className="flex space-x-2 border-b border-slate-800 pb-2">
-            <button
-              onClick={() => setActiveTab('grid')}
-              className={`px-4 py-2 rounded-lg text-xs font-semibold transition ${
-                activeTab === 'grid'
-                  ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Timetable Grid
-            </button>
-            <button
-              onClick={() => setActiveTab('analytics')}
-              className={`px-4 py-2 rounded-lg text-xs font-semibold transition ${
-                activeTab === 'analytics'
-                  ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Optimization Analytics
-            </button>
-            <button
-              onClick={() => setActiveTab('editor')}
-              className={`px-4 py-2 rounded-lg text-xs font-semibold transition ${
-                activeTab === 'editor'
-                  ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Raw Input JSON
-            </button>
+          <div className="flex flex-wrap gap-2 border-b border-slate-800 pb-2">
+            {[
+              { id: 'views', label: '5-Audience Multi-View' },
+              { id: 'export', label: 'Multi-Format Export (7 Formats)' },
+              { id: 'feedback', label: 'Teacher Feedback & ML' },
+              ...(currentSchedule ? [{ id: 'grid', label: 'Interactive Slot Grid' }] : []),
+              ...(currentSchedule ? [{ id: 'analytics', label: 'Optimization Analytics' }] : []),
+              { id: 'editor', label: 'Raw JSON Config' },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as any)}
+                className={`px-4 py-2 rounded-lg text-xs font-semibold transition ${
+                  activeTab === tab.id
+                    ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
           </div>
 
-          {activeTab === 'grid' && <TimetableGrid entries={currentSchedule.schedule} />}
+          {activeTab === 'views' && (
+            <MetricsPanel
+              scheduleId={effectiveScheduleId}
+              analytics={currentSchedule?.analytics}
+              conflictCount={currentSchedule?.stats?.conflict_count ?? 0}
+            />
+          )}
 
-          {activeTab === 'analytics' && currentSchedule.analytics && (
+          {activeTab === 'export' && <ExportOptions scheduleId={effectiveScheduleId} />}
+
+          {activeTab === 'feedback' && <FeedbackForm scheduleId={effectiveScheduleId} />}
+
+          {activeTab === 'grid' && currentSchedule && (
+            <TimetableGrid entries={currentSchedule.schedule} />
+          )}
+
+          {activeTab === 'analytics' && currentSchedule?.analytics && (
             <Analytics analyticsData={currentSchedule.analytics} />
           )}
 
@@ -268,19 +299,19 @@ export default function SchedulePage() {
       )}
 
       {/* When no schedule is loaded yet, show the JSON Editor directly */}
-      {!currentSchedule && (
+      {!effectiveScheduleId && (
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-3">
           <div className="flex items-center justify-between border-b border-slate-800 pb-3">
             <div className="flex items-center space-x-2 text-white font-semibold text-sm">
               <FileCode className="w-4 h-4 text-emerald-400" />
               <span>Input Data Configuration (Faculty, Venues, Slots, Courses)</span>
             </div>
-            <span className="text-xs text-slate-500">Edit or paste directly</span>
+            <span className="text-xs text-slate-500">Edit JSON or upload CSV above</span>
           </div>
           <textarea
             value={datasetJson}
             onChange={(e) => setDatasetJson(e.target.value)}
-            rows={16}
+            rows={14}
             className="w-full bg-slate-950 font-mono text-xs text-slate-300 p-4 rounded-xl border border-slate-800 outline-none focus:ring-1 focus:ring-emerald-500"
           />
         </div>

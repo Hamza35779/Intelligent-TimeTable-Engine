@@ -1,4 +1,5 @@
 from typing import List, Dict, Any
+from solver.fairness import calculate_fairness_score
 
 
 class TimetableAnalytics:
@@ -61,11 +62,16 @@ class TimetableAnalytics:
             # Preference tracking
             fac_data = faculty_lookup.get(entry["faculty_id"])
             if fac_data and "preferences" in fac_data:
-                prefs = fac_data["preferences"]
+                prefs = fac_data["preferences"] or {}
                 if "prefer_morning" in prefs:
                     total_preferences_checked += 1
-                    start_h = int(entry.get("start_time", "12:00").split(":")[0])
-                    if (start_h < 12 and prefs["prefer_morning"]) or (start_h >= 12 and not prefs["prefer_morning"]):
+                    try:
+                        start_h = int(str(entry.get("start_time", "12:00")).split(":")[0])
+                    except Exception:
+                        start_h = 9
+                    if (start_h < 12 and prefs["prefer_morning"]) or (
+                        start_h >= 12 and not prefs["prefer_morning"]
+                    ):
                         preferences_satisfied += 1
 
                 if "preferred_days" in prefs and prefs["preferred_days"]:
@@ -95,11 +101,15 @@ class TimetableAnalytics:
 
         total_grid_capacity = max(1, len(venue_list) * len(slot_list))
         fill_rate = round((len(schedule_entries) / total_grid_capacity) * 100.0, 2)
+        fairness_ratio = calculate_fairness_score(schedule_entries, faculty_list)
 
         return {
             "faculty_workload": faculty_workload,
             "venue_utilization": venue_utilization,
+            "fairness_score": fairness_ratio,
+            "workload_fairness_score": round(fairness_ratio * 100.0, 1),
             "preference_satisfaction_percentage": pref_satisfaction_pct,
+            "preference_satisfaction_pct": pref_satisfaction_pct,
             "time_slot_fill_rate_percentage": fill_rate,
             "conflicts_resolved_count": len(schedule_entries),
             "solver_efficiency": {

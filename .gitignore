@@ -48,3 +48,5 @@ yarn-error.log*
 .env
 .DS_Store
 Thumbs.db
+*.pkl
+*.tsbuildinfo

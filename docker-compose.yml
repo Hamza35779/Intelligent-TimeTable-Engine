@@ -31,6 +31,7 @@ services:
     container_name: timetable_backend
     environment:
       DATABASE_URL: postgresql://postgres:postgrespassword@db:5432/timetable_db
+      REDIS_URL: redis://redis:6379/0
       DEFAULT_SOLVER_TIMEOUT_SECONDS: 5
       BACKEND_CORS_ORIGINS: "http://localhost:3000,http://127.0.0.1:3000"
     ports:
@@ -43,6 +44,23 @@ services:
     volumes:
       - ./backend:/app
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  celery:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: timetable_celery
+    environment:
+      DATABASE_URL: postgresql://postgres:postgrespassword@db:5432/timetable_db
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    volumes:
+      - ./backend:/app
+    command: celery -A tasks.ml_training worker --loglevel=info
 
   frontend:
     build:

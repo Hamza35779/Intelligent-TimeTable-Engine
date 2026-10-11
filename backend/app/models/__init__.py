@@ -4,6 +4,7 @@ from app.models.slot import TimeSlot
 from app.models.course import Course
 from app.models.constraint import CustomConstraint
 from app.models.timetable import ScheduleRun, TimetableEntry
+from app.models.feedback import Feedback, MLModelMetadata, ChatSession
 
 __all__ = [
     "Faculty",
@@ -13,4 +14,7 @@ __all__ = [
     "CustomConstraint",
     "ScheduleRun",
     "TimetableEntry",
+    "Feedback",
+    "MLModelMetadata",
+    "ChatSession",
 ]

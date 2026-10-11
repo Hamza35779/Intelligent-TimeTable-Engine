@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, JSON
 from sqlalchemy.orm import relationship
 from app.database import Base
@@ -8,8 +8,8 @@ class ScheduleRun(Base):
     __tablename__ = "schedule_runs"
 
     id = Column(Integer, primary_key=True, index=True)
-    generated_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
-    started_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    generated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False, index=True)
+    started_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
     completed_at = Column(DateTime, nullable=True)
     status = Column(String(50), default="completed", nullable=False)  # completed, optimal, feasible, infeasible, timeout
     solver_status = Column(String(50), nullable=True)

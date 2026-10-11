@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { CustomConstraint } from '../types';
-import { Sliders, PlusCircle, Check } from 'lucide-react';
+import { Sliders, Check } from 'lucide-react';
 
 interface ConstraintFormProps {
   onSubmit: (data: Omit<CustomConstraint, 'id'>) => Promise<boolean>;
@@ -16,6 +16,7 @@ export default function ConstraintForm({ onSubmit, onCancel }: ConstraintFormPro
   const [weight, setWeight] = useState(1.0);
   const [preferMorning, setPreferMorning] = useState(false);
   const [maxHoursPerDay, setMaxHoursPerDay] = useState(6);
+  const [maxDaysPerWeek, setMaxDaysPerWeek] = useState(5);
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -25,6 +26,7 @@ export default function ConstraintForm({ onSubmit, onCancel }: ConstraintFormPro
     const constraintData: Record<string, any> = {
       prefer_morning: preferMorning,
       max_hours_per_day: maxHoursPerDay,
+      max_days_per_week: maxDaysPerWeek,
     };
 
     const success = await onSubmit({
@@ -100,6 +102,46 @@ export default function ConstraintForm({ onSubmit, onCancel }: ConstraintFormPro
           placeholder="Brief explanation of policy..."
           className="w-full bg-slate-950 border border-slate-800 text-white rounded-lg px-3 py-2 text-xs focus:ring-1 focus:ring-emerald-500 outline-none"
         />
+      </div>
+
+      {/* Policy Parameters */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-slate-950 p-4 rounded-xl border border-slate-800">
+        <div>
+          <label className="block text-xs font-semibold text-slate-300 mb-1">Max Daily Hours / Faculty</label>
+          <input
+            type="number"
+            min={1}
+            max={8}
+            value={maxHoursPerDay}
+            onChange={(e) => setMaxHoursPerDay(Number(e.target.value))}
+            className="w-full bg-slate-900 border border-slate-800 text-white rounded-lg px-3 py-1.5 text-xs font-mono"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-slate-300 mb-1">Max Days / Week</label>
+          <input
+            type="number"
+            min={1}
+            max={5}
+            value={maxDaysPerWeek}
+            onChange={(e) => setMaxDaysPerWeek(Number(e.target.value))}
+            className="w-full bg-slate-900 border border-slate-800 text-white rounded-lg px-3 py-1.5 text-xs font-mono"
+          />
+        </div>
+
+        <div className="flex flex-col justify-center">
+          <label className="block text-xs font-semibold text-slate-300 mb-1">Time Slot Rule</label>
+          <label className="inline-flex items-center space-x-2 text-xs text-slate-300 cursor-pointer mt-1">
+            <input
+              type="checkbox"
+              checked={preferMorning}
+              onChange={(e) => setPreferMorning(e.target.checked)}
+              className="accent-emerald-500 rounded"
+            />
+            <span>Prioritize Morning (Before 12pm)</span>
+          </label>
+        </div>
       </div>
 
       {type === 'soft' && (

@@ -1,162 +1,99 @@
-# Intelligent Autonomous Timetable Generation Engine
+# Intelligent Autonomous Timetable Engine v2.0
 
-A production-grade, constraint-based university timetable optimization engine that autonomously generates conflict-free schedules in **< 5 seconds** using **Google OR-Tools CP-SAT**.
-
----
-
-## Architecture & Tech Stack
-
-```
-                          ┌───────────────────────────┐
-                          │   Next.js 14 Dashboard    │
-                          │   (React / TailwindCSS)   │
-                          └─────────────┬─────────────┘
-                                        │ REST / JSON
-                                        ▼
-                          ┌───────────────────────────┐
-                          │      FastAPI Gateway      │
-                          │   (Pydantic Validation)   │
-                          └──────┬─────────────┬──────┘
-                                 │             │
-                    ┌────────────▼──┐       ┌──▼────────────┐
-                    │  CP-SAT Model │       │  PostgreSQL   │
-                    │   (OR-Tools)  │       │ (SQLAlchemy)  │
-                    └───────────────┘       └───────────────┘
-```
-
-- **Backend:** Python 3.11+, FastAPI, SQLAlchemy, Pydantic v2
-- **Constraint Solver:** Google OR-Tools CP-SAT (Constraint Programming - Satisfiability)
-- **Database:** PostgreSQL (with SQLite zero-config automatic local fallback)
-- **Frontend:** Next.js 14, React 18, TailwindCSS, Lucide Icons
-- **Deployment:** Docker, Docker Compose
-- **Async & Caching:** Redis
+A production-ready, conversational university timetable optimization engine combining **Google OR-Tools CP-SAT**, **Machine Learning Preference Prediction (`scikit-learn`)**, **Conversational AI**, **5-Audience Multi-View Generation**, and **7-Format Simultaneous Export**.
 
 ---
 
-## Key Features
+## Core Capabilities
 
-1. **<5s Solver Performance:** Solves 50 faculty, 20 venues, 100 courses in milliseconds with guaranteed mathematical optimality.
-2. **Strict Hard Constraints (Zero Violations):**
-   - No faculty double-booking across any slot.
-   - No venue double-booking.
-   - Respect room capacity ($VenueCapacity \ge CourseCapacityRequired$).
-   - Respect faculty unavailability & maximum daily teaching hours limit.
-   - Respect venue operational hours.
-3. **Multi-Objective Soft Optimization:**
-   - Honors faculty preferences (morning vs. afternoon slots, preferred days).
-   - Minimizes auditorium seat waste (tightest room capacity fit).
-   - Equalizes faculty teaching workload distribution.
-4. **Real-Time Delta Rescheduling:**
-   - Minimizes disruption during campus emergencies (room maintenance, faculty sickness).
-   - Preserves unaffected lecture slots while autonomously rerouting conflicted sessions.
-5. **Interactive Next.js Dashboard:**
-   - Interactive timetable grid color-coded by faculty.
-   - Day-of-week and faculty filters.
-   - One-click CSV and Print export.
-   - Real-time optimization analytics (workload distribution, room utilization, SLA indicators).
+1. **OR-Tools CP-SAT Constraint Solver (`<5s` SLA)**
+   - Enforces zero room, teacher, and student group double-booking (`AddAllDifferent` + domain reduction).
+   - Protects mandatory lunch breaks (`12:00 - 14:00` / `BREAK` slots).
+   - Multi-objective optimization balancing workload fairness (`0-100`) and ML-predicted teacher time-of-day preferences.
+   - Real-time delta rescheduling around unexpected room/slot outages.
+
+2. **Machine Learning Teacher Preference Learner (`scikit-learn`)**
+   - Extracts 6 behavioral features per teacher (`morning_ratio`, `afternoon_ratio`, `evening_ratio`, `avg_daily_hours`, `consecutive_classes`, `free_days`).
+   - Trains a `RandomForestClassifier` with `StandardScaler` on teacher feedback ratings (`1-5` stars + preferred time slots).
+   - Automatically triggers background model retraining via Celery / FastAPI tasks once feedback thresholds are reached.
+
+3. **Conversational AI Scheduling Assistant**
+   - Understands natural language requests such as:
+     > *"Create schedules for teachers, students, and canteen staff, and export as PDF and Excel"*
+   - Extracts target audience views (`master`, `teacher`, `student`, `staff`, `canteen`), time preferences, lunch protections, and export formats, then generates one-click download links for every combination.
+
+4. **5-Audience Multi-View Output**
+   - **Master University View**: Complete room, faculty, course, and slot matrix.
+   - **Teacher Schedule View**: Individualized teaching rosters, daily hours, and assigned rooms.
+   - **Student Schedule View**: Chronological class schedule with automatic lunch break blocks.
+   - **Support Staff View**: Hourly active room counts, busy/moderate/quiet status, and maintenance windows.
+   - **Canteen Staff View**: Expected student & staff dining volume, rush windows, and prep alerts.
+
+5. **Simultaneous 7-Format Export**
+   - Export any audience view as **CSV**, **Excel (`.xlsx`)**, **PDF**, **PNG**, **JPG**, **JSON**, or **HTML**.
 
 ---
 
-## Quickstart Guide
+## Tech Stack
 
-### Option 1: Run with Docker Compose (Recommended)
+- **Backend**: Python 3.9+, FastAPI, SQLAlchemy 2.0, Pydantic v2
+- **Constraint Solver**: Google OR-Tools (`ortools` CP-SAT)
+- **Machine Learning**: `scikit-learn` (Random Forest), `pandas`, `numpy`, `joblib`
+- **Exporters**: `openpyxl` (Excel), `reportlab` (PDF), `Pillow` (PNG/JPG)
+- **Async / Queue**: Celery, Redis
+- **Frontend**: Next.js 14, React 18, TailwindCSS, Lucide Icons
+
+---
+
+## Quick Start
+
+### 1. Docker Compose (Full Stack + Postgres + Redis + Celery)
 
 ```bash
-# Clone and enter the repository
-git clone <repo_url>
-cd "Time Table Generator"
-
-# Start database, redis, backend, and frontend
 docker-compose up --build
 ```
 
-- **Frontend Dashboard:** [http://localhost:3000](http://localhost:3000)
-- **Backend API Docs (Swagger):** [http://localhost:8000/docs](http://localhost:8000/docs)
-- **Health Check:** [http://localhost:8000/health](http://localhost:8000/health)
+- **Frontend UI**: `http://localhost:3000`
+- **FastAPI Backend**: `http://localhost:8000`
+- **Swagger OpenAPI Docs**: `http://localhost:8000/docs`
 
----
+### 2. Local Development
 
-### Option 2: Local Development Setup
-
-#### 1. Backend Setup
+#### Backend
 ```bash
 cd backend
-python -m venv venv
-
-# On Windows:
-.\venv\Scripts\activate
-# On Linux/macOS:
-source venv/bin/activate
-
+python -m venv .venv
+.\.venv\Scripts\activate
 pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8000
 ```
 
-#### 2. Frontend Setup
+#### Run Tests (20 Unit, ML, Solver & API Tests)
+```bash
+cd backend
+.\.venv\Scripts\pytest -v
+```
+
+#### Frontend
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-Visit [http://localhost:3000](http://localhost:3000).
-
 ---
 
-## API Documentation
+## Key API Endpoints
 
 | Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/health` | Returns solver status, engine version, and uptime |
-| `POST` | `/schedule/generate` | Autonomous timetable generation (<5s) |
-| `POST` | `/schedule/reschedule` | Delta reschedule around sudden conflicts |
-| `GET` | `/schedule/{id}` | Full timetable details, assignments & metrics |
-| `GET` | `/analytics/schedule/{id}` | Workload distribution & room utilization |
-| `POST` | `/constraints` | Create custom hard/soft constraint |
-| `GET` | `/constraints` | List all registered constraints |
-| `DELETE` | `/constraints/{id}` | Delete a constraint |
-
-Interactive Swagger documentation is available at `/docs`.
-
----
-
-## Mathematical Constraint Formulation
-
-The problem is formulated as a binary integer program:
-
-Let:
-- $C$ = set of courses
-- $V$ = set of venues
-- $S$ = set of time slots
-- $F$ = set of faculty members
-- $x_{c, v, s} \in \{0, 1\}$ = 1 if course $c$ is assigned to venue $v$ at slot $s$, 0 otherwise.
-
-### Hard Constraints:
-1. **Course Assignment:** Each course is assigned exactly once:
-   $$\sum_{v \in V} \sum_{s \in S} x_{c, v, s} = 1 \quad \forall c \in C$$
-
-2. **Venue Conflict:** At most one course per venue and slot:
-   $$\sum_{c \in C} x_{c, v, s} \le 1 \quad \forall v \in V, \forall s \in S$$
-
-3. **Faculty Conflict:** At most one course per faculty member and slot:
-   $$\sum_{c \in C : \text{faculty}(c) = f} \sum_{v \in V} x_{c, v, s} \le 1 \quad \forall f \in F, \forall s \in S$$
-
-4. **Capacity Pruning:** Variable $x_{c, v, s}$ is pruned if $\text{capacity}(v) < \text{capacity\_required}(c)$.
-
-5. **Daily Workload Limit:** For each faculty $f$ and each day $d$:
-   $$\sum_{c : \text{faculty}(c) = f} \sum_{v \in V} \sum_{s \in S_d} x_{c, v, s} \le \text{max\_hours\_per\_day}(f)$$
-
----
-
-## Running the Automated Test Suite
-
-```bash
-cd backend
-pytest tests/ -v
-```
-
-Tests include:
-- `test_solver.py`: Small and medium benchmarks, infeasibility proofs.
-- `test_constraints.py`: Comprehensive input constraint validation.
-- `test_api.py`: Full REST lifecycle integration tests.
-- `test_performance.py`: Scale benchmark verifying solve time <5 seconds.
+|--------|----------|-------------|
+| `POST` | `/schedule/generate` | Run CP-SAT + ML preference solver on JSON payload |
+| `POST` | `/schedule/upload-csv` | Upload CSV dataset and generate optimal schedule |
+| `GET`  | `/schedule/{id}/table` | Get clean tabular rows for a generated schedule |
+| `GET`  | `/schedule/{id}/views` | Get all 5 tailored audience views (`master`, `teacher`, `student`, `staff`, `canteen`) |
+| `POST` | `/feedback/{schedule_id}` | Submit 1-5 star teacher feedback & trigger ML check |
+| `GET`  | `/ml/model-stats` | View Random Forest accuracy, feature importances & sample count |
+| `POST` | `/ml/retrain` | Trigger ML model retraining on accumulated teacher feedback |
+| `GET`  | `/export/{schedule_id}?format=pdf&view=canteen` | Export any view in `csv`, `xlsx`, `pdf`, `png`, `jpg`, `json`, or `html` |
+| `POST` | `/chat/start` | Start conversational AI scheduling session |
+| `POST` | `/chat/{id}/message` | Send natural language request & receive multi-view/multi-format exports |

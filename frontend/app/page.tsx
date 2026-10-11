@@ -2,14 +2,19 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Sparkles, Calendar, Clock, CheckCircle2, ShieldCheck, Zap, ArrowRight, Activity } from 'lucide-react';
+import CsvUploader from '../components/CsvUploader';
+import ChatBot from '../components/ChatBot';
+import MLStatus from '../components/MLStatus';
+import { TimetableResponse } from '../types';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 export default function HomePage() {
+  const router = useRouter();
   const [health, setHealth] = useState<any>(null);
   const [recentSchedules, setRecentSchedules] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchData() {
@@ -27,12 +32,14 @@ export default function HomePage() {
         }
       } catch (e) {
         console.error(e);
-      } finally {
-        setLoading(false);
       }
     }
     fetchData();
   }, []);
+
+  const handleCsvGenerated = (data: TimetableResponse) => {
+    router.push(`/schedule/${data.schedule_id}`);
+  };
 
   return (
     <div className="space-y-10">
@@ -42,13 +49,13 @@ export default function HomePage() {
         <div className="max-w-3xl space-y-4">
           <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
             <Zap className="w-3.5 h-3.5" />
-            <span>Autonomous Constraint Optimization Engine</span>
+            <span>OR-Tools CP-SAT + Random Forest ML + Conversational AI</span>
           </div>
           <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight">
-            Autonomous, conflict-free university timetabling in <span className="text-emerald-400">&lt;5 seconds</span>.
+            Conversational, ML-driven university timetabling in <span className="text-emerald-400">&lt;5 seconds</span>.
           </h1>
           <p className="text-slate-400 text-sm sm:text-base leading-relaxed">
-            Formulates faculty availability, venue capacities, slot constraints, and departmental preferences into an exact CP-SAT integer programming model powered by Google OR-Tools.
+            Upload your course CSV or chat with the AI Assistant to generate conflict-free schedules with 5 tailored audience views (Master, Teacher, Student, Support Staff, Canteen Staff) and 7 simultaneous export formats.
           </p>
           <div className="pt-2 flex flex-wrap gap-4">
             <Link
@@ -56,7 +63,7 @@ export default function HomePage() {
               className="inline-flex items-center space-x-2 px-6 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold text-sm shadow-xl shadow-emerald-500/25 transition-all transform hover:-translate-y-0.5"
             >
               <Sparkles className="w-4 h-4" />
-              <span>Launch Timetable Generator</span>
+              <span>Launch Timetable Workspace</span>
             </Link>
             <Link
               href="/constraints"
@@ -65,6 +72,17 @@ export default function HomePage() {
               <span>Manage Constraints</span>
             </Link>
           </div>
+        </div>
+      </div>
+
+      {/* Interactive CSV Uploader + Conversational AI Assistant */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <div className="lg:col-span-5 space-y-6">
+          <CsvUploader onScheduleGenerated={handleCsvGenerated} />
+          <MLStatus />
+        </div>
+        <div className="lg:col-span-7">
+          <ChatBot scheduleId={recentSchedules[0]?.id} />
         </div>
       </div>
 
@@ -88,14 +106,14 @@ export default function HomePage() {
           <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 mb-4">
             <ShieldCheck className="w-5 h-5" />
           </div>
-          <h3 className="text-white font-bold text-base mb-1">Zero-Conflict Guarantee</h3>
+          <h3 className="text-white font-bold text-base mb-1">5-Audience Multi-View Output</h3>
           <p className="text-slate-400 text-xs mb-3">
-            100% satisfaction enforced for all hard constraints: double-bookings, capacities, and room availability.
+            Automatically tailors the master timetable for Teachers, Students, Support Staff, and Canteen Lunch Coordination.
           </p>
           <div className="text-xs text-slate-400 space-y-1 border-t border-slate-800 pt-3">
             <div className="flex items-center gap-1 text-emerald-400">
               <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>Hard constraints mathematically proven</span>
+              <span>CSV, XLSX, PDF, PNG, JPG, JSON, HTML</span>
             </div>
           </div>
         </div>
@@ -104,9 +122,9 @@ export default function HomePage() {
           <div className="w-10 h-10 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-violet-400 mb-4">
             <Clock className="w-5 h-5" />
           </div>
-          <h3 className="text-white font-bold text-base mb-1">Real-Time Rescheduling</h3>
+          <h3 className="text-white font-bold text-base mb-1">Adaptive ML Preference Loop</h3>
           <p className="text-slate-400 text-xs mb-3">
-            Autonomous delta re-computation preserves undisturbed schedules while resolving sudden emergencies.
+            Learns teacher time-of-day preferences from feedback ratings via Random Forest and optimizes subsequent runs.
           </p>
           <div className="text-xs text-slate-400 space-y-1 border-t border-slate-800 pt-3">
             <div>Response SLA: <span className="text-slate-200 font-mono">&lt; 5.0 seconds</span></div>
@@ -132,7 +150,7 @@ export default function HomePage() {
 
         {recentSchedules.length === 0 ? (
           <div className="text-center py-8 text-slate-500 text-xs">
-            No timetables generated yet. Click "Launch Timetable Generator" to create your first schedule.
+            No timetables generated yet. Use the CSV Uploader or click &quot;Launch Timetable Workspace&quot; above.
           </div>
         ) : (
           <div className="divide-y divide-slate-800/80">
@@ -153,7 +171,7 @@ export default function HomePage() {
                     href={`/schedule/${item.id}`}
                     className="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-emerald-400 text-xs font-semibold rounded-lg border border-slate-700 transition"
                   >
-                    View Grid
+                    View Views & Export
                   </Link>
                 </div>
               </div>
