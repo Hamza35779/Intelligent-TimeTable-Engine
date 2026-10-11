@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSchedule } from '../../hooks/useSchedule';
 import TimetableGrid from '../../components/TimetableGrid';
 import SolverStatus from '../../components/SolverStatus';
@@ -10,92 +10,13 @@ import ChatBot from '../../components/ChatBot';
 import MetricsPanel from '../../components/MetricsPanel';
 import ExportOptions from '../../components/ExportOptions';
 import FeedbackForm from '../../components/FeedbackForm';
+import {
+  UNIVERSITY_SECTION_PRESETS,
+  solveLocally,
+} from '../../utils/localFallbackSolver';
 import { Sparkles, Play, RefreshCw, AlertTriangle, Layers, FileCode } from 'lucide-react';
 
-const SAMPLE_BENCHMARK_DATA = {
-  faculty: [
-    {
-      name: "Dr. Alan Turing",
-      department: "Computer Science",
-      max_hours_per_day: 4,
-      max_days_per_week: 5,
-      email: "turing@cs.university.edu",
-      preferences: { prefer_morning: true, preferred_days: ["Monday", "Wednesday"] },
-      unavailable_slots: [3],
-    },
-    {
-      name: "Dr. Ada Lovelace",
-      department: "Computer Science",
-      max_hours_per_day: 4,
-      max_days_per_week: 5,
-      email: "ada@cs.university.edu",
-      preferences: { prefer_morning: true, preferred_days: ["Tuesday", "Thursday"] },
-      unavailable_slots: [],
-    },
-    {
-      name: "Dr. Claude Shannon",
-      department: "Information Theory",
-      max_hours_per_day: 4,
-      max_days_per_week: 4,
-      email: "shannon@it.university.edu",
-      preferences: { prefer_morning: false, preferred_days: ["Monday", "Wednesday", "Friday"] },
-      unavailable_slots: [0],
-    },
-    {
-      name: "Dr. Grace Hopper",
-      department: "Software Engineering",
-      max_hours_per_day: 5,
-      max_days_per_week: 5,
-      email: "hopper@eng.university.edu",
-      preferences: { prefer_morning: true, preferred_days: ["Monday", "Tuesday"] },
-      unavailable_slots: [],
-    },
-    {
-      name: "Dr. John von Neumann",
-      department: "Mathematics",
-      max_hours_per_day: 4,
-      max_days_per_week: 5,
-      email: "vonneumann@math.university.edu",
-      preferences: { prefer_morning: false, preferred_days: ["Thursday", "Friday"] },
-      unavailable_slots: [],
-    },
-  ],
-  venues: [
-    { name: "Auditorium Turing", capacity: 120, equipment: ["projector", "mic", "recording"] },
-    { name: "Hall Shannon", capacity: 80, equipment: ["projector", "mic"] },
-    { name: "Lab Hopper", capacity: 45, equipment: ["workstations", "projector"] },
-    { name: "Seminar Room 101", capacity: 35, equipment: ["whiteboard"] },
-  ],
-  slots: [
-    { day_of_week: "Monday", start_time: "09:00", end_time: "10:00", duration_minutes: 60 },
-    { day_of_week: "Monday", start_time: "10:00", end_time: "11:00", duration_minutes: 60 },
-    { day_of_week: "Monday", start_time: "11:00", end_time: "12:00", duration_minutes: 60 },
-    { day_of_week: "Monday", start_time: "14:00", end_time: "15:00", duration_minutes: 60 },
-    { day_of_week: "Tuesday", start_time: "09:00", end_time: "10:00", duration_minutes: 60 },
-    { day_of_week: "Tuesday", start_time: "10:00", end_time: "11:00", duration_minutes: 60 },
-    { day_of_week: "Tuesday", start_time: "11:00", end_time: "12:00", duration_minutes: 60 },
-    { day_of_week: "Wednesday", start_time: "09:00", end_time: "10:00", duration_minutes: 60 },
-    { day_of_week: "Wednesday", start_time: "10:00", end_time: "11:00", duration_minutes: 60 },
-    { day_of_week: "Wednesday", start_time: "14:00", end_time: "15:00", duration_minutes: 60 },
-    { day_of_week: "Thursday", start_time: "09:00", end_time: "10:00", duration_minutes: 60 },
-    { day_of_week: "Thursday", start_time: "10:00", end_time: "11:00", duration_minutes: 60 },
-    { day_of_week: "Friday", start_time: "09:00", end_time: "10:00", duration_minutes: 60 },
-    { day_of_week: "Friday", start_time: "10:00", end_time: "11:00", duration_minutes: 60 },
-  ],
-  courses: [
-    { name: "Theory of Computation", code: "CS301", faculty_id: 0, capacity_required: 70 },
-    { name: "Computer Architecture", code: "CS201", faculty_id: 0, capacity_required: 40 },
-    { name: "Algorithms & Complexity", code: "CS401", faculty_id: 1, capacity_required: 60 },
-    { name: "Compiler Design", code: "CS405", faculty_id: 1, capacity_required: 35 },
-    { name: "Information Theory", code: "IT202", faculty_id: 2, capacity_required: 50 },
-    { name: "Digital Communications", code: "IT303", faculty_id: 2, capacity_required: 30 },
-    { name: "Software System Design", code: "SE310", faculty_id: 3, capacity_required: 40 },
-    { name: "Operating Systems", code: "SE205", faculty_id: 3, capacity_required: 30 },
-    { name: "Discrete Mathematics", code: "MA101", faculty_id: 4, capacity_required: 80 },
-    { name: "Game Theory & Automata", code: "MA302", faculty_id: 4, capacity_required: 35 },
-  ],
-  timeout_seconds: 5,
-};
+const SAMPLE_BENCHMARK_DATA = UNIVERSITY_SECTION_PRESETS['AI 2023'];
 
 export default function SchedulePage() {
   const {
@@ -106,13 +27,25 @@ export default function SchedulePage() {
     generateSchedule,
     rescheduleConflicts,
   } = useSchedule();
+  const [selectedPresetName, setSelectedPresetName] = useState<string>('AI 2023');
   const [datasetJson, setDatasetJson] = useState(JSON.stringify(SAMPLE_BENCHMARK_DATA, null, 2));
-  const [activeTab, setActiveTab] = useState<'views' | 'grid' | 'export' | 'feedback' | 'analytics' | 'editor'>('views');
+  const [activeTab, setActiveTab] = useState<
+    'views' | 'grid' | 'export' | 'feedback' | 'analytics' | 'editor'
+  >('views');
   const [rescheduleSlotId, setRescheduleSlotId] = useState<number>(0);
   const [rescheduling, setRescheduling] = useState(false);
-  const [activeScheduleId, setActiveScheduleId] = useState<number | undefined>(undefined);
+  const [activeScheduleId, setActiveScheduleId] = useState<number | undefined>(1);
 
-  const effectiveScheduleId = currentSchedule?.schedule_id || activeScheduleId;
+  // Initialize with the AI 2023 University Sheet on first render so the user immediately sees the schedule
+  useEffect(() => {
+    if (!currentSchedule) {
+      const initial = solveLocally(UNIVERSITY_SECTION_PRESETS['AI 2023']);
+      setCurrentSchedule(initial);
+      setActiveScheduleId(initial.schedule_id);
+    }
+  }, [currentSchedule, setCurrentSchedule]);
+
+  const effectiveScheduleId = currentSchedule?.schedule_id || activeScheduleId || 1;
 
   const handleRunSolver = async () => {
     try {
@@ -127,8 +60,13 @@ export default function SchedulePage() {
     }
   };
 
-  const handleLoadSample = () => {
-    setDatasetJson(JSON.stringify(SAMPLE_BENCHMARK_DATA, null, 2));
+  const handleSelectSectionPreset = (sectionName: string) => {
+    setSelectedPresetName(sectionName);
+    const preset = UNIVERSITY_SECTION_PRESETS[sectionName] || SAMPLE_BENCHMARK_DATA;
+    setDatasetJson(JSON.stringify(preset, null, 2));
+    const generated = solveLocally(preset);
+    setCurrentSchedule(generated);
+    setActiveScheduleId(generated.schedule_id);
   };
 
   const handleTestReschedule = async () => {
@@ -155,21 +93,28 @@ export default function SchedulePage() {
         <div>
           <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight flex items-center gap-2">
             <Sparkles className="w-6 h-6 text-emerald-400" />
-            <span>Autonomous Schedule & Multi-View Studio</span>
+            <span>Autonomous Schedule & University Sheet Studio</span>
           </h2>
           <p className="text-slate-400 text-xs sm:text-sm mt-1">
-            Combine OR-Tools CP-SAT, ML Teacher Preference Learning, and Conversational AI.
+            Official 9-Slot Horizontal University Timetable Sheets with Merged Lab/Lecture Spans & Course Legend.
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          <button
-            onClick={handleLoadSample}
-            className="flex items-center space-x-1.5 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl border border-slate-700 transition"
-          >
-            <Layers className="w-4 h-4 text-emerald-400" />
-            <span>Load University Preset</span>
-          </button>
+          <div className="flex items-center gap-2 bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5">
+            <Layers className="w-4 h-4 text-blue-400" />
+            <select
+              value={selectedPresetName}
+              onChange={(e) => handleSelectSectionPreset(e.target.value)}
+              className="bg-transparent text-white text-xs font-semibold outline-none cursor-pointer"
+            >
+              {Object.keys(UNIVERSITY_SECTION_PRESETS).map((sec) => (
+                <option key={sec} value={sec} className="bg-slate-900 text-white">
+                  {sec}
+                </option>
+              ))}
+            </select>
+          </div>
 
           <button
             onClick={handleRunSolver}
@@ -232,8 +177,12 @@ export default function SchedulePage() {
             <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-wrap items-center justify-between gap-4">
               <div className="flex items-center space-x-2">
                 <RefreshCw className="w-4 h-4 text-blue-400" />
-                <span className="text-xs font-semibold text-slate-200">Real-Time Conflict Rescheduling:</span>
-                <span className="text-xs text-slate-400">Simulate room maintenance or unexpected slot cancellation</span>
+                <span className="text-xs font-semibold text-slate-200">
+                  Real-Time Conflict Rescheduling:
+                </span>
+                <span className="text-xs text-slate-400">
+                  Simulate room maintenance or unexpected slot cancellation
+                </span>
               </div>
               <div className="flex items-center gap-2">
                 <select
@@ -241,9 +190,9 @@ export default function SchedulePage() {
                   onChange={(e) => setRescheduleSlotId(Number(e.target.value))}
                   className="bg-slate-800 border border-slate-700 text-white text-xs rounded-lg px-2.5 py-1.5 outline-none"
                 >
-                  <option value={0}>Simulate Slot #0 Outage (Monday 09:00)</option>
-                  <option value={1}>Simulate Slot #1 Outage (Monday 10:00)</option>
-                  <option value={4}>Simulate Slot #4 Outage (Tuesday 09:00)</option>
+                  <option value={0}>Simulate Slot #1 Outage (Monday 08:30-09:20)</option>
+                  <option value={1}>Simulate Slot #2 Outage (Monday 09:20-10:10)</option>
+                  <option value={4}>Simulate Slot #5 Outage (Tuesday 09:20-10:10)</option>
                 </select>
                 <button
                   onClick={handleTestReschedule}
@@ -259,10 +208,10 @@ export default function SchedulePage() {
           {/* View Mode Tabs */}
           <div className="flex flex-wrap gap-2 border-b border-slate-800 pb-2">
             {[
-              { id: 'views', label: '5-Audience Multi-View' },
+              { id: 'views', label: 'University Sheet & Multi-View' },
+              { id: 'grid', label: 'Printable Official Sheet' },
               { id: 'export', label: 'Multi-Format Export (7 Formats)' },
               { id: 'feedback', label: 'Teacher Feedback & ML' },
-              ...(currentSchedule ? [{ id: 'grid', label: 'Interactive Slot Grid' }] : []),
               ...(currentSchedule ? [{ id: 'analytics', label: 'Optimization Analytics' }] : []),
               { id: 'editor', label: 'Raw JSON Config' },
             ].map((tab) => (
@@ -293,7 +242,11 @@ export default function SchedulePage() {
           {activeTab === 'feedback' && <FeedbackForm scheduleId={effectiveScheduleId} />}
 
           {activeTab === 'grid' && currentSchedule && (
-            <TimetableGrid entries={currentSchedule.schedule} />
+            <TimetableGrid
+              entries={currentSchedule.schedule}
+              sectionTitle={currentSchedule.analytics?.section_title || selectedPresetName}
+              scheduleId={effectiveScheduleId}
+            />
           )}
 
           {activeTab === 'analytics' && currentSchedule?.analytics && (
@@ -310,25 +263,6 @@ export default function SchedulePage() {
               />
             </div>
           )}
-        </div>
-      )}
-
-      {/* When no schedule is loaded yet, show the JSON Editor directly */}
-      {!effectiveScheduleId && (
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-3">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-            <div className="flex items-center space-x-2 text-white font-semibold text-sm">
-              <FileCode className="w-4 h-4 text-emerald-400" />
-              <span>Input Data Configuration (Faculty, Venues, Slots, Courses)</span>
-            </div>
-            <span className="text-xs text-slate-500">Edit JSON or upload CSV above</span>
-          </div>
-          <textarea
-            value={datasetJson}
-            onChange={(e) => setDatasetJson(e.target.value)}
-            rows={14}
-            className="w-full bg-slate-950 font-mono text-xs text-slate-300 p-4 rounded-xl border border-slate-800 outline-none focus:ring-1 focus:ring-emerald-500"
-          />
         </div>
       )}
     </div>

@@ -9,7 +9,11 @@ from app.schemas.timetable import (
     TimetableAnalyticsResponse,
 )
 from solver.fairness import calculate_fairness_score, calculate_preference_satisfaction
-from utils.timetable_formatter import build_table_rows, generate_multi_views
+from utils.timetable_formatter import (
+    build_table_rows,
+    build_university_sheet_data,
+    generate_multi_views,
+)
 
 router = APIRouter(tags=["Timetable"])
 
@@ -120,6 +124,10 @@ def get_schedule_table(
     run, _, entry_dicts, teacher_count, prefs_map = _load_run_entries(schedule_id, db)
     rows = build_table_rows(entry_dicts, view_type=view.lower())
     stored_metrics = run.metrics or {}
+    section_title = stored_metrics.get("section_title") or "AI 2024 - Section A"
+    sheet = build_university_sheet_data(
+        entry_dicts, section_title=section_title, view_type=view.lower()
+    )
     fairness = stored_metrics.get("fairness_score") or calculate_fairness_score(entry_dicts)
     pref_sat = stored_metrics.get("preference_satisfaction") or calculate_preference_satisfaction(
         entry_dicts, prefs_map
@@ -130,8 +138,10 @@ def get_schedule_table(
         "view": view.lower(),
         "headers": rows[0] if rows else [],
         "rows": rows[1:] if len(rows) > 1 else [],
+        "sheet": sheet,
         "metadata": {
             "schedule_id": run.id,
+            "section_title": section_title,
             "total_courses": len(entry_dicts),
             "total_teachers": teacher_count,
             "fairness_score": fairness,

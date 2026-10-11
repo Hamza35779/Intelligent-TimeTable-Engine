@@ -6,17 +6,18 @@ from datetime import datetime, timezone
 from typing import List, Dict, Any, Tuple
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+from openpyxl.utils import get_column_letter
 from reportlab.lib.pagesizes import landscape, A4
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 from reportlab.lib import colors
 from PIL import Image, ImageDraw, ImageFont
-from utils.timetable_formatter import build_table_rows
+from utils.timetable_formatter import build_table_rows, build_university_sheet_data
 
 
 VIEW_TITLES = {
-    "master": "Master University Schedule",
+    "master": "AI 2024 - Section A",
     "teacher": "Faculty & Teacher Schedule View",
     "student": "Student Cohort Schedule View",
     "staff": "Support & Facilities Staff View",
@@ -44,8 +45,15 @@ class TimetableExporter:
         self.entries = entries
         self.metadata = metadata or {}
         self.view_type = view_type if view_type in VIEW_TITLES else "master"
-        self.title = VIEW_TITLES[self.view_type]
+        self.section_title = (
+            self.metadata.get("section_title")
+            or (VIEW_TITLES[self.view_type] if self.view_type != "master" else "AI 2024 - Section A")
+        )
+        self.title = self.section_title
         self.rows = build_table_rows(entries, view_type=self.view_type)
+        self.sheet = build_university_sheet_data(
+            entries, section_title=self.section_title, view_type=self.view_type
+        )
 
     def export(self, format_type: str) -> Tuple[bytes, str, str]:
         fmt = format_type.strip().lower()
@@ -76,51 +84,176 @@ class TimetableExporter:
     def _export_csv(self) -> bytes:
         buf = io.StringIO()
         writer = csv.writer(buf)
+        writer.writerow([_sanitize_spreadsheet_cell(self.section_title)])
         sanitized_rows = [
             [_sanitize_spreadsheet_cell(cell) for cell in row] for row in self.rows
         ]
         writer.writerows(sanitized_rows)
+        writer.writerow([])
+        writer.writerow(
+            [
+                "Serial",
+                "Course Code",
+                "Course Titles",
+                "CHs",
+                "Name of Faculty",
+                "Elective / Compulsory",
+                "Venues",
+                "Remarks",
+            ]
+        )
+        for c_row in self.sheet["course_legend"]:
+            writer.writerow(
+                [
+                    _sanitize_spreadsheet_cell(c_row["serial"]),
+                    _sanitize_spreadsheet_cell(c_row["course_code"]),
+                    _sanitize_spreadsheet_cell(c_row["course_title"]),
+                    _sanitize_spreadsheet_cell(c_row["credit_hours"]),
+                    _sanitize_spreadsheet_cell(c_row["faculty_name"]),
+                    _sanitize_spreadsheet_cell(c_row["elective_compulsory"]),
+                    _sanitize_spreadsheet_cell(c_row["venues"]),
+                    _sanitize_spreadsheet_cell(c_row["remarks"]),
+                ]
+            )
         return buf.getvalue().encode("utf-8")
 
     def _export_xlsx(self) -> bytes:
         wb = Workbook()
         ws = wb.active
-        ws.title = f"{self.view_type.capitalize()} Schedule"
+        ws.title = self.section_title[:31]
 
-        thin_border = Border(
-            left=Side(style="thin", color="CCCCCC"),
-            right=Side(style="thin", color="CCCCCC"),
-            top=Side(style="thin", color="CCCCCC"),
-            bottom=Side(style="thin", color="CCCCCC"),
+        black_border = Border(
+            left=Side(style="thin", color="000000"),
+            right=Side(style="thin", color="000000"),
+            top=Side(style="thin", color="000000"),
+            bottom=Side(style="thin", color="000000"),
         )
+        blue_fill = PatternFill(start_color="2E75B6", end_color="2E75B6", fill_type="solid")
+        center_align = Alignment(horizontal="center", vertical="center", wrap_text=True)
 
-        for r_idx, row in enumerate(self.rows, start=1):
-            for c_idx, val in enumerate(row, start=1):
-                safe_val = _sanitize_spreadsheet_cell(val)
-                cell = ws.cell(row=r_idx, column=c_idx, value=safe_val)
-                cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
-                cell.border = thin_border
+        # Row 1: Blue Section Banner merged across columns A..J (10 columns)
+        ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=10)
+        for col_idx in range(1, 11):
+            c = ws.cell(row=1, column=col_idx)
+            c.fill = blue_fill
+            c.border = black_border
+        banner_cell = ws.cell(row=1, column=1, value=_sanitize_spreadsheet_cell(self.section_title))
+        banner_cell.font = Font(name="Calibri", color="FFFFFF", bold=True, size=12)
+        banner_cell.alignment = center_align
+        ws.row_dimensions[1].height = 24
 
-                if r_idx == 1:
-                    cell.fill = PatternFill(start_color="1F4E78", end_color="1F4E78", fill_type="solid")
-                    cell.font = Font(color="FFFFFF", bold=True, size=11)
-                elif "Lunch" in str(val) or "BREAK" in str(row[0]):
-                    cell.fill = PatternFill(start_color="FFF2CC", end_color="FFF2CC", fill_type="solid")
-                    cell.font = Font(color="7F6000", bold=True)
+        # Row 2: Slot 1 .. Slot 9
+        for col_idx, val in enumerate(self.sheet["slot_headers"], start=1):
+            c = ws.cell(row=2, column=col_idx, value=_sanitize_spreadsheet_cell(val))
+            c.font = Font(name="Calibri", bold=True, size=10)
+            c.alignment = center_align
+            c.border = black_border
+        ws.row_dimensions[2].height = 20
 
-        for col in ws.columns:
-            col_letter = col[0].column_letter
-            ws.column_dimensions[col_letter].width = 24
-        for r_idx in range(2, len(self.rows) + 1):
-            ws.row_dimensions[r_idx].height = 45
+        # Row 3: Day/Time | 0830-9020 .. 1510-1600
+        for col_idx, val in enumerate(self.sheet["time_headers"], start=1):
+            c = ws.cell(row=3, column=col_idx, value=_sanitize_spreadsheet_cell(val))
+            c.font = Font(name="Calibri", bold=True, size=10)
+            c.alignment = center_align
+            c.border = black_border
+        ws.row_dimensions[3].height = 20
 
-        ws_meta = wb.create_sheet("Metrics")
-        ws_meta.append(["Metric", "Value"])
-        ws_meta.append(["Audience View", self.title])
-        ws_meta.append(["Fairness Score", self.metadata.get("fairness_score", 0.92)])
-        ws_meta.append(["Preference Satisfaction", self.metadata.get("preference_satisfaction", 0.88)])
-        ws_meta.append(["Total Courses", self.metadata.get("total_courses", len(self.entries))])
-        ws_meta.append(["Total Teachers", self.metadata.get("total_teachers", 5)])
+        # Rows 4..8: Days with merged horizontal spans
+        current_row = 4
+        for day in self.sheet["days"]:
+            day_cell = ws.cell(row=current_row, column=1, value=_sanitize_spreadsheet_cell(day))
+            day_cell.font = Font(name="Calibri", bold=True, size=10)
+            day_cell.alignment = center_align
+            day_cell.border = black_border
+
+            spans = self.sheet["merged_day_cells"].get(day, [])
+            for span in spans:
+                start_col = span["startSlot"] + 1  # Slot 1 is column 2
+                end_col = start_col + span["colSpan"] - 1
+                if end_col > start_col:
+                    ws.merge_cells(
+                        start_row=current_row,
+                        start_column=start_col,
+                        end_row=current_row,
+                        end_column=end_col,
+                    )
+                for col_i in range(start_col, end_col + 1):
+                    c = ws.cell(row=current_row, column=col_i)
+                    c.border = black_border
+                    c.alignment = center_align
+                top_cell = ws.cell(
+                    row=current_row,
+                    column=start_col,
+                    value=_sanitize_spreadsheet_cell(span["text"]),
+                )
+                top_cell.font = Font(name="Calibri", size=10)
+                top_cell.alignment = center_align
+            ws.row_dimensions[current_row].height = 42
+            current_row += 1
+
+        # Blank separator row
+        current_row += 1
+
+        # Lower Table: Course & Faculty Summary Legend
+        legend_headers = [
+            "Serial",
+            "Course Code",
+            "Course Titles",
+            "CHs",
+            "Name of Faculty",
+            "Elective / Compulsory",
+            "Venues",
+            "Remarks",
+        ]
+        # Map 8 legend columns neatly across the 10-column sheet (Course Titles spans C..D, Name of Faculty spans F..G)
+        legend_col_spans = [
+            (1, 1),   # Serial
+            (2, 2),   # Course Code
+            (3, 4),   # Course Titles
+            (5, 5),   # CHs
+            (6, 7),   # Name of Faculty
+            (8, 8),   # Elective / Compulsory
+            (9, 9),   # Venues
+            (10, 10), # Remarks
+        ]
+        for h_val, (sc, ec) in zip(legend_headers, legend_col_spans):
+            if ec > sc:
+                ws.merge_cells(start_row=current_row, start_column=sc, end_row=current_row, end_column=ec)
+            for col_i in range(sc, ec + 1):
+                c = ws.cell(row=current_row, column=col_i)
+                c.border = black_border
+                c.alignment = center_align
+            hc = ws.cell(row=current_row, column=sc, value=h_val)
+            hc.font = Font(name="Calibri", bold=True, size=10)
+        ws.row_dimensions[current_row].height = 24
+        current_row += 1
+
+        for c_row in self.sheet["course_legend"]:
+            vals = [
+                c_row["serial"],
+                c_row["course_code"],
+                c_row["course_title"],
+                c_row["credit_hours"],
+                c_row["faculty_name"],
+                c_row["elective_compulsory"],
+                c_row["venues"],
+                c_row["remarks"],
+            ]
+            for val, (sc, ec) in zip(vals, legend_col_spans):
+                if ec > sc:
+                    ws.merge_cells(start_row=current_row, start_column=sc, end_row=current_row, end_column=ec)
+                for col_i in range(sc, ec + 1):
+                    c = ws.cell(row=current_row, column=col_i)
+                    c.border = black_border
+                    c.alignment = center_align
+                vc = ws.cell(row=current_row, column=sc, value=_sanitize_spreadsheet_cell(val))
+                vc.font = Font(name="Calibri", size=10)
+            ws.row_dimensions[current_row].height = 22
+            current_row += 1
+
+        for col_idx in range(1, 11):
+            col_letter = get_column_letter(col_idx)
+            ws.column_dimensions[col_letter].width = 16 if col_idx > 1 else 15
 
         out = io.BytesIO()
         wb.save(out)
@@ -131,105 +264,241 @@ class TimetableExporter:
         doc = SimpleDocTemplate(
             buf,
             pagesize=landscape(A4),
-            leftMargin=24,
-            rightMargin=24,
-            topMargin=24,
-            bottomMargin=24,
+            leftMargin=20,
+            rightMargin=20,
+            topMargin=20,
+            bottomMargin=20,
         )
         elements = []
-        styles = getSampleStyleSheet()
-        title_style = ParagraphStyle(
-            "ScheduleTitle",
-            parent=styles["Heading1"],
-            fontSize=18,
-            textColor=colors.HexColor("#1F4E78"),
+        cell_style = ParagraphStyle(
+            "CellText",
+            fontName="Helvetica",
+            fontSize=8,
+            leading=10,
             alignment=1,
-            spaceAfter=14,
         )
-        elements.append(Paragraph(html.escape(self.title), title_style))
+        bold_style = ParagraphStyle(
+            "CellBold",
+            fontName="Helvetica-Bold",
+            fontSize=8.5,
+            leading=10,
+            alignment=1,
+        )
+        banner_style = ParagraphStyle(
+            "BannerText",
+            fontName="Helvetica-Bold",
+            fontSize=11,
+            leading=14,
+            textColor=colors.white,
+            alignment=1,
+        )
 
-        num_day_cols = max(1, (len(self.rows[0]) - 1) if self.rows else 5)
-        day_col_width = min(1.85 * inch, (9.2 * inch) / num_day_cols)
-        col_widths = [1.3 * inch] + [day_col_width] * num_day_cols
-        table = Table(self.rows, colWidths=col_widths)
+        # Build Upper Table (Banner + Slot Headers + Time Headers + Days)
+        upper_data = []
+        upper_data.append([Paragraph(html.escape(self.section_title), banner_style)] + [""] * 9)
+        upper_data.append([Paragraph(html.escape(s), bold_style) for s in self.sheet["slot_headers"]])
+        upper_data.append([Paragraph(html.escape(t), bold_style) for t in self.sheet["time_headers"]])
 
-        t_style = [
-            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#1F4E78")),
-            ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
+        upper_styles = [
+            ("SPAN", (0, 0), (9, 0)),
+            ("BACKGROUND", (0, 0), (9, 0), colors.HexColor("#2E75B6")),
+            ("TEXTCOLOR", (0, 0), (9, 0), colors.white),
             ("ALIGN", (0, 0), (-1, -1), "CENTER"),
             ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-            ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-            ("FONTSIZE", (0, 0), (-1, 0), 10),
-            ("FONTNAME", (0, 1), (-1, -1), "Helvetica"),
-            ("FONTSIZE", (0, 1), (-1, -1), 8),
-            ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#CBD5E1")),
-            ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#F8FAFC")]),
+            ("GRID", (0, 0), (-1, -1), 0.75, colors.black),
+            ("BACKGROUND", (0, 1), (-1, -1), colors.white),
         ]
-        for r_idx, row in enumerate(self.rows):
-            if r_idx > 0 and "BREAK" in str(row[0]):
-                t_style.append(("BACKGROUND", (0, r_idx), (-1, r_idx), colors.HexColor("#FEF3C7")))
 
-        table.setStyle(TableStyle(t_style))
-        elements.append(table)
+        for d_idx, day in enumerate(self.sheet["days"]):
+            r_idx = 3 + d_idx
+            row_cells = [Paragraph(html.escape(day), bold_style)] + [""] * 9
+            spans = self.sheet["merged_day_cells"].get(day, [])
+            for sp in spans:
+                sc = sp["startSlot"]
+                ec = sc + sp["colSpan"] - 1
+                txt_html = html.escape(sp["text"]).replace("\n", "<br/>")
+                row_cells[sc] = Paragraph(txt_html, cell_style)
+                if ec > sc:
+                    upper_styles.append(("SPAN", (sc, r_idx), (ec, r_idx)))
+            upper_data.append(row_cells)
+
+        col_widths = [1.05 * inch] + [1.06 * inch] * 9
+        upper_table = Table(upper_data, colWidths=col_widths)
+        upper_table.setStyle(TableStyle(upper_styles))
+        elements.append(upper_table)
         elements.append(Spacer(1, 14))
 
-        fairness = float(self.metadata.get("fairness_score", 0.92)) * 100
-        pref = float(self.metadata.get("preference_satisfaction", 0.88)) * 100
-        summary_html = (
-            f"<b>Optimization Summary:</b> Fairness Score: {fairness:.1f}% | "
-            f"Preference Satisfaction: {pref:.1f}% | "
-            f"Courses Scheduled: {int(self.metadata.get('total_courses', len(self.entries)))}"
+        # Lower Table: 8-Column Course Legend
+        legend_headers = [
+            "Serial",
+            "Course Code",
+            "Course Titles",
+            "CHs",
+            "Name of Faculty",
+            "Elective / Compulsory",
+            "Venues",
+            "Remarks",
+        ]
+        lower_data = [[Paragraph(html.escape(h), bold_style) for h in legend_headers]]
+        for c_row in self.sheet["course_legend"]:
+            lower_data.append(
+                [
+                    Paragraph(html.escape(str(c_row["serial"])), cell_style),
+                    Paragraph(html.escape(str(c_row["course_code"])), cell_style),
+                    Paragraph(html.escape(str(c_row["course_title"])), cell_style),
+                    Paragraph(html.escape(str(c_row["credit_hours"])), cell_style),
+                    Paragraph(html.escape(str(c_row["faculty_name"])), cell_style),
+                    Paragraph(html.escape(str(c_row["elective_compulsory"])), cell_style),
+                    Paragraph(html.escape(str(c_row["venues"])), cell_style),
+                    Paragraph(html.escape(str(c_row["remarks"])), cell_style),
+                ]
+            )
+
+        lower_col_widths = [
+            0.6 * inch,
+            1.0 * inch,
+            2.5 * inch,
+            0.6 * inch,
+            2.0 * inch,
+            1.5 * inch,
+            1.2 * inch,
+            1.19 * inch,
+        ]
+        lower_table = Table(lower_data, colWidths=lower_col_widths)
+        lower_table.setStyle(
+            TableStyle(
+                [
+                    ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+                    ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                    ("GRID", (0, 0), (-1, -1), 0.75, colors.black),
+                    ("BACKGROUND", (0, 0), (-1, -1), colors.white),
+                ]
+            )
         )
-        elements.append(Paragraph(summary_html, styles["Normal"]))
+        elements.append(lower_table)
 
         doc.build(elements)
         return buf.getvalue()
 
     def _export_image(self, ext: str = "png") -> bytes:
-        num_cols = len(self.rows[0]) if self.rows else 6
-        num_rows = len(self.rows)
-        cell_w = 210
-        cell_h = 85
-        margin = 24
-        header_h = 60
+        margin = 20
+        col_w = 135
+        total_w = col_w * 10
+        banner_h = 34
+        hdr_h = 28
+        day_h = 64
+        gap_h = 26
+        leg_row_h = 30
 
-        img_w = num_cols * cell_w + margin * 2
-        img_h = header_h + num_rows * cell_h + margin * 2
+        num_days = len(self.sheet["days"])
+        num_legend_rows = len(self.sheet["course_legend"]) + 1
+        img_w = total_w + margin * 2
+        img_h = (
+            margin * 2
+            + banner_h
+            + hdr_h * 2
+            + num_days * day_h
+            + gap_h
+            + num_legend_rows * leg_row_h
+        )
 
         img = Image.new("RGB", (img_w, img_h), color=(255, 255, 255))
         draw = ImageDraw.Draw(img)
         font = ImageFont.load_default()
 
-        draw.text((margin, 20), f"{self.title} (OR-Tools CP-SAT + ML)", fill=(31, 78, 120), font=font)
+        def draw_centered_text(box: Tuple[int, int, int, int], text: str, fill=(0, 0, 0)):
+            x0, y0, x1, y1 = box
+            lines = [line.strip() for line in str(text).split("\n") if line.strip()]
+            if not lines:
+                return
+            line_h = 14
+            total_txt_h = len(lines) * line_h
+            start_y = y0 + max(4, (y1 - y0 - total_txt_h) // 2)
+            for idx, line in enumerate(lines[:3]):
+                approx_w = len(line) * 6
+                start_x = x0 + max(4, (x1 - x0 - approx_w) // 2)
+                draw.text((start_x, start_y + idx * line_h), line, fill=fill, font=font)
 
-        y_start = header_h
-        for r_idx, row in enumerate(self.rows):
-            for c_idx, cell_val in enumerate(row):
-                x = margin + c_idx * cell_w
-                y = y_start + r_idx * cell_h
+        y = margin
+        # 1. Blue Section Banner
+        draw.rectangle(
+            [(margin, y), (margin + total_w, y + banner_h)],
+            fill=(46, 117, 182),
+            outline=(0, 0, 0),
+            width=1,
+        )
+        draw_centered_text((margin, y, margin + total_w, y + banner_h), self.section_title, fill=(255, 255, 255))
+        y += banner_h
 
-                if r_idx == 0:
-                    bg = (31, 78, 120)
-                    fg = (255, 255, 255)
-                elif "BREAK" in str(row[0]):
-                    bg = (254, 243, 199)
-                    fg = (120, 53, 15)
-                elif r_idx % 2 == 0:
-                    bg = (248, 250, 252)
-                    fg = (15, 23, 42)
-                else:
-                    bg = (255, 255, 255)
-                    fg = (15, 23, 42)
+        # 2. Slot Headers
+        for c_idx, val in enumerate(self.sheet["slot_headers"]):
+            x0 = margin + c_idx * col_w
+            draw.rectangle([(x0, y), (x0 + col_w, y + hdr_h)], fill=(255, 255, 255), outline=(0, 0, 0), width=1)
+            draw_centered_text((x0, y, x0 + col_w, y + hdr_h), val)
+        y += hdr_h
 
-                draw.rectangle([(x, y), (x + cell_w, y + cell_h)], fill=bg, outline=(203, 213, 225), width=1)
+        # 3. Time Headers
+        for c_idx, val in enumerate(self.sheet["time_headers"]):
+            x0 = margin + c_idx * col_w
+            draw.rectangle([(x0, y), (x0 + col_w, y + hdr_h)], fill=(255, 255, 255), outline=(0, 0, 0), width=1)
+            draw_centered_text((x0, y, x0 + col_w, y + hdr_h), val)
+        y += hdr_h
 
-                lines = str(cell_val).split("\n")[:4]
-                for l_i, line in enumerate(lines):
-                    draw.text((x + 8, y + 8 + l_i * 16), line[:28], fill=fg, font=font)
+        # 4. Day Rows with merged cells
+        for day in self.sheet["days"]:
+            draw.rectangle([(margin, y), (margin + col_w, y + day_h)], fill=(255, 255, 255), outline=(0, 0, 0), width=1)
+            draw_centered_text((margin, y, margin + col_w, y + day_h), day)
+
+            spans = self.sheet["merged_day_cells"].get(day, [])
+            for sp in spans:
+                x0 = margin + sp["startSlot"] * col_w
+                w = sp["colSpan"] * col_w
+                draw.rectangle([(x0, y), (x0 + w, y + day_h)], fill=(255, 255, 255), outline=(0, 0, 0), width=1)
+                draw_centered_text((x0, y, x0 + w, y + day_h), sp["text"])
+            y += day_h
+
+        y += gap_h
+
+        # 5. Lower Table (8 columns across total_w)
+        leg_widths = [70, 120, 310, 70, 260, 190, 165, 165]
+        leg_headers = [
+            "Serial",
+            "Course Code",
+            "Course Titles",
+            "CHs",
+            "Name of Faculty",
+            "Elective / Compulsory",
+            "Venues",
+            "Remarks",
+        ]
+        cx = margin
+        for h_txt, lw in zip(leg_headers, leg_widths):
+            draw.rectangle([(cx, y), (cx + lw, y + leg_row_h)], fill=(255, 255, 255), outline=(0, 0, 0), width=1)
+            draw_centered_text((cx, y, cx + lw, y + leg_row_h), h_txt)
+            cx += lw
+        y += leg_row_h
+
+        for c_row in self.sheet["course_legend"]:
+            vals = [
+                c_row["serial"],
+                c_row["course_code"],
+                c_row["course_title"],
+                c_row["credit_hours"],
+                c_row["faculty_name"],
+                c_row["elective_compulsory"],
+                c_row["venues"],
+                c_row["remarks"],
+            ]
+            cx = margin
+            for val, lw in zip(vals, leg_widths):
+                draw.rectangle([(cx, y), (cx + lw, y + leg_row_h)], fill=(255, 255, 255), outline=(0, 0, 0), width=1)
+                draw_centered_text((cx, y, cx + lw, y + leg_row_h), str(val))
+                cx += lw
+            y += leg_row_h
 
         buf = io.BytesIO()
         if ext == "jpg":
-            img.save(buf, format="JPEG", quality=92)
+            img.save(buf, format="JPEG", quality=95)
         else:
             img.save(buf, format="PNG")
         return buf.getvalue()
@@ -238,6 +507,7 @@ class TimetableExporter:
         payload = {
             "view_type": self.view_type,
             "title": self.title,
+            "section_title": self.section_title,
             "metadata": {
                 "generated_at": datetime.now(timezone.utc).isoformat(),
                 "fairness_score": self.metadata.get("fairness_score", 0.92),
@@ -247,56 +517,62 @@ class TimetableExporter:
             },
             "headers": self.rows[0] if self.rows else [],
             "table_rows": self.rows[1:] if len(self.rows) > 1 else [],
+            "sheet": self.sheet,
             "entries": self.entries,
         }
         return json.dumps(payload, indent=2).encode("utf-8")
 
     def _export_html(self) -> bytes:
-        fairness = float(self.metadata.get("fairness_score", 0.92)) * 100
-        pref = float(self.metadata.get("preference_satisfaction", 0.88)) * 100
-        safe_title = html.escape(self.title)
-
+        safe_title = html.escape(self.section_title)
         html_lines = [
             "<!DOCTYPE html>",
             "<html><head><meta charset='UTF-8'>",
             f"<title>{safe_title}</title>",
             "<style>",
-            "body { font-family: system-ui, -apple-system, sans-serif; margin: 24px; background: #f8fafc; color: #0f172a; }",
-            "h1 { color: #1e3a8a; margin-bottom: 8px; }",
-            "table { border-collapse: collapse; width: 100%; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }",
-            "th, td { border: 1px solid #cbd5e1; padding: 10px; text-align: center; font-size: 13px; white-space: pre-line; }",
-            "th { background: #1e3a8a; color: white; font-weight: 600; }",
-            "tr:nth-child(even) { background: #f1f5f9; }",
-            ".break-row { background: #fef3c7 !important; font-weight: 600; color: #92400e; }",
-            ".metrics { margin-top: 16px; padding: 14px; background: white; border: 1px solid #cbd5e1; border-radius: 8px; }",
+            "body { font-family: Calibri, 'Segoe UI', Arial, sans-serif; margin: 24px; background: #ffffff; color: #000000; }",
+            "table { border-collapse: collapse; width: 100%; background: #ffffff; margin-bottom: 24px; }",
+            "th, td { border: 1px solid #000000; padding: 8px 6px; text-align: center; vertical-align: middle; font-size: 13px; white-space: pre-line; }",
+            ".banner { background: #2E75B6; color: #ffffff; font-weight: 700; font-size: 16px; padding: 8px; }",
+            ".bold-cell { font-weight: 700; }",
             "</style></head><body>",
-            f"<h1>{safe_title}</h1>",
             "<table>",
+            f"<thead><tr><th colspan='10' class='banner'>{safe_title}</th></tr>",
+            "<tr>" + "".join(f"<th class='bold-cell'>{html.escape(s)}</th>" for s in self.sheet["slot_headers"]) + "</tr>",
+            "<tr>" + "".join(f"<th class='bold-cell'>{html.escape(t)}</th>" for t in self.sheet["time_headers"]) + "</tr>",
+            "</thead><tbody>",
         ]
 
-        for r_idx, row in enumerate(self.rows):
-            if r_idx == 0:
-                html_lines.append(
-                    "<thead><tr>"
-                    + "".join(f"<th>{html.escape(str(c))}</th>" for c in row)
-                    + "</tr></thead><tbody>"
-                )
-            else:
-                row_cls = " class='break-row'" if "BREAK" in str(row[0]) else ""
-                html_lines.append(
-                    f"<tr{row_cls}>"
-                    + "".join(f"<td>{html.escape(str(c))}</td>" for c in row)
-                    + "</tr>"
-                )
+        for day in self.sheet["days"]:
+            row_html = [f"<tr><td class='bold-cell'>{html.escape(day)}</td>"]
+            for sp in self.sheet["merged_day_cells"].get(day, []):
+                colspan = f" colspan='{sp['colSpan']}'" if sp["colSpan"] > 1 else ""
+                row_html.append(f"<td{colspan}>{html.escape(sp['text'])}</td>")
+            row_html.append("</tr>")
+            html_lines.append("".join(row_html))
 
+        html_lines.append("</tbody></table>")
+
+        # Lower Table: Course & Faculty Summary Legend
         html_lines.extend(
             [
-                "</tbody></table>",
-                "<div class='metrics'>",
-                f"<strong>Fairness Score:</strong> {fairness:.1f}% &nbsp;|&nbsp; ",
-                f"<strong>Preference Satisfaction:</strong> {pref:.1f}% &nbsp;|&nbsp; ",
-                f"<strong>Total Courses:</strong> {int(self.metadata.get('total_courses', len(self.entries)))}",
-                "</div></body></html>",
+                "<table><thead><tr>",
+                "<th>Serial</th><th>Course Code</th><th>Course Titles</th><th>CHs</th>",
+                "<th>Name of Faculty</th><th>Elective / Compulsory</th><th>Venues</th><th>Remarks</th>",
+                "</tr></thead><tbody>",
             ]
         )
+        for c_row in self.sheet["course_legend"]:
+            html_lines.append(
+                "<tr>"
+                f"<td>{html.escape(str(c_row['serial']))}</td>"
+                f"<td>{html.escape(str(c_row['course_code']))}</td>"
+                f"<td>{html.escape(str(c_row['course_title']))}</td>"
+                f"<td>{html.escape(str(c_row['credit_hours']))}</td>"
+                f"<td>{html.escape(str(c_row['faculty_name']))}</td>"
+                f"<td>{html.escape(str(c_row['elective_compulsory']))}</td>"
+                f"<td>{html.escape(str(c_row['venues']))}</td>"
+                f"<td>{html.escape(str(c_row['remarks']))}</td>"
+                "</tr>"
+            )
+        html_lines.append("</tbody></table></body></html>")
         return "\n".join(html_lines).encode("utf-8")

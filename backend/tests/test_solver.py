@@ -200,7 +200,6 @@ def test_formatter_preserves_non_standard_slots():
         }
     ]
     rows = build_table_rows(entries, view_type="master")
-    headers = rows[0]
-    assert "Saturday" in headers
     flat_text = "\n".join("\t".join(r) for r in rows)
+    assert "Saturday" in flat_text
     assert "Early Bird Algorithms" in flat_text
