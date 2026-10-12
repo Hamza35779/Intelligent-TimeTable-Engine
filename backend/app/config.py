@@ -8,8 +8,11 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     DEBUG: bool = True
 
-    # Database
+    # Database & Optional Services
     DATABASE_URL: str = "sqlite:///./timetable.db"
+    REDIS_URL: str = ""
+    GEMINI_API_KEY: str = ""
+    GEMINI_MODEL: str = "gemini-2.5-flash"
 
     # Solver
     DEFAULT_SOLVER_TIMEOUT_SECONDS: int = 5

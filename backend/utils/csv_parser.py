@@ -1,14 +1,86 @@
 import csv
 import io
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 
 
-def parse_schedule_csv(csv_content: str) -> Dict[str, Any]:
+def _time_to_minutes(t_str: str) -> int:
+    parts = str(t_str).strip().split(":")
+    return int(parts[0]) * 60 + (int(parts[1]) if len(parts) > 1 else 0)
+
+
+def _minutes_to_time(mins: int) -> str:
+    return f"{mins // 60:02d}:{mins % 60:02d}"
+
+
+def build_slots_from_config(config: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
     """
-    Parse an uploaded CSV containing course/teacher rows into a complete
-    GenerateScheduleRequest dictionary (faculty, venues, slots, courses).
-    Supported columns (case-insensitive):
-      teacher / faculty, course / course_name, code, hours, preferred_time, department, capacity, room
+    Build weekly time slots from the supervisor's Global Schedule Config:
+      - days: Monday to Friday (default)
+      - day_start: 09:00 (default)
+      - day_end: 17:00 (default)
+      - slot_minutes: 60 (default)
+      - lunch_start: 12:00, lunch_end: 14:00 (protected, no classes)
+    """
+    cfg = config or {}
+    days = cfg.get("days") or ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+    day_start_m = _time_to_minutes(cfg.get("day_start", "09:00"))
+    day_end_m = _time_to_minutes(cfg.get("day_end", "17:00"))
+    slot_mins = int(cfg.get("slot_minutes", 60))
+    lunch_start_m = _time_to_minutes(cfg.get("lunch_start", "12:00"))
+    lunch_end_m = _time_to_minutes(cfg.get("lunch_end", "14:00"))
+
+    slots_list: List[Dict[str, Any]] = []
+    for day in days:
+        cur = day_start_m
+        while cur + slot_mins <= day_end_m:
+            nxt = cur + slot_mins
+            # Protect lunch window [lunch_start, lunch_end): no slot may overlap lunch
+            overlaps_lunch = cur < lunch_end_m and nxt > lunch_start_m
+            if not overlaps_lunch:
+                slots_list.append(
+                    {
+                        "day_of_week": day,
+                        "start_time": _minutes_to_time(cur),
+                        "end_time": _minutes_to_time(nxt),
+                        "duration_minutes": slot_mins,
+                    }
+                )
+            cur = nxt
+    return slots_list
+
+
+def split_credit_hours_into_sessions(credit_hours: int) -> List[int]:
+    """
+    Credit-hours mapping assumption:
+      - Each credit hour = 1 contact hour per week.
+      - A course's weekly contact hours = its credit hours.
+      - Split into sessions of at most 2 hours, placed on different days where possible.
+      - Example: a 3-credit course becomes 2 sessions (2h + 1h) on different days;
+        a 4-credit course becomes 2 sessions (2h + 2h) on different days.
+    """
+    remaining = max(1, int(credit_hours))
+    sessions: List[int] = []
+    while remaining > 0:
+        chunk = 2 if remaining >= 2 else 1
+        sessions.append(chunk)
+        remaining -= chunk
+    return sessions
+
+
+def parse_schedule_csv(
+    csv_content: str,
+    config: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
+    """
+    Parse an uploaded CSV into a complete GenerateScheduleRequest dictionary.
+    Supervisor's Required Columns:
+      - teacher_name (or alias: teacher / faculty / instructor)
+      - course_name (or alias: course / subject)
+      - credit_hours (or alias: hours)
+    Optional Columns:
+      - student_group
+      - room_type
+      - code, preferred_time, department, capacity, room
     """
     cleaned = csv_content.lstrip("\ufeff").strip()
     if not cleaned:
@@ -18,6 +90,11 @@ def parse_schedule_csv(csv_content: str) -> Dict[str, Any]:
     rows = list(reader)
     if not rows:
         raise ValueError("Uploaded CSV is empty or missing rows.")
+
+    cfg = dict(config or {})
+    max_daily_hrs = int(cfg.get("max_teaching_hours_per_day", 6))
+    default_rooms = cfg.get("rooms") or ["Room 1", "Room 2", "Room 3", "Room 4", "Room 5"]
+    days = cfg.get("days") or ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
 
     faculty_map: Dict[str, int] = {}
     faculty_list: List[Dict[str, Any]] = []
@@ -31,15 +108,15 @@ def parse_schedule_csv(csv_content: str) -> Dict[str, Any]:
             continue
 
         teacher_name = (
-            row.get("teacher")
-            or row.get("teacher_name")
+            row.get("teacher_name")
+            or row.get("teacher")
             or row.get("faculty")
             or row.get("instructor")
             or f"Instructor {idx + 1}"
         )
         course_name = (
-            row.get("course")
-            or row.get("course_name")
+            row.get("course_name")
+            or row.get("course")
             or row.get("subject")
             or f"Course {idx + 1}"
         )
@@ -53,6 +130,8 @@ def parse_schedule_csv(csv_content: str) -> Dict[str, Any]:
 
         dept = row.get("department") or "Computer Science"
         pref_time = row.get("preferred_time") or "Morning"
+        student_group = row.get("student_group") or f"Group-{course_code}"
+        room_type = row.get("room_type") or "Lecture"
         room_hint = row.get("room") or row.get("venue")
         if room_hint:
             venue_names.add(room_hint)
@@ -62,10 +141,11 @@ def parse_schedule_csv(csv_content: str) -> Dict[str, Any]:
         except ValueError:
             capacity = 40
 
+        raw_ch = row.get("credit_hours") or row.get("hours") or "3"
         try:
-            hours = max(1, min(8, int(row.get("hours") or row.get("max_hours_per_day") or 4)))
+            credit_hours = max(1, min(6, int(float(raw_ch))))
         except ValueError:
-            hours = 4
+            credit_hours = 3
 
         if teacher_name not in faculty_map:
             f_idx = len(faculty_list)
@@ -75,20 +155,17 @@ def parse_schedule_csv(csv_content: str) -> Dict[str, Any]:
                 {
                     "name": teacher_name,
                     "department": dept,
-                    "max_hours_per_day": max(hours, 4),
-                    "max_days_per_week": 5,
+                    "max_hours_per_day": max_daily_hrs,
+                    "max_days_per_week": len(days),
                     "email": f"{email_slug}@university.edu",
                     "preferences": {
                         "prefer_morning": pref_time.lower() == "morning",
                         "preferred_time": pref_time.capitalize(),
-                        "preferred_days": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+                        "preferred_days": list(days),
                     },
                     "unavailable_slots": [],
                 }
             )
-        else:
-            existing_fac = faculty_list[faculty_map[teacher_name]]
-            existing_fac["max_hours_per_day"] = max(existing_fac["max_hours_per_day"], hours)
 
         courses_list.append(
             {
@@ -97,6 +174,9 @@ def parse_schedule_csv(csv_content: str) -> Dict[str, Any]:
                 "faculty_id": faculty_map[teacher_name],
                 "capacity_required": capacity,
                 "duration_minutes": 60,
+                "credit_hours": credit_hours,
+                "student_group": student_group,
+                "room_type": room_type,
             }
         )
 
@@ -105,41 +185,33 @@ def parse_schedule_csv(csv_content: str) -> Dict[str, Any]:
 
     max_course_cap = max((c["capacity_required"] for c in courses_list), default=60)
     default_venues = [
-        {"name": "Room 101", "capacity": max(120, max_course_cap), "equipment": ["projector", "mic"]},
-        {"name": "Room 102", "capacity": 80, "equipment": ["projector"]},
-        {"name": "Room 103", "capacity": 60, "equipment": ["workstations"]},
-        {"name": "Lab 201", "capacity": 50, "equipment": ["computers"]},
+        {"name": r_name, "capacity": max(100, max_course_cap), "equipment": ["projector"]}
+        for r_name in default_rooms
     ]
     for v_name in sorted(venue_names):
         if not any(v["name"].lower() == v_name.lower() for v in default_venues):
             default_venues.append(
-                {"name": v_name, "capacity": max(80, max_course_cap), "equipment": ["projector"]}
+                {"name": v_name, "capacity": max(100, max_course_cap), "equipment": ["projector"]}
             )
 
-    days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
-    slot_hours = [
-        ("09:00", "10:00"),
-        ("10:00", "11:00"),
-        ("11:00", "12:00"),
-        ("14:00", "15:00"),
-        ("15:00", "16:00"),
-    ]
-    slots_list = []
-    for day in days:
-        for start_t, end_t in slot_hours:
-            slots_list.append(
-                {
-                    "day_of_week": day,
-                    "start_time": start_t,
-                    "end_time": end_t,
-                    "duration_minutes": 60,
-                }
-            )
+    slots_list = build_slots_from_config(cfg)
 
     return {
         "faculty": faculty_list,
         "venues": default_venues,
         "slots": slots_list,
         "courses": courses_list,
-        "timeout_seconds": 5,
+        "config": {
+            "days": days,
+            "day_start": cfg.get("day_start", "09:00"),
+            "day_end": cfg.get("day_end", "17:00"),
+            "slot_minutes": int(cfg.get("slot_minutes", 60)),
+            "lunch_start": cfg.get("lunch_start", "12:00"),
+            "lunch_end": cfg.get("lunch_end", "14:00"),
+            "break_minutes": int(cfg.get("break_minutes", 15)),
+            "min_gap_minutes": int(cfg.get("min_gap_minutes", 30)),
+            "max_teaching_hours_per_day": max_daily_hrs,
+            "rooms": default_rooms,
+        },
+        "timeout_seconds": int(cfg.get("timeout_seconds", 5)),
     }

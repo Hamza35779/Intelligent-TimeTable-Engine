@@ -1,0 +1,4688 @@
+{
+  "master": {
+    "view_type": "master",
+    "title": "Master University Timetable",
+    "schedule_id": 1,
+    "generated_at": "2026-10-12T09:00:00+00:00",
+    "section_title": "AI 2024 - Section A",
+    "headers": [
+      "Time Slot",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday"
+    ],
+    "rows": [
+      [
+        "09:00 - 10:00",
+        "Computer Vision (CS103)\nTeacher: Lec. Faria Sajjad\nRoom: Room 5\n---\nOperating Systems (CS105)\nTeacher: Dr. Ayesha Siddiqui\nRoom: Room 3\n---\nNatural Language Processing (CS107)\nTeacher: Lec. Hassan Raza\nRoom: Room 2\n---\nDatabase Systems (CS109)\nTeacher: Dr. Salman Ahmed\nRoom: Room 4\n---\nSoftware Engineering (CS111)\nTeacher: Lec. Zainab Tariq\nRoom: Room 1",
+        "Digital Image Processing (CS104)\nTeacher: Lec. Faria Sajjad\nRoom: Room 4\n---\nOperating Systems (CS105)\nTeacher: Dr. Ayesha Siddiqui\nRoom: Room 1\n---\nNatural Language Processing (CS107)\nTeacher: Lec. Hassan Raza\nRoom: Room 2\n---\nDatabase Systems (CS109)\nTeacher: Dr. Salman Ahmed\nRoom: Room 5\n---\nSoftware Engineering (CS111)\nTeacher: Lec. Zainab Tariq\nRoom: Room 3",
+        "Machine Learning Fundamentals (CS102)\nTeacher: Dr. Tariq Mehmood\nRoom: Room 1\n---\nSystem Programming (CS106)\nTeacher: Dr. Ayesha Siddiqui\nRoom: Room 2\n---\nInformation Retrieval (CS108)\nTeacher: Lec. Hassan Raza\nRoom: Room 3\n---\nData Warehousing (CS110)\nTeacher: Dr. Salman Ahmed\nRoom: Room 4\n---\nTechnical & Business Writing (CS112)\nTeacher: Lec. Zainab Tariq\nRoom: Room 5",
+        "Machine Learning Fundamentals (CS102)\nTeacher: Dr. Tariq Mehmood\nRoom: Room 2\n---\nData Warehousing (CS110)\nTeacher: Dr. Salman Ahmed\nRoom: Room 1",
+        "Artificial Intelligence (CS101)\nTeacher: Dr. Tariq Mehmood\nRoom: Room 5"
+      ],
+      [
+        "10:00 - 11:00",
+        "Artificial Intelligence (CS101)\nTeacher: Dr. Tariq Mehmood\nRoom: Room 2\n---\nComputer Vision (CS103)\nTeacher: Lec. Faria Sajjad\nRoom: Room 5\n---\nOperating Systems (CS105)\nTeacher: Dr. Ayesha Siddiqui\nRoom: Room 3\n---\nDatabase Systems (CS109)\nTeacher: Dr. Salman Ahmed\nRoom: Room 4",
+        "Digital Image Processing (CS104)\nTeacher: Lec. Faria Sajjad\nRoom: Room 4\n---\nOperating Systems (CS105)\nTeacher: Dr. Ayesha Siddiqui\nRoom: Room 1\n---\nNatural Language Processing (CS107)\nTeacher: Lec. Hassan Raza\nRoom: Room 2\n---\nDatabase Systems (CS109)\nTeacher: Dr. Salman Ahmed\nRoom: Room 5\n---\nSoftware Engineering (CS111)\nTeacher: Lec. Zainab Tariq\nRoom: Room 3",
+        "Machine Learning Fundamentals (CS102)\nTeacher: Dr. Tariq Mehmood\nRoom: Room 1\n---\nSystem Programming (CS106)\nTeacher: Dr. Ayesha Siddiqui\nRoom: Room 2\n---\nInformation Retrieval (CS108)\nTeacher: Lec. Hassan Raza\nRoom: Room 3\n---\nTechnical & Business Writing (CS112)\nTeacher: Lec. Zainab Tariq\nRoom: Room 5",
+        "Machine Learning Fundamentals (CS102)\nTeacher: Dr. Tariq Mehmood\nRoom: Room 2\n---\nData Warehousing (CS110)\nTeacher: Dr. Salman Ahmed\nRoom: Room 1",
+        "Artificial Intelligence (CS101)\nTeacher: Dr. Tariq Mehmood\nRoom: Room 5"
+      ],
+      [
+        "11:00 - 12:00",
+        "",
+        "",
+        "Computer Vision (CS103)\nTeacher: Lec. Faria Sajjad\nRoom: Room 5",
+        "",
+        ""
+      ],
+      [
+        "12:00 - 14:00 (LUNCH BREAK)",
+        "LUNCH BREAK (No Classes)",
+        "LUNCH BREAK (No Classes)",
+        "LUNCH BREAK (No Classes)",
+        "LUNCH BREAK (No Classes)",
+        "LUNCH BREAK (No Classes)"
+      ],
+      [
+        "14:00 - 15:00",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "15:00 - 16:00",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "16:00 - 17:00",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ]
+    ],
+    "sheet": {
+      "section_title": "AI 2024 - Section A",
+      "slot_headers": [
+        "",
+        "Slot 1",
+        "Slot 2",
+        "Slot 3",
+        "Slot 4",
+        "Slot 5",
+        "Slot 6",
+        "Slot 7",
+        "Slot 8",
+        "Slot 9"
+      ],
+      "time_headers": [
+        "Day/Time",
+        "0830-9020",
+        "0920-1010",
+        "1010-1100",
+        "1100-1150",
+        "1150-1240",
+        "1240-1330",
+        "1330-1420",
+        "1420-1510",
+        "1510-1600"
+      ],
+      "days": [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday"
+      ],
+      "day_cells": {
+        "Monday": [
+          "Computer Vision\nLec. Faria Sajjad | Room 5\n---\nOperating Systems\nDr. Ayesha Siddiqui | Room 3\n---\nNatural Language Processing\nLec. Hassan Raza | Room 2\n---\nDatabase Systems\nDr. Salman Ahmed | Room 4\n---\nSoftware Engineering\nLec. Zainab Tariq | Room 1",
+          "Artificial Intelligence\nDr. Tariq Mehmood | Room 2\n---\nComputer Vision\nLec. Faria Sajjad | Room 5\n---\nOperating Systems\nDr. Ayesha Siddiqui | Room 3\n---\nDatabase Systems\nDr. Salman Ahmed | Room 4",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "Tuesday": [
+          "Digital Image Processing\nLec. Faria Sajjad | Room 4\n---\nOperating Systems\nDr. Ayesha Siddiqui | Room 1\n---\nNatural Language Processing\nLec. Hassan Raza | Room 2\n---\nDatabase Systems\nDr. Salman Ahmed | Room 5\n---\nSoftware Engineering\nLec. Zainab Tariq | Room 3",
+          "Digital Image Processing\nLec. Faria Sajjad | Room 4\n---\nOperating Systems\nDr. Ayesha Siddiqui | Room 1\n---\nNatural Language Processing\nLec. Hassan Raza | Room 2\n---\nDatabase Systems\nDr. Salman Ahmed | Room 5\n---\nSoftware Engineering\nLec. Zainab Tariq | Room 3",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "Wednesday": [
+          "Machine Learning Fundamentals\nDr. Tariq Mehmood | Room 1\n---\nSystem Programming\nDr. Ayesha Siddiqui | Room 2\n---\nInformation Retrieval\nLec. Hassan Raza | Room 3\n---\nData Warehousing\nDr. Salman Ahmed | Room 4\n---\nTechnical & Business Writing\nLec. Zainab Tariq | Room 5",
+          "Machine Learning Fundamentals\nDr. Tariq Mehmood | Room 1\n---\nSystem Programming\nDr. Ayesha Siddiqui | Room 2\n---\nInformation Retrieval\nLec. Hassan Raza | Room 3\n---\nTechnical & Business Writing\nLec. Zainab Tariq | Room 5",
+          "",
+          "Computer Vision\nLec. Faria Sajjad | Room 5",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "Thursday": [
+          "Machine Learning Fundamentals\nDr. Tariq Mehmood | Room 2\n---\nData Warehousing\nDr. Salman Ahmed | Room 1",
+          "Machine Learning Fundamentals\nDr. Tariq Mehmood | Room 2\n---\nData Warehousing\nDr. Salman Ahmed | Room 1",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "Friday": [
+          "Artificial Intelligence\nDr. Tariq Mehmood | Room 5",
+          "Artificial Intelligence\nDr. Tariq Mehmood | Room 5",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      "merged_day_cells": {
+        "Monday": [
+          {
+            "text": "Computer Vision\nLec. Faria Sajjad | Room 5\n---\nOperating Systems\nDr. Ayesha Siddiqui | Room 3\n---\nNatural Language Processing\nLec. Hassan Raza | Room 2\n---\nDatabase Systems\nDr. Salman Ahmed | Room 4\n---\nSoftware Engineering\nLec. Zainab Tariq | Room 1",
+            "colSpan": 1,
+            "startSlot": 1
+          },
+          {
+            "text": "Artificial Intelligence\nDr. Tariq Mehmood | Room 2\n---\nComputer Vision\nLec. Faria Sajjad | Room 5\n---\nOperating Systems\nDr. Ayesha Siddiqui | Room 3\n---\nDatabase Systems\nDr. Salman Ahmed | Room 4",
+            "colSpan": 1,
+            "startSlot": 2
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 3
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 4
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 5
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 6
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 7
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 8
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 9
+          }
+        ],
+        "Tuesday": [
+          {
+            "text": "Digital Image Processing\nLec. Faria Sajjad | Room 4\n---\nOperating Systems\nDr. Ayesha Siddiqui | Room 1\n---\nNatural Language Processing\nLec. Hassan Raza | Room 2\n---\nDatabase Systems\nDr. Salman Ahmed | Room 5\n---\nSoftware Engineering\nLec. Zainab Tariq | Room 3",
+            "colSpan": 2,
+            "startSlot": 1
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 3
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 4
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 5
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 6
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 7
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 8
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 9
+          }
+        ],
+        "Wednesday": [
+          {
+            "text": "Machine Learning Fundamentals\nDr. Tariq Mehmood | Room 1\n---\nSystem Programming\nDr. Ayesha Siddiqui | Room 2\n---\nInformation Retrieval\nLec. Hassan Raza | Room 3\n---\nData Warehousing\nDr. Salman Ahmed | Room 4\n---\nTechnical & Business Writing\nLec. Zainab Tariq | Room 5",
+            "colSpan": 1,
+            "startSlot": 1
+          },
+          {
+            "text": "Machine Learning Fundamentals\nDr. Tariq Mehmood | Room 1\n---\nSystem Programming\nDr. Ayesha Siddiqui | Room 2\n---\nInformation Retrieval\nLec. Hassan Raza | Room 3\n---\nTechnical & Business Writing\nLec. Zainab Tariq | Room 5",
+            "colSpan": 1,
+            "startSlot": 2
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 3
+          },
+          {
+            "text": "Computer Vision\nLec. Faria Sajjad | Room 5",
+            "colSpan": 1,
+            "startSlot": 4
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 5
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 6
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 7
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 8
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 9
+          }
+        ],
+        "Thursday": [
+          {
+            "text": "Machine Learning Fundamentals\nDr. Tariq Mehmood | Room 2\n---\nData Warehousing\nDr. Salman Ahmed | Room 1",
+            "colSpan": 2,
+            "startSlot": 1
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 3
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 4
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 5
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 6
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 7
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 8
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 9
+          }
+        ],
+        "Friday": [
+          {
+            "text": "Artificial Intelligence\nDr. Tariq Mehmood | Room 5",
+            "colSpan": 2,
+            "startSlot": 1
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 3
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 4
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 5
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 6
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 7
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 8
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 9
+          }
+        ]
+      },
+      "course_legend": [
+        {
+          "serial": 1,
+          "course_code": "CS101",
+          "course_title": "Artificial Intelligence",
+          "credit_hours": 3,
+          "faculty_name": "Dr. Tariq Mehmood",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 5, Room 2",
+          "remarks": ""
+        },
+        {
+          "serial": 2,
+          "course_code": "CS102",
+          "course_title": "Machine Learning Fundamentals",
+          "credit_hours": 4,
+          "faculty_name": "Dr. Tariq Mehmood",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 2, Room 1",
+          "remarks": ""
+        },
+        {
+          "serial": 3,
+          "course_code": "CS103",
+          "course_title": "Computer Vision",
+          "credit_hours": 3,
+          "faculty_name": "Lec. Faria Sajjad",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 5",
+          "remarks": ""
+        },
+        {
+          "serial": 4,
+          "course_code": "CS104",
+          "course_title": "Digital Image Processing",
+          "credit_hours": 2,
+          "faculty_name": "Lec. Faria Sajjad",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 4",
+          "remarks": ""
+        },
+        {
+          "serial": 5,
+          "course_code": "CS105",
+          "course_title": "Operating Systems",
+          "credit_hours": 4,
+          "faculty_name": "Dr. Ayesha Siddiqui",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 3, Room 1",
+          "remarks": ""
+        },
+        {
+          "serial": 6,
+          "course_code": "CS106",
+          "course_title": "System Programming",
+          "credit_hours": 2,
+          "faculty_name": "Dr. Ayesha Siddiqui",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 2",
+          "remarks": ""
+        },
+        {
+          "serial": 7,
+          "course_code": "CS107",
+          "course_title": "Natural Language Processing",
+          "credit_hours": 3,
+          "faculty_name": "Lec. Hassan Raza",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 2",
+          "remarks": ""
+        },
+        {
+          "serial": 8,
+          "course_code": "CS108",
+          "course_title": "Information Retrieval",
+          "credit_hours": 2,
+          "faculty_name": "Lec. Hassan Raza",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 3",
+          "remarks": ""
+        },
+        {
+          "serial": 9,
+          "course_code": "CS109",
+          "course_title": "Database Systems",
+          "credit_hours": 4,
+          "faculty_name": "Dr. Salman Ahmed",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 4, Room 5",
+          "remarks": ""
+        },
+        {
+          "serial": 10,
+          "course_code": "CS110",
+          "course_title": "Data Warehousing",
+          "credit_hours": 3,
+          "faculty_name": "Dr. Salman Ahmed",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 1, Room 4",
+          "remarks": ""
+        },
+        {
+          "serial": 11,
+          "course_code": "CS111",
+          "course_title": "Software Engineering",
+          "credit_hours": 3,
+          "faculty_name": "Lec. Zainab Tariq",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 3, Room 1",
+          "remarks": ""
+        },
+        {
+          "serial": 12,
+          "course_code": "CS112",
+          "course_title": "Technical & Business Writing",
+          "credit_hours": 2,
+          "faculty_name": "Lec. Zainab Tariq",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 5",
+          "remarks": ""
+        }
+      ]
+    },
+    "metadata": {
+      "schedule_id": 1,
+      "generated_at": "2026-10-12T09:00:00+00:00",
+      "section_title": "AI 2024 - Section A",
+      "total_courses": 35,
+      "total_teachers": 6,
+      "fairness_score": 0.946,
+      "preference_satisfaction": 0.96,
+      "config": {
+        "days": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday"
+        ],
+        "day_start": "09:00",
+        "day_end": "17:00",
+        "slot_minutes": 60,
+        "lunch_start": "12:00",
+        "lunch_end": "14:00",
+        "break_minutes": 15,
+        "min_gap_minutes": 30,
+        "max_teaching_hours_per_day": 6,
+        "rooms": [
+          "Room 1",
+          "Room 2",
+          "Room 3",
+          "Room 4",
+          "Room 5"
+        ]
+      }
+    }
+  },
+  "teacher": {
+    "view_type": "teacher",
+    "title": "Teacher Schedule View (Per-Teacher Sessions, Total Hours & Days Taught)",
+    "schedule_id": 1,
+    "generated_at": "2026-10-12T09:00:00+00:00",
+    "section_title": "AI 2024 - Section A",
+    "headers": [
+      "Teacher",
+      "Total Weekly Hours",
+      "Days Taught",
+      "Day",
+      "Time",
+      "Course",
+      "Room"
+    ],
+    "rows": [
+      [
+        "Dr. Ayesha Siddiqui",
+        "6h",
+        "Monday, Tuesday, Wednesday",
+        "Monday",
+        "09:00 - 10:00",
+        "Operating Systems (CS105)",
+        "Room 3"
+      ],
+      [
+        "Dr. Ayesha Siddiqui",
+        "6h",
+        "Monday, Tuesday, Wednesday",
+        "Monday",
+        "10:00 - 11:00",
+        "Operating Systems (CS105)",
+        "Room 3"
+      ],
+      [
+        "Dr. Ayesha Siddiqui",
+        "6h",
+        "Monday, Tuesday, Wednesday",
+        "Tuesday",
+        "09:00 - 10:00",
+        "Operating Systems (CS105)",
+        "Room 1"
+      ],
+      [
+        "Dr. Ayesha Siddiqui",
+        "6h",
+        "Monday, Tuesday, Wednesday",
+        "Tuesday",
+        "10:00 - 11:00",
+        "Operating Systems (CS105)",
+        "Room 1"
+      ],
+      [
+        "Dr. Ayesha Siddiqui",
+        "6h",
+        "Monday, Tuesday, Wednesday",
+        "Wednesday",
+        "09:00 - 10:00",
+        "System Programming (CS106)",
+        "Room 2"
+      ],
+      [
+        "Dr. Ayesha Siddiqui",
+        "6h",
+        "Monday, Tuesday, Wednesday",
+        "Wednesday",
+        "10:00 - 11:00",
+        "System Programming (CS106)",
+        "Room 2"
+      ],
+      [
+        "Dr. Salman Ahmed",
+        "7h",
+        "Monday, Tuesday, Wednesday, Thursday",
+        "Monday",
+        "09:00 - 10:00",
+        "Database Systems (CS109)",
+        "Room 4"
+      ],
+      [
+        "Dr. Salman Ahmed",
+        "7h",
+        "Monday, Tuesday, Wednesday, Thursday",
+        "Monday",
+        "10:00 - 11:00",
+        "Database Systems (CS109)",
+        "Room 4"
+      ],
+      [
+        "Dr. Salman Ahmed",
+        "7h",
+        "Monday, Tuesday, Wednesday, Thursday",
+        "Tuesday",
+        "09:00 - 10:00",
+        "Database Systems (CS109)",
+        "Room 5"
+      ],
+      [
+        "Dr. Salman Ahmed",
+        "7h",
+        "Monday, Tuesday, Wednesday, Thursday",
+        "Tuesday",
+        "10:00 - 11:00",
+        "Database Systems (CS109)",
+        "Room 5"
+      ],
+      [
+        "Dr. Salman Ahmed",
+        "7h",
+        "Monday, Tuesday, Wednesday, Thursday",
+        "Wednesday",
+        "09:00 - 10:00",
+        "Data Warehousing (CS110)",
+        "Room 4"
+      ],
+      [
+        "Dr. Salman Ahmed",
+        "7h",
+        "Monday, Tuesday, Wednesday, Thursday",
+        "Thursday",
+        "09:00 - 10:00",
+        "Data Warehousing (CS110)",
+        "Room 1"
+      ],
+      [
+        "Dr. Salman Ahmed",
+        "7h",
+        "Monday, Tuesday, Wednesday, Thursday",
+        "Thursday",
+        "10:00 - 11:00",
+        "Data Warehousing (CS110)",
+        "Room 1"
+      ],
+      [
+        "Dr. Tariq Mehmood",
+        "7h",
+        "Monday, Wednesday, Thursday, Friday",
+        "Monday",
+        "10:00 - 11:00",
+        "Artificial Intelligence (CS101)",
+        "Room 2"
+      ],
+      [
+        "Dr. Tariq Mehmood",
+        "7h",
+        "Monday, Wednesday, Thursday, Friday",
+        "Wednesday",
+        "09:00 - 10:00",
+        "Machine Learning Fundamentals (CS102)",
+        "Room 1"
+      ],
+      [
+        "Dr. Tariq Mehmood",
+        "7h",
+        "Monday, Wednesday, Thursday, Friday",
+        "Wednesday",
+        "10:00 - 11:00",
+        "Machine Learning Fundamentals (CS102)",
+        "Room 1"
+      ],
+      [
+        "Dr. Tariq Mehmood",
+        "7h",
+        "Monday, Wednesday, Thursday, Friday",
+        "Thursday",
+        "09:00 - 10:00",
+        "Machine Learning Fundamentals (CS102)",
+        "Room 2"
+      ],
+      [
+        "Dr. Tariq Mehmood",
+        "7h",
+        "Monday, Wednesday, Thursday, Friday",
+        "Thursday",
+        "10:00 - 11:00",
+        "Machine Learning Fundamentals (CS102)",
+        "Room 2"
+      ],
+      [
+        "Dr. Tariq Mehmood",
+        "7h",
+        "Monday, Wednesday, Thursday, Friday",
+        "Friday",
+        "09:00 - 10:00",
+        "Artificial Intelligence (CS101)",
+        "Room 5"
+      ],
+      [
+        "Dr. Tariq Mehmood",
+        "7h",
+        "Monday, Wednesday, Thursday, Friday",
+        "Friday",
+        "10:00 - 11:00",
+        "Artificial Intelligence (CS101)",
+        "Room 5"
+      ],
+      [
+        "Lec. Faria Sajjad",
+        "5h",
+        "Monday, Tuesday, Wednesday",
+        "Monday",
+        "09:00 - 10:00",
+        "Computer Vision (CS103)",
+        "Room 5"
+      ],
+      [
+        "Lec. Faria Sajjad",
+        "5h",
+        "Monday, Tuesday, Wednesday",
+        "Monday",
+        "10:00 - 11:00",
+        "Computer Vision (CS103)",
+        "Room 5"
+      ],
+      [
+        "Lec. Faria Sajjad",
+        "5h",
+        "Monday, Tuesday, Wednesday",
+        "Tuesday",
+        "09:00 - 10:00",
+        "Digital Image Processing (CS104)",
+        "Room 4"
+      ],
+      [
+        "Lec. Faria Sajjad",
+        "5h",
+        "Monday, Tuesday, Wednesday",
+        "Tuesday",
+        "10:00 - 11:00",
+        "Digital Image Processing (CS104)",
+        "Room 4"
+      ],
+      [
+        "Lec. Faria Sajjad",
+        "5h",
+        "Monday, Tuesday, Wednesday",
+        "Wednesday",
+        "11:00 - 12:00",
+        "Computer Vision (CS103)",
+        "Room 5"
+      ],
+      [
+        "Lec. Hassan Raza",
+        "5h",
+        "Monday, Tuesday, Wednesday",
+        "Monday",
+        "09:00 - 10:00",
+        "Natural Language Processing (CS107)",
+        "Room 2"
+      ],
+      [
+        "Lec. Hassan Raza",
+        "5h",
+        "Monday, Tuesday, Wednesday",
+        "Tuesday",
+        "09:00 - 10:00",
+        "Natural Language Processing (CS107)",
+        "Room 2"
+      ],
+      [
+        "Lec. Hassan Raza",
+        "5h",
+        "Monday, Tuesday, Wednesday",
+        "Tuesday",
+        "10:00 - 11:00",
+        "Natural Language Processing (CS107)",
+        "Room 2"
+      ],
+      [
+        "Lec. Hassan Raza",
+        "5h",
+        "Monday, Tuesday, Wednesday",
+        "Wednesday",
+        "09:00 - 10:00",
+        "Information Retrieval (CS108)",
+        "Room 3"
+      ],
+      [
+        "Lec. Hassan Raza",
+        "5h",
+        "Monday, Tuesday, Wednesday",
+        "Wednesday",
+        "10:00 - 11:00",
+        "Information Retrieval (CS108)",
+        "Room 3"
+      ],
+      [
+        "Lec. Zainab Tariq",
+        "5h",
+        "Monday, Tuesday, Wednesday",
+        "Monday",
+        "09:00 - 10:00",
+        "Software Engineering (CS111)",
+        "Room 1"
+      ],
+      [
+        "Lec. Zainab Tariq",
+        "5h",
+        "Monday, Tuesday, Wednesday",
+        "Tuesday",
+        "09:00 - 10:00",
+        "Software Engineering (CS111)",
+        "Room 3"
+      ],
+      [
+        "Lec. Zainab Tariq",
+        "5h",
+        "Monday, Tuesday, Wednesday",
+        "Tuesday",
+        "10:00 - 11:00",
+        "Software Engineering (CS111)",
+        "Room 3"
+      ],
+      [
+        "Lec. Zainab Tariq",
+        "5h",
+        "Monday, Tuesday, Wednesday",
+        "Wednesday",
+        "09:00 - 10:00",
+        "Technical & Business Writing (CS112)",
+        "Room 5"
+      ],
+      [
+        "Lec. Zainab Tariq",
+        "5h",
+        "Monday, Tuesday, Wednesday",
+        "Wednesday",
+        "10:00 - 11:00",
+        "Technical & Business Writing (CS112)",
+        "Room 5"
+      ]
+    ],
+    "sheet": {
+      "section_title": "AI 2024 - Section A",
+      "slot_headers": [
+        "",
+        "Slot 1",
+        "Slot 2",
+        "Slot 3",
+        "Slot 4",
+        "Slot 5",
+        "Slot 6",
+        "Slot 7",
+        "Slot 8",
+        "Slot 9"
+      ],
+      "time_headers": [
+        "Day/Time",
+        "0830-9020",
+        "0920-1010",
+        "1010-1100",
+        "1100-1150",
+        "1150-1240",
+        "1240-1330",
+        "1330-1420",
+        "1420-1510",
+        "1510-1600"
+      ],
+      "days": [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday"
+      ],
+      "day_cells": {
+        "Monday": [
+          "Lec. Faria Sajjad\nComputer Vision (Room 5)\nDr. Ayesha Siddiqui\nOperating Systems (Room 3)\nLec. Hassan Raza\nNatural Language Processing (Room 2)\nDr. Salman Ahmed\nDatabase Systems (Room 4)\nLec. Zainab Tariq\nSoftware Engineering (Room 1)",
+          "Dr. Tariq Mehmood\nArtificial Intelligence (Room 2)\nLec. Faria Sajjad\nComputer Vision (Room 5)\nDr. Ayesha Siddiqui\nOperating Systems (Room 3)\nDr. Salman Ahmed\nDatabase Systems (Room 4)",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "Tuesday": [
+          "Lec. Faria Sajjad\nDigital Image Processing (Room 4)\nDr. Ayesha Siddiqui\nOperating Systems (Room 1)\nLec. Hassan Raza\nNatural Language Processing (Room 2)\nDr. Salman Ahmed\nDatabase Systems (Room 5)\nLec. Zainab Tariq\nSoftware Engineering (Room 3)",
+          "Lec. Faria Sajjad\nDigital Image Processing (Room 4)\nDr. Ayesha Siddiqui\nOperating Systems (Room 1)\nLec. Hassan Raza\nNatural Language Processing (Room 2)\nDr. Salman Ahmed\nDatabase Systems (Room 5)\nLec. Zainab Tariq\nSoftware Engineering (Room 3)",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "Wednesday": [
+          "Dr. Tariq Mehmood\nMachine Learning Fundamentals (Room 1)\nDr. Ayesha Siddiqui\nSystem Programming (Room 2)\nLec. Hassan Raza\nInformation Retrieval (Room 3)\nDr. Salman Ahmed\nData Warehousing (Room 4)\nLec. Zainab Tariq\nTechnical & Business Writing (Room 5)",
+          "Dr. Tariq Mehmood\nMachine Learning Fundamentals (Room 1)\nDr. Ayesha Siddiqui\nSystem Programming (Room 2)\nLec. Hassan Raza\nInformation Retrieval (Room 3)\nLec. Zainab Tariq\nTechnical & Business Writing (Room 5)",
+          "",
+          "Lec. Faria Sajjad\nComputer Vision (Room 5)",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "Thursday": [
+          "Dr. Tariq Mehmood\nMachine Learning Fundamentals (Room 2)\nDr. Salman Ahmed\nData Warehousing (Room 1)",
+          "Dr. Tariq Mehmood\nMachine Learning Fundamentals (Room 2)\nDr. Salman Ahmed\nData Warehousing (Room 1)",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "Friday": [
+          "Dr. Tariq Mehmood\nArtificial Intelligence (Room 5)",
+          "Dr. Tariq Mehmood\nArtificial Intelligence (Room 5)",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      "merged_day_cells": {
+        "Monday": [
+          {
+            "text": "Lec. Faria Sajjad\nComputer Vision (Room 5)\nDr. Ayesha Siddiqui\nOperating Systems (Room 3)\nLec. Hassan Raza\nNatural Language Processing (Room 2)\nDr. Salman Ahmed\nDatabase Systems (Room 4)\nLec. Zainab Tariq\nSoftware Engineering (Room 1)",
+            "colSpan": 1,
+            "startSlot": 1
+          },
+          {
+            "text": "Dr. Tariq Mehmood\nArtificial Intelligence (Room 2)\nLec. Faria Sajjad\nComputer Vision (Room 5)\nDr. Ayesha Siddiqui\nOperating Systems (Room 3)\nDr. Salman Ahmed\nDatabase Systems (Room 4)",
+            "colSpan": 1,
+            "startSlot": 2
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 3
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 4
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 5
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 6
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 7
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 8
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 9
+          }
+        ],
+        "Tuesday": [
+          {
+            "text": "Lec. Faria Sajjad\nDigital Image Processing (Room 4)\nDr. Ayesha Siddiqui\nOperating Systems (Room 1)\nLec. Hassan Raza\nNatural Language Processing (Room 2)\nDr. Salman Ahmed\nDatabase Systems (Room 5)\nLec. Zainab Tariq\nSoftware Engineering (Room 3)",
+            "colSpan": 2,
+            "startSlot": 1
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 3
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 4
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 5
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 6
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 7
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 8
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 9
+          }
+        ],
+        "Wednesday": [
+          {
+            "text": "Dr. Tariq Mehmood\nMachine Learning Fundamentals (Room 1)\nDr. Ayesha Siddiqui\nSystem Programming (Room 2)\nLec. Hassan Raza\nInformation Retrieval (Room 3)\nDr. Salman Ahmed\nData Warehousing (Room 4)\nLec. Zainab Tariq\nTechnical & Business Writing (Room 5)",
+            "colSpan": 1,
+            "startSlot": 1
+          },
+          {
+            "text": "Dr. Tariq Mehmood\nMachine Learning Fundamentals (Room 1)\nDr. Ayesha Siddiqui\nSystem Programming (Room 2)\nLec. Hassan Raza\nInformation Retrieval (Room 3)\nLec. Zainab Tariq\nTechnical & Business Writing (Room 5)",
+            "colSpan": 1,
+            "startSlot": 2
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 3
+          },
+          {
+            "text": "Lec. Faria Sajjad\nComputer Vision (Room 5)",
+            "colSpan": 1,
+            "startSlot": 4
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 5
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 6
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 7
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 8
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 9
+          }
+        ],
+        "Thursday": [
+          {
+            "text": "Dr. Tariq Mehmood\nMachine Learning Fundamentals (Room 2)\nDr. Salman Ahmed\nData Warehousing (Room 1)",
+            "colSpan": 2,
+            "startSlot": 1
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 3
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 4
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 5
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 6
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 7
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 8
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 9
+          }
+        ],
+        "Friday": [
+          {
+            "text": "Dr. Tariq Mehmood\nArtificial Intelligence (Room 5)",
+            "colSpan": 2,
+            "startSlot": 1
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 3
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 4
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 5
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 6
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 7
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 8
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 9
+          }
+        ]
+      },
+      "course_legend": [
+        {
+          "serial": 1,
+          "course_code": "CS101",
+          "course_title": "Artificial Intelligence",
+          "credit_hours": 3,
+          "faculty_name": "Dr. Tariq Mehmood",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 5, Room 2",
+          "remarks": ""
+        },
+        {
+          "serial": 2,
+          "course_code": "CS102",
+          "course_title": "Machine Learning Fundamentals",
+          "credit_hours": 4,
+          "faculty_name": "Dr. Tariq Mehmood",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 2, Room 1",
+          "remarks": ""
+        },
+        {
+          "serial": 3,
+          "course_code": "CS103",
+          "course_title": "Computer Vision",
+          "credit_hours": 3,
+          "faculty_name": "Lec. Faria Sajjad",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 5",
+          "remarks": ""
+        },
+        {
+          "serial": 4,
+          "course_code": "CS104",
+          "course_title": "Digital Image Processing",
+          "credit_hours": 2,
+          "faculty_name": "Lec. Faria Sajjad",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 4",
+          "remarks": ""
+        },
+        {
+          "serial": 5,
+          "course_code": "CS105",
+          "course_title": "Operating Systems",
+          "credit_hours": 4,
+          "faculty_name": "Dr. Ayesha Siddiqui",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 3, Room 1",
+          "remarks": ""
+        },
+        {
+          "serial": 6,
+          "course_code": "CS106",
+          "course_title": "System Programming",
+          "credit_hours": 2,
+          "faculty_name": "Dr. Ayesha Siddiqui",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 2",
+          "remarks": ""
+        },
+        {
+          "serial": 7,
+          "course_code": "CS107",
+          "course_title": "Natural Language Processing",
+          "credit_hours": 3,
+          "faculty_name": "Lec. Hassan Raza",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 2",
+          "remarks": ""
+        },
+        {
+          "serial": 8,
+          "course_code": "CS108",
+          "course_title": "Information Retrieval",
+          "credit_hours": 2,
+          "faculty_name": "Lec. Hassan Raza",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 3",
+          "remarks": ""
+        },
+        {
+          "serial": 9,
+          "course_code": "CS109",
+          "course_title": "Database Systems",
+          "credit_hours": 4,
+          "faculty_name": "Dr. Salman Ahmed",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 4, Room 5",
+          "remarks": ""
+        },
+        {
+          "serial": 10,
+          "course_code": "CS110",
+          "course_title": "Data Warehousing",
+          "credit_hours": 3,
+          "faculty_name": "Dr. Salman Ahmed",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 1, Room 4",
+          "remarks": ""
+        },
+        {
+          "serial": 11,
+          "course_code": "CS111",
+          "course_title": "Software Engineering",
+          "credit_hours": 3,
+          "faculty_name": "Lec. Zainab Tariq",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 3, Room 1",
+          "remarks": ""
+        },
+        {
+          "serial": 12,
+          "course_code": "CS112",
+          "course_title": "Technical & Business Writing",
+          "credit_hours": 2,
+          "faculty_name": "Lec. Zainab Tariq",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 5",
+          "remarks": ""
+        }
+      ]
+    },
+    "metadata": {
+      "schedule_id": 1,
+      "generated_at": "2026-10-12T09:00:00+00:00",
+      "section_title": "AI 2024 - Section A",
+      "total_courses": 35,
+      "total_teachers": 6,
+      "fairness_score": 0.946,
+      "preference_satisfaction": 0.96,
+      "config": {
+        "days": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday"
+        ],
+        "day_start": "09:00",
+        "day_end": "17:00",
+        "slot_minutes": 60,
+        "lunch_start": "12:00",
+        "lunch_end": "14:00",
+        "break_minutes": 15,
+        "min_gap_minutes": 30,
+        "max_teaching_hours_per_day": 6,
+        "rooms": [
+          "Room 1",
+          "Room 2",
+          "Room 3",
+          "Room 4",
+          "Room 5"
+        ]
+      }
+    },
+    "teacher_tables": [
+      {
+        "teacher_name": "Dr. Ayesha Siddiqui",
+        "total_hours": 6,
+        "days_taught": [
+          "Monday",
+          "Tuesday",
+          "Wednesday"
+        ],
+        "days_taught_count": 3,
+        "headers": [
+          "Day",
+          "Time",
+          "Course",
+          "Room",
+          "Student Group"
+        ],
+        "rows": [
+          [
+            "Monday",
+            "09:00 - 10:00",
+            "Operating Systems (CS105)",
+            "Room 3",
+            "Group-CS105"
+          ],
+          [
+            "Monday",
+            "10:00 - 11:00",
+            "Operating Systems (CS105)",
+            "Room 3",
+            "Group-CS105"
+          ],
+          [
+            "Tuesday",
+            "09:00 - 10:00",
+            "Operating Systems (CS105)",
+            "Room 1",
+            "Group-CS105"
+          ],
+          [
+            "Tuesday",
+            "10:00 - 11:00",
+            "Operating Systems (CS105)",
+            "Room 1",
+            "Group-CS105"
+          ],
+          [
+            "Wednesday",
+            "09:00 - 10:00",
+            "System Programming (CS106)",
+            "Room 2",
+            "Group-CS106"
+          ],
+          [
+            "Wednesday",
+            "10:00 - 11:00",
+            "System Programming (CS106)",
+            "Room 2",
+            "Group-CS106"
+          ]
+        ]
+      },
+      {
+        "teacher_name": "Dr. Salman Ahmed",
+        "total_hours": 7,
+        "days_taught": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday"
+        ],
+        "days_taught_count": 4,
+        "headers": [
+          "Day",
+          "Time",
+          "Course",
+          "Room",
+          "Student Group"
+        ],
+        "rows": [
+          [
+            "Monday",
+            "09:00 - 10:00",
+            "Database Systems (CS109)",
+            "Room 4",
+            "Group-CS109"
+          ],
+          [
+            "Monday",
+            "10:00 - 11:00",
+            "Database Systems (CS109)",
+            "Room 4",
+            "Group-CS109"
+          ],
+          [
+            "Tuesday",
+            "09:00 - 10:00",
+            "Database Systems (CS109)",
+            "Room 5",
+            "Group-CS109"
+          ],
+          [
+            "Tuesday",
+            "10:00 - 11:00",
+            "Database Systems (CS109)",
+            "Room 5",
+            "Group-CS109"
+          ],
+          [
+            "Wednesday",
+            "09:00 - 10:00",
+            "Data Warehousing (CS110)",
+            "Room 4",
+            "Group-CS110"
+          ],
+          [
+            "Thursday",
+            "09:00 - 10:00",
+            "Data Warehousing (CS110)",
+            "Room 1",
+            "Group-CS110"
+          ],
+          [
+            "Thursday",
+            "10:00 - 11:00",
+            "Data Warehousing (CS110)",
+            "Room 1",
+            "Group-CS110"
+          ]
+        ]
+      },
+      {
+        "teacher_name": "Dr. Tariq Mehmood",
+        "total_hours": 7,
+        "days_taught": [
+          "Monday",
+          "Wednesday",
+          "Thursday",
+          "Friday"
+        ],
+        "days_taught_count": 4,
+        "headers": [
+          "Day",
+          "Time",
+          "Course",
+          "Room",
+          "Student Group"
+        ],
+        "rows": [
+          [
+            "Monday",
+            "10:00 - 11:00",
+            "Artificial Intelligence (CS101)",
+            "Room 2",
+            "Group-CS101"
+          ],
+          [
+            "Wednesday",
+            "09:00 - 10:00",
+            "Machine Learning Fundamentals (CS102)",
+            "Room 1",
+            "Group-CS102"
+          ],
+          [
+            "Wednesday",
+            "10:00 - 11:00",
+            "Machine Learning Fundamentals (CS102)",
+            "Room 1",
+            "Group-CS102"
+          ],
+          [
+            "Thursday",
+            "09:00 - 10:00",
+            "Machine Learning Fundamentals (CS102)",
+            "Room 2",
+            "Group-CS102"
+          ],
+          [
+            "Thursday",
+            "10:00 - 11:00",
+            "Machine Learning Fundamentals (CS102)",
+            "Room 2",
+            "Group-CS102"
+          ],
+          [
+            "Friday",
+            "09:00 - 10:00",
+            "Artificial Intelligence (CS101)",
+            "Room 5",
+            "Group-CS101"
+          ],
+          [
+            "Friday",
+            "10:00 - 11:00",
+            "Artificial Intelligence (CS101)",
+            "Room 5",
+            "Group-CS101"
+          ]
+        ]
+      },
+      {
+        "teacher_name": "Lec. Faria Sajjad",
+        "total_hours": 5,
+        "days_taught": [
+          "Monday",
+          "Tuesday",
+          "Wednesday"
+        ],
+        "days_taught_count": 3,
+        "headers": [
+          "Day",
+          "Time",
+          "Course",
+          "Room",
+          "Student Group"
+        ],
+        "rows": [
+          [
+            "Monday",
+            "09:00 - 10:00",
+            "Computer Vision (CS103)",
+            "Room 5",
+            "Group-CS103"
+          ],
+          [
+            "Monday",
+            "10:00 - 11:00",
+            "Computer Vision (CS103)",
+            "Room 5",
+            "Group-CS103"
+          ],
+          [
+            "Tuesday",
+            "09:00 - 10:00",
+            "Digital Image Processing (CS104)",
+            "Room 4",
+            "Group-CS104"
+          ],
+          [
+            "Tuesday",
+            "10:00 - 11:00",
+            "Digital Image Processing (CS104)",
+            "Room 4",
+            "Group-CS104"
+          ],
+          [
+            "Wednesday",
+            "11:00 - 12:00",
+            "Computer Vision (CS103)",
+            "Room 5",
+            "Group-CS103"
+          ]
+        ]
+      },
+      {
+        "teacher_name": "Lec. Hassan Raza",
+        "total_hours": 5,
+        "days_taught": [
+          "Monday",
+          "Tuesday",
+          "Wednesday"
+        ],
+        "days_taught_count": 3,
+        "headers": [
+          "Day",
+          "Time",
+          "Course",
+          "Room",
+          "Student Group"
+        ],
+        "rows": [
+          [
+            "Monday",
+            "09:00 - 10:00",
+            "Natural Language Processing (CS107)",
+            "Room 2",
+            "Group-CS107"
+          ],
+          [
+            "Tuesday",
+            "09:00 - 10:00",
+            "Natural Language Processing (CS107)",
+            "Room 2",
+            "Group-CS107"
+          ],
+          [
+            "Tuesday",
+            "10:00 - 11:00",
+            "Natural Language Processing (CS107)",
+            "Room 2",
+            "Group-CS107"
+          ],
+          [
+            "Wednesday",
+            "09:00 - 10:00",
+            "Information Retrieval (CS108)",
+            "Room 3",
+            "Group-CS108"
+          ],
+          [
+            "Wednesday",
+            "10:00 - 11:00",
+            "Information Retrieval (CS108)",
+            "Room 3",
+            "Group-CS108"
+          ]
+        ]
+      },
+      {
+        "teacher_name": "Lec. Zainab Tariq",
+        "total_hours": 5,
+        "days_taught": [
+          "Monday",
+          "Tuesday",
+          "Wednesday"
+        ],
+        "days_taught_count": 3,
+        "headers": [
+          "Day",
+          "Time",
+          "Course",
+          "Room",
+          "Student Group"
+        ],
+        "rows": [
+          [
+            "Monday",
+            "09:00 - 10:00",
+            "Software Engineering (CS111)",
+            "Room 1",
+            "Group-CS111"
+          ],
+          [
+            "Tuesday",
+            "09:00 - 10:00",
+            "Software Engineering (CS111)",
+            "Room 3",
+            "Group-CS111"
+          ],
+          [
+            "Tuesday",
+            "10:00 - 11:00",
+            "Software Engineering (CS111)",
+            "Room 3",
+            "Group-CS111"
+          ],
+          [
+            "Wednesday",
+            "09:00 - 10:00",
+            "Technical & Business Writing (CS112)",
+            "Room 5",
+            "Group-CS112"
+          ],
+          [
+            "Wednesday",
+            "10:00 - 11:00",
+            "Technical & Business Writing (CS112)",
+            "Room 5",
+            "Group-CS112"
+          ]
+        ]
+      }
+    ]
+  },
+  "student": {
+    "view_type": "student",
+    "title": "Student Group Schedule View (With Explicit Break Rows)",
+    "schedule_id": 1,
+    "generated_at": "2026-10-12T09:00:00+00:00",
+    "section_title": "AI 2024 - Section A",
+    "headers": [
+      "Student Group",
+      "Day",
+      "Time",
+      "Course / Break",
+      "Room",
+      "Teacher"
+    ],
+    "rows": [
+      [
+        "Group-CS101",
+        "Monday",
+        "10:00 - 11:00",
+        "Artificial Intelligence (CS101)",
+        "Room 2",
+        "Dr. Tariq Mehmood"
+      ],
+      [
+        "Group-CS101",
+        "Friday",
+        "09:00 - 10:00",
+        "Artificial Intelligence (CS101)",
+        "Room 5",
+        "Dr. Tariq Mehmood"
+      ],
+      [
+        "Group-CS101",
+        "Friday",
+        "10:00 - 11:00",
+        "Artificial Intelligence (CS101)",
+        "Room 5",
+        "Dr. Tariq Mehmood"
+      ],
+      [
+        "Group-CS101",
+        "Friday",
+        "After 11:00 (15 min)",
+        "MANDATORY 15-MIN BREAK (After 2 Consecutive Hours)",
+        "\u2014",
+        "\u2014"
+      ],
+      [
+        "Group-CS101",
+        "Monday\u2013Friday",
+        "12:00 - 14:00",
+        "LUNCH BREAK (Explicit Break Row)",
+        "\u2014",
+        "\u2014"
+      ],
+      [
+        "Group-CS102",
+        "Wednesday",
+        "09:00 - 10:00",
+        "Machine Learning Fundamentals (CS102)",
+        "Room 1",
+        "Dr. Tariq Mehmood"
+      ],
+      [
+        "Group-CS102",
+        "Wednesday",
+        "10:00 - 11:00",
+        "Machine Learning Fundamentals (CS102)",
+        "Room 1",
+        "Dr. Tariq Mehmood"
+      ],
+      [
+        "Group-CS102",
+        "Wednesday",
+        "After 11:00 (15 min)",
+        "MANDATORY 15-MIN BREAK (After 2 Consecutive Hours)",
+        "\u2014",
+        "\u2014"
+      ],
+      [
+        "Group-CS102",
+        "Thursday",
+        "09:00 - 10:00",
+        "Machine Learning Fundamentals (CS102)",
+        "Room 2",
+        "Dr. Tariq Mehmood"
+      ],
+      [
+        "Group-CS102",
+        "Thursday",
+        "10:00 - 11:00",
+        "Machine Learning Fundamentals (CS102)",
+        "Room 2",
+        "Dr. Tariq Mehmood"
+      ],
+      [
+        "Group-CS102",
+        "Thursday",
+        "After 11:00 (15 min)",
+        "MANDATORY 15-MIN BREAK (After 2 Consecutive Hours)",
+        "\u2014",
+        "\u2014"
+      ],
+      [
+        "Group-CS102",
+        "Monday\u2013Friday",
+        "12:00 - 14:00",
+        "LUNCH BREAK (Explicit Break Row)",
+        "\u2014",
+        "\u2014"
+      ],
+      [
+        "Group-CS103",
+        "Monday",
+        "09:00 - 10:00",
+        "Computer Vision (CS103)",
+        "Room 5",
+        "Lec. Faria Sajjad"
+      ],
+      [
+        "Group-CS103",
+        "Monday",
+        "10:00 - 11:00",
+        "Computer Vision (CS103)",
+        "Room 5",
+        "Lec. Faria Sajjad"
+      ],
+      [
+        "Group-CS103",
+        "Monday",
+        "After 11:00 (15 min)",
+        "MANDATORY 15-MIN BREAK (After 2 Consecutive Hours)",
+        "\u2014",
+        "\u2014"
+      ],
+      [
+        "Group-CS103",
+        "Wednesday",
+        "11:00 - 12:00",
+        "Computer Vision (CS103)",
+        "Room 5",
+        "Lec. Faria Sajjad"
+      ],
+      [
+        "Group-CS103",
+        "Monday\u2013Friday",
+        "12:00 - 14:00",
+        "LUNCH BREAK (Explicit Break Row)",
+        "\u2014",
+        "\u2014"
+      ],
+      [
+        "Group-CS104",
+        "Tuesday",
+        "09:00 - 10:00",
+        "Digital Image Processing (CS104)",
+        "Room 4",
+        "Lec. Faria Sajjad"
+      ],
+      [
+        "Group-CS104",
+        "Tuesday",
+        "10:00 - 11:00",
+        "Digital Image Processing (CS104)",
+        "Room 4",
+        "Lec. Faria Sajjad"
+      ],
+      [
+        "Group-CS104",
+        "Tuesday",
+        "After 11:00 (15 min)",
+        "MANDATORY 15-MIN BREAK (After 2 Consecutive Hours)",
+        "\u2014",
+        "\u2014"
+      ],
+      [
+        "Group-CS104",
+        "Monday\u2013Friday",
+        "12:00 - 14:00",
+        "LUNCH BREAK (Explicit Break Row)",
+        "\u2014",
+        "\u2014"
+      ],
+      [
+        "Group-CS105",
+        "Monday",
+        "09:00 - 10:00",
+        "Operating Systems (CS105)",
+        "Room 3",
+        "Dr. Ayesha Siddiqui"
+      ],
+      [
+        "Group-CS105",
+        "Monday",
+        "10:00 - 11:00",
+        "Operating Systems (CS105)",
+        "Room 3",
+        "Dr. Ayesha Siddiqui"
+      ],
+      [
+        "Group-CS105",
+        "Monday",
+        "After 11:00 (15 min)",
+        "MANDATORY 15-MIN BREAK (After 2 Consecutive Hours)",
+        "\u2014",
+        "\u2014"
+      ],
+      [
+        "Group-CS105",
+        "Tuesday",
+        "09:00 - 10:00",
+        "Operating Systems (CS105)",
+        "Room 1",
+        "Dr. Ayesha Siddiqui"
+      ],
+      [
+        "Group-CS105",
+        "Tuesday",
+        "10:00 - 11:00",
+        "Operating Systems (CS105)",
+        "Room 1",
+        "Dr. Ayesha Siddiqui"
+      ],
+      [
+        "Group-CS105",
+        "Tuesday",
+        "After 11:00 (15 min)",
+        "MANDATORY 15-MIN BREAK (After 2 Consecutive Hours)",
+        "\u2014",
+        "\u2014"
+      ],
+      [
+        "Group-CS105",
+        "Monday\u2013Friday",
+        "12:00 - 14:00",
+        "LUNCH BREAK (Explicit Break Row)",
+        "\u2014",
+        "\u2014"
+      ],
+      [
+        "Group-CS106",
+        "Wednesday",
+        "09:00 - 10:00",
+        "System Programming (CS106)",
+        "Room 2",
+        "Dr. Ayesha Siddiqui"
+      ],
+      [
+        "Group-CS106",
+        "Wednesday",
+        "10:00 - 11:00",
+        "System Programming (CS106)",
+        "Room 2",
+        "Dr. Ayesha Siddiqui"
+      ],
+      [
+        "Group-CS106",
+        "Wednesday",
+        "After 11:00 (15 min)",
+        "MANDATORY 15-MIN BREAK (After 2 Consecutive Hours)",
+        "\u2014",
+        "\u2014"
+      ],
+      [
+        "Group-CS106",
+        "Monday\u2013Friday",
+        "12:00 - 14:00",
+        "LUNCH BREAK (Explicit Break Row)",
+        "\u2014",
+        "\u2014"
+      ],
+      [
+        "Group-CS107",
+        "Monday",
+        "09:00 - 10:00",
+        "Natural Language Processing (CS107)",
+        "Room 2",
+        "Lec. Hassan Raza"
+      ],
+      [
+        "Group-CS107",
+        "Tuesday",
+        "09:00 - 10:00",
+        "Natural Language Processing (CS107)",
+        "Room 2",
+        "Lec. Hassan Raza"
+      ],
+      [
+        "Group-CS107",
+        "Tuesday",
+        "10:00 - 11:00",
+        "Natural Language Processing (CS107)",
+        "Room 2",
+        "Lec. Hassan Raza"
+      ],
+      [
+        "Group-CS107",
+        "Tuesday",
+        "After 11:00 (15 min)",
+        "MANDATORY 15-MIN BREAK (After 2 Consecutive Hours)",
+        "\u2014",
+        "\u2014"
+      ],
+      [
+        "Group-CS107",
+        "Monday\u2013Friday",
+        "12:00 - 14:00",
+        "LUNCH BREAK (Explicit Break Row)",
+        "\u2014",
+        "\u2014"
+      ],
+      [
+        "Group-CS108",
+        "Wednesday",
+        "09:00 - 10:00",
+        "Information Retrieval (CS108)",
+        "Room 3",
+        "Lec. Hassan Raza"
+      ],
+      [
+        "Group-CS108",
+        "Wednesday",
+        "10:00 - 11:00",
+        "Information Retrieval (CS108)",
+        "Room 3",
+        "Lec. Hassan Raza"
+      ],
+      [
+        "Group-CS108",
+        "Wednesday",
+        "After 11:00 (15 min)",
+        "MANDATORY 15-MIN BREAK (After 2 Consecutive Hours)",
+        "\u2014",
+        "\u2014"
+      ],
+      [
+        "Group-CS108",
+        "Monday\u2013Friday",
+        "12:00 - 14:00",
+        "LUNCH BREAK (Explicit Break Row)",
+        "\u2014",
+        "\u2014"
+      ],
+      [
+        "Group-CS109",
+        "Monday",
+        "09:00 - 10:00",
+        "Database Systems (CS109)",
+        "Room 4",
+        "Dr. Salman Ahmed"
+      ],
+      [
+        "Group-CS109",
+        "Monday",
+        "10:00 - 11:00",
+        "Database Systems (CS109)",
+        "Room 4",
+        "Dr. Salman Ahmed"
+      ],
+      [
+        "Group-CS109",
+        "Monday",
+        "After 11:00 (15 min)",
+        "MANDATORY 15-MIN BREAK (After 2 Consecutive Hours)",
+        "\u2014",
+        "\u2014"
+      ],
+      [
+        "Group-CS109",
+        "Tuesday",
+        "09:00 - 10:00",
+        "Database Systems (CS109)",
+        "Room 5",
+        "Dr. Salman Ahmed"
+      ],
+      [
+        "Group-CS109",
+        "Tuesday",
+        "10:00 - 11:00",
+        "Database Systems (CS109)",
+        "Room 5",
+        "Dr. Salman Ahmed"
+      ],
+      [
+        "Group-CS109",
+        "Tuesday",
+        "After 11:00 (15 min)",
+        "MANDATORY 15-MIN BREAK (After 2 Consecutive Hours)",
+        "\u2014",
+        "\u2014"
+      ],
+      [
+        "Group-CS109",
+        "Monday\u2013Friday",
+        "12:00 - 14:00",
+        "LUNCH BREAK (Explicit Break Row)",
+        "\u2014",
+        "\u2014"
+      ],
+      [
+        "Group-CS110",
+        "Wednesday",
+        "09:00 - 10:00",
+        "Data Warehousing (CS110)",
+        "Room 4",
+        "Dr. Salman Ahmed"
+      ],
+      [
+        "Group-CS110",
+        "Thursday",
+        "09:00 - 10:00",
+        "Data Warehousing (CS110)",
+        "Room 1",
+        "Dr. Salman Ahmed"
+      ],
+      [
+        "Group-CS110",
+        "Thursday",
+        "10:00 - 11:00",
+        "Data Warehousing (CS110)",
+        "Room 1",
+        "Dr. Salman Ahmed"
+      ],
+      [
+        "Group-CS110",
+        "Thursday",
+        "After 11:00 (15 min)",
+        "MANDATORY 15-MIN BREAK (After 2 Consecutive Hours)",
+        "\u2014",
+        "\u2014"
+      ],
+      [
+        "Group-CS110",
+        "Monday\u2013Friday",
+        "12:00 - 14:00",
+        "LUNCH BREAK (Explicit Break Row)",
+        "\u2014",
+        "\u2014"
+      ],
+      [
+        "Group-CS111",
+        "Monday",
+        "09:00 - 10:00",
+        "Software Engineering (CS111)",
+        "Room 1",
+        "Lec. Zainab Tariq"
+      ],
+      [
+        "Group-CS111",
+        "Tuesday",
+        "09:00 - 10:00",
+        "Software Engineering (CS111)",
+        "Room 3",
+        "Lec. Zainab Tariq"
+      ],
+      [
+        "Group-CS111",
+        "Tuesday",
+        "10:00 - 11:00",
+        "Software Engineering (CS111)",
+        "Room 3",
+        "Lec. Zainab Tariq"
+      ],
+      [
+        "Group-CS111",
+        "Tuesday",
+        "After 11:00 (15 min)",
+        "MANDATORY 15-MIN BREAK (After 2 Consecutive Hours)",
+        "\u2014",
+        "\u2014"
+      ],
+      [
+        "Group-CS111",
+        "Monday\u2013Friday",
+        "12:00 - 14:00",
+        "LUNCH BREAK (Explicit Break Row)",
+        "\u2014",
+        "\u2014"
+      ],
+      [
+        "Group-CS112",
+        "Wednesday",
+        "09:00 - 10:00",
+        "Technical & Business Writing (CS112)",
+        "Room 5",
+        "Lec. Zainab Tariq"
+      ],
+      [
+        "Group-CS112",
+        "Wednesday",
+        "10:00 - 11:00",
+        "Technical & Business Writing (CS112)",
+        "Room 5",
+        "Lec. Zainab Tariq"
+      ],
+      [
+        "Group-CS112",
+        "Wednesday",
+        "After 11:00 (15 min)",
+        "MANDATORY 15-MIN BREAK (After 2 Consecutive Hours)",
+        "\u2014",
+        "\u2014"
+      ],
+      [
+        "Group-CS112",
+        "Monday\u2013Friday",
+        "12:00 - 14:00",
+        "LUNCH BREAK (Explicit Break Row)",
+        "\u2014",
+        "\u2014"
+      ]
+    ],
+    "sheet": {
+      "section_title": "AI 2024 - Section A",
+      "slot_headers": [
+        "",
+        "Slot 1",
+        "Slot 2",
+        "Slot 3",
+        "Slot 4",
+        "Slot 5",
+        "Slot 6",
+        "Slot 7",
+        "Slot 8",
+        "Slot 9"
+      ],
+      "time_headers": [
+        "Day/Time",
+        "0830-9020",
+        "0920-1010",
+        "1010-1100",
+        "1100-1150",
+        "1150-1240",
+        "1240-1330",
+        "1330-1420",
+        "1420-1510",
+        "1510-1600"
+      ],
+      "days": [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday"
+      ],
+      "day_cells": {
+        "Monday": [
+          "CS103: Computer Vision\nRoom 5 (Lec. Faria Sajjad)\nCS105: Operating Systems\nRoom 3 (Dr. Ayesha Siddiqui)\nCS107: Natural Language Processing\nRoom 2 (Lec. Hassan Raza)\nCS109: Database Systems\nRoom 4 (Dr. Salman Ahmed)\nCS111: Software Engineering\nRoom 1 (Lec. Zainab Tariq)",
+          "CS101: Artificial Intelligence\nRoom 2 (Dr. Tariq Mehmood)\nCS103: Computer Vision\nRoom 5 (Lec. Faria Sajjad)\nCS105: Operating Systems\nRoom 3 (Dr. Ayesha Siddiqui)\nCS109: Database Systems\nRoom 4 (Dr. Salman Ahmed)",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "Tuesday": [
+          "CS104: Digital Image Processing\nRoom 4 (Lec. Faria Sajjad)\nCS105: Operating Systems\nRoom 1 (Dr. Ayesha Siddiqui)\nCS107: Natural Language Processing\nRoom 2 (Lec. Hassan Raza)\nCS109: Database Systems\nRoom 5 (Dr. Salman Ahmed)\nCS111: Software Engineering\nRoom 3 (Lec. Zainab Tariq)",
+          "CS104: Digital Image Processing\nRoom 4 (Lec. Faria Sajjad)\nCS105: Operating Systems\nRoom 1 (Dr. Ayesha Siddiqui)\nCS107: Natural Language Processing\nRoom 2 (Lec. Hassan Raza)\nCS109: Database Systems\nRoom 5 (Dr. Salman Ahmed)\nCS111: Software Engineering\nRoom 3 (Lec. Zainab Tariq)",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "Wednesday": [
+          "CS102: Machine Learning Fundamentals\nRoom 1 (Dr. Tariq Mehmood)\nCS106: System Programming\nRoom 2 (Dr. Ayesha Siddiqui)\nCS108: Information Retrieval\nRoom 3 (Lec. Hassan Raza)\nCS110: Data Warehousing\nRoom 4 (Dr. Salman Ahmed)\nCS112: Technical & Business Writing\nRoom 5 (Lec. Zainab Tariq)",
+          "CS102: Machine Learning Fundamentals\nRoom 1 (Dr. Tariq Mehmood)\nCS106: System Programming\nRoom 2 (Dr. Ayesha Siddiqui)\nCS108: Information Retrieval\nRoom 3 (Lec. Hassan Raza)\nCS112: Technical & Business Writing\nRoom 5 (Lec. Zainab Tariq)",
+          "",
+          "CS103: Computer Vision\nRoom 5 (Lec. Faria Sajjad)",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "Thursday": [
+          "CS102: Machine Learning Fundamentals\nRoom 2 (Dr. Tariq Mehmood)\nCS110: Data Warehousing\nRoom 1 (Dr. Salman Ahmed)",
+          "CS102: Machine Learning Fundamentals\nRoom 2 (Dr. Tariq Mehmood)\nCS110: Data Warehousing\nRoom 1 (Dr. Salman Ahmed)",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "Friday": [
+          "CS101: Artificial Intelligence\nRoom 5 (Dr. Tariq Mehmood)",
+          "CS101: Artificial Intelligence\nRoom 5 (Dr. Tariq Mehmood)",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      "merged_day_cells": {
+        "Monday": [
+          {
+            "text": "CS103: Computer Vision\nRoom 5 (Lec. Faria Sajjad)\nCS105: Operating Systems\nRoom 3 (Dr. Ayesha Siddiqui)\nCS107: Natural Language Processing\nRoom 2 (Lec. Hassan Raza)\nCS109: Database Systems\nRoom 4 (Dr. Salman Ahmed)\nCS111: Software Engineering\nRoom 1 (Lec. Zainab Tariq)",
+            "colSpan": 1,
+            "startSlot": 1
+          },
+          {
+            "text": "CS101: Artificial Intelligence\nRoom 2 (Dr. Tariq Mehmood)\nCS103: Computer Vision\nRoom 5 (Lec. Faria Sajjad)\nCS105: Operating Systems\nRoom 3 (Dr. Ayesha Siddiqui)\nCS109: Database Systems\nRoom 4 (Dr. Salman Ahmed)",
+            "colSpan": 1,
+            "startSlot": 2
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 3
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 4
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 5
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 6
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 7
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 8
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 9
+          }
+        ],
+        "Tuesday": [
+          {
+            "text": "CS104: Digital Image Processing\nRoom 4 (Lec. Faria Sajjad)\nCS105: Operating Systems\nRoom 1 (Dr. Ayesha Siddiqui)\nCS107: Natural Language Processing\nRoom 2 (Lec. Hassan Raza)\nCS109: Database Systems\nRoom 5 (Dr. Salman Ahmed)\nCS111: Software Engineering\nRoom 3 (Lec. Zainab Tariq)",
+            "colSpan": 2,
+            "startSlot": 1
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 3
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 4
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 5
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 6
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 7
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 8
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 9
+          }
+        ],
+        "Wednesday": [
+          {
+            "text": "CS102: Machine Learning Fundamentals\nRoom 1 (Dr. Tariq Mehmood)\nCS106: System Programming\nRoom 2 (Dr. Ayesha Siddiqui)\nCS108: Information Retrieval\nRoom 3 (Lec. Hassan Raza)\nCS110: Data Warehousing\nRoom 4 (Dr. Salman Ahmed)\nCS112: Technical & Business Writing\nRoom 5 (Lec. Zainab Tariq)",
+            "colSpan": 1,
+            "startSlot": 1
+          },
+          {
+            "text": "CS102: Machine Learning Fundamentals\nRoom 1 (Dr. Tariq Mehmood)\nCS106: System Programming\nRoom 2 (Dr. Ayesha Siddiqui)\nCS108: Information Retrieval\nRoom 3 (Lec. Hassan Raza)\nCS112: Technical & Business Writing\nRoom 5 (Lec. Zainab Tariq)",
+            "colSpan": 1,
+            "startSlot": 2
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 3
+          },
+          {
+            "text": "CS103: Computer Vision\nRoom 5 (Lec. Faria Sajjad)",
+            "colSpan": 1,
+            "startSlot": 4
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 5
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 6
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 7
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 8
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 9
+          }
+        ],
+        "Thursday": [
+          {
+            "text": "CS102: Machine Learning Fundamentals\nRoom 2 (Dr. Tariq Mehmood)\nCS110: Data Warehousing\nRoom 1 (Dr. Salman Ahmed)",
+            "colSpan": 2,
+            "startSlot": 1
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 3
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 4
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 5
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 6
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 7
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 8
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 9
+          }
+        ],
+        "Friday": [
+          {
+            "text": "CS101: Artificial Intelligence\nRoom 5 (Dr. Tariq Mehmood)",
+            "colSpan": 2,
+            "startSlot": 1
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 3
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 4
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 5
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 6
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 7
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 8
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 9
+          }
+        ]
+      },
+      "course_legend": [
+        {
+          "serial": 1,
+          "course_code": "CS101",
+          "course_title": "Artificial Intelligence",
+          "credit_hours": 3,
+          "faculty_name": "Dr. Tariq Mehmood",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 5, Room 2",
+          "remarks": ""
+        },
+        {
+          "serial": 2,
+          "course_code": "CS102",
+          "course_title": "Machine Learning Fundamentals",
+          "credit_hours": 4,
+          "faculty_name": "Dr. Tariq Mehmood",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 2, Room 1",
+          "remarks": ""
+        },
+        {
+          "serial": 3,
+          "course_code": "CS103",
+          "course_title": "Computer Vision",
+          "credit_hours": 3,
+          "faculty_name": "Lec. Faria Sajjad",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 5",
+          "remarks": ""
+        },
+        {
+          "serial": 4,
+          "course_code": "CS104",
+          "course_title": "Digital Image Processing",
+          "credit_hours": 2,
+          "faculty_name": "Lec. Faria Sajjad",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 4",
+          "remarks": ""
+        },
+        {
+          "serial": 5,
+          "course_code": "CS105",
+          "course_title": "Operating Systems",
+          "credit_hours": 4,
+          "faculty_name": "Dr. Ayesha Siddiqui",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 3, Room 1",
+          "remarks": ""
+        },
+        {
+          "serial": 6,
+          "course_code": "CS106",
+          "course_title": "System Programming",
+          "credit_hours": 2,
+          "faculty_name": "Dr. Ayesha Siddiqui",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 2",
+          "remarks": ""
+        },
+        {
+          "serial": 7,
+          "course_code": "CS107",
+          "course_title": "Natural Language Processing",
+          "credit_hours": 3,
+          "faculty_name": "Lec. Hassan Raza",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 2",
+          "remarks": ""
+        },
+        {
+          "serial": 8,
+          "course_code": "CS108",
+          "course_title": "Information Retrieval",
+          "credit_hours": 2,
+          "faculty_name": "Lec. Hassan Raza",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 3",
+          "remarks": ""
+        },
+        {
+          "serial": 9,
+          "course_code": "CS109",
+          "course_title": "Database Systems",
+          "credit_hours": 4,
+          "faculty_name": "Dr. Salman Ahmed",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 4, Room 5",
+          "remarks": ""
+        },
+        {
+          "serial": 10,
+          "course_code": "CS110",
+          "course_title": "Data Warehousing",
+          "credit_hours": 3,
+          "faculty_name": "Dr. Salman Ahmed",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 1, Room 4",
+          "remarks": ""
+        },
+        {
+          "serial": 11,
+          "course_code": "CS111",
+          "course_title": "Software Engineering",
+          "credit_hours": 3,
+          "faculty_name": "Lec. Zainab Tariq",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 3, Room 1",
+          "remarks": ""
+        },
+        {
+          "serial": 12,
+          "course_code": "CS112",
+          "course_title": "Technical & Business Writing",
+          "credit_hours": 2,
+          "faculty_name": "Lec. Zainab Tariq",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 5",
+          "remarks": ""
+        }
+      ]
+    },
+    "metadata": {
+      "schedule_id": 1,
+      "generated_at": "2026-10-12T09:00:00+00:00",
+      "section_title": "AI 2024 - Section A",
+      "total_courses": 35,
+      "total_teachers": 6,
+      "fairness_score": 0.946,
+      "preference_satisfaction": 0.96,
+      "config": {
+        "days": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday"
+        ],
+        "day_start": "09:00",
+        "day_end": "17:00",
+        "slot_minutes": 60,
+        "lunch_start": "12:00",
+        "lunch_end": "14:00",
+        "break_minutes": 15,
+        "min_gap_minutes": 30,
+        "max_teaching_hours_per_day": 6,
+        "rooms": [
+          "Room 1",
+          "Room 2",
+          "Room 3",
+          "Room 4",
+          "Room 5"
+        ]
+      }
+    },
+    "student_group_tables": [
+      {
+        "student_group": "Group-CS101",
+        "total_weekly_hours": 3,
+        "headers": [
+          "Day",
+          "Time",
+          "Course / Break",
+          "Room",
+          "Teacher"
+        ],
+        "rows": [
+          [
+            "Monday",
+            "10:00 - 11:00",
+            "Artificial Intelligence (CS101)",
+            "Room 2",
+            "Dr. Tariq Mehmood"
+          ],
+          [
+            "Friday",
+            "09:00 - 10:00",
+            "Artificial Intelligence (CS101)",
+            "Room 5",
+            "Dr. Tariq Mehmood"
+          ],
+          [
+            "Friday",
+            "10:00 - 11:00",
+            "Artificial Intelligence (CS101)",
+            "Room 5",
+            "Dr. Tariq Mehmood"
+          ],
+          [
+            "Friday",
+            "After 11:00 (15 min)",
+            "MANDATORY 15-MIN BREAK (After 2 Consecutive Hours)",
+            "\u2014",
+            "\u2014"
+          ],
+          [
+            "Monday\u2013Friday",
+            "12:00 - 14:00",
+            "LUNCH BREAK (Explicit Break Row)",
+            "\u2014",
+            "\u2014"
+          ]
+        ]
+      },
+      {
+        "student_group": "Group-CS102",
+        "total_weekly_hours": 4,
+        "headers": [
+          "Day",
+          "Time",
+          "Course / Break",
+          "Room",
+          "Teacher"
+        ],
+        "rows": [
+          [
+            "Wednesday",
+            "09:00 - 10:00",
+            "Machine Learning Fundamentals (CS102)",
+            "Room 1",
+            "Dr. Tariq Mehmood"
+          ],
+          [
+            "Wednesday",
+            "10:00 - 11:00",
+            "Machine Learning Fundamentals (CS102)",
+            "Room 1",
+            "Dr. Tariq Mehmood"
+          ],
+          [
+            "Wednesday",
+            "After 11:00 (15 min)",
+            "MANDATORY 15-MIN BREAK (After 2 Consecutive Hours)",
+            "\u2014",
+            "\u2014"
+          ],
+          [
+            "Thursday",
+            "09:00 - 10:00",
+            "Machine Learning Fundamentals (CS102)",
+            "Room 2",
+            "Dr. Tariq Mehmood"
+          ],
+          [
+            "Thursday",
+            "10:00 - 11:00",
+            "Machine Learning Fundamentals (CS102)",
+            "Room 2",
+            "Dr. Tariq Mehmood"
+          ],
+          [
+            "Thursday",
+            "After 11:00 (15 min)",
+            "MANDATORY 15-MIN BREAK (After 2 Consecutive Hours)",
+            "\u2014",
+            "\u2014"
+          ],
+          [
+            "Monday\u2013Friday",
+            "12:00 - 14:00",
+            "LUNCH BREAK (Explicit Break Row)",
+            "\u2014",
+            "\u2014"
+          ]
+        ]
+      },
+      {
+        "student_group": "Group-CS103",
+        "total_weekly_hours": 3,
+        "headers": [
+          "Day",
+          "Time",
+          "Course / Break",
+          "Room",
+          "Teacher"
+        ],
+        "rows": [
+          [
+            "Monday",
+            "09:00 - 10:00",
+            "Computer Vision (CS103)",
+            "Room 5",
+            "Lec. Faria Sajjad"
+          ],
+          [
+            "Monday",
+            "10:00 - 11:00",
+            "Computer Vision (CS103)",
+            "Room 5",
+            "Lec. Faria Sajjad"
+          ],
+          [
+            "Monday",
+            "After 11:00 (15 min)",
+            "MANDATORY 15-MIN BREAK (After 2 Consecutive Hours)",
+            "\u2014",
+            "\u2014"
+          ],
+          [
+            "Wednesday",
+            "11:00 - 12:00",
+            "Computer Vision (CS103)",
+            "Room 5",
+            "Lec. Faria Sajjad"
+          ],
+          [
+            "Monday\u2013Friday",
+            "12:00 - 14:00",
+            "LUNCH BREAK (Explicit Break Row)",
+            "\u2014",
+            "\u2014"
+          ]
+        ]
+      },
+      {
+        "student_group": "Group-CS104",
+        "total_weekly_hours": 2,
+        "headers": [
+          "Day",
+          "Time",
+          "Course / Break",
+          "Room",
+          "Teacher"
+        ],
+        "rows": [
+          [
+            "Tuesday",
+            "09:00 - 10:00",
+            "Digital Image Processing (CS104)",
+            "Room 4",
+            "Lec. Faria Sajjad"
+          ],
+          [
+            "Tuesday",
+            "10:00 - 11:00",
+            "Digital Image Processing (CS104)",
+            "Room 4",
+            "Lec. Faria Sajjad"
+          ],
+          [
+            "Tuesday",
+            "After 11:00 (15 min)",
+            "MANDATORY 15-MIN BREAK (After 2 Consecutive Hours)",
+            "\u2014",
+            "\u2014"
+          ],
+          [
+            "Monday\u2013Friday",
+            "12:00 - 14:00",
+            "LUNCH BREAK (Explicit Break Row)",
+            "\u2014",
+            "\u2014"
+          ]
+        ]
+      },
+      {
+        "student_group": "Group-CS105",
+        "total_weekly_hours": 4,
+        "headers": [
+          "Day",
+          "Time",
+          "Course / Break",
+          "Room",
+          "Teacher"
+        ],
+        "rows": [
+          [
+            "Monday",
+            "09:00 - 10:00",
+            "Operating Systems (CS105)",
+            "Room 3",
+            "Dr. Ayesha Siddiqui"
+          ],
+          [
+            "Monday",
+            "10:00 - 11:00",
+            "Operating Systems (CS105)",
+            "Room 3",
+            "Dr. Ayesha Siddiqui"
+          ],
+          [
+            "Monday",
+            "After 11:00 (15 min)",
+            "MANDATORY 15-MIN BREAK (After 2 Consecutive Hours)",
+            "\u2014",
+            "\u2014"
+          ],
+          [
+            "Tuesday",
+            "09:00 - 10:00",
+            "Operating Systems (CS105)",
+            "Room 1",
+            "Dr. Ayesha Siddiqui"
+          ],
+          [
+            "Tuesday",
+            "10:00 - 11:00",
+            "Operating Systems (CS105)",
+            "Room 1",
+            "Dr. Ayesha Siddiqui"
+          ],
+          [
+            "Tuesday",
+            "After 11:00 (15 min)",
+            "MANDATORY 15-MIN BREAK (After 2 Consecutive Hours)",
+            "\u2014",
+            "\u2014"
+          ],
+          [
+            "Monday\u2013Friday",
+            "12:00 - 14:00",
+            "LUNCH BREAK (Explicit Break Row)",
+            "\u2014",
+            "\u2014"
+          ]
+        ]
+      },
+      {
+        "student_group": "Group-CS106",
+        "total_weekly_hours": 2,
+        "headers": [
+          "Day",
+          "Time",
+          "Course / Break",
+          "Room",
+          "Teacher"
+        ],
+        "rows": [
+          [
+            "Wednesday",
+            "09:00 - 10:00",
+            "System Programming (CS106)",
+            "Room 2",
+            "Dr. Ayesha Siddiqui"
+          ],
+          [
+            "Wednesday",
+            "10:00 - 11:00",
+            "System Programming (CS106)",
+            "Room 2",
+            "Dr. Ayesha Siddiqui"
+          ],
+          [
+            "Wednesday",
+            "After 11:00 (15 min)",
+            "MANDATORY 15-MIN BREAK (After 2 Consecutive Hours)",
+            "\u2014",
+            "\u2014"
+          ],
+          [
+            "Monday\u2013Friday",
+            "12:00 - 14:00",
+            "LUNCH BREAK (Explicit Break Row)",
+            "\u2014",
+            "\u2014"
+          ]
+        ]
+      },
+      {
+        "student_group": "Group-CS107",
+        "total_weekly_hours": 3,
+        "headers": [
+          "Day",
+          "Time",
+          "Course / Break",
+          "Room",
+          "Teacher"
+        ],
+        "rows": [
+          [
+            "Monday",
+            "09:00 - 10:00",
+            "Natural Language Processing (CS107)",
+            "Room 2",
+            "Lec. Hassan Raza"
+          ],
+          [
+            "Tuesday",
+            "09:00 - 10:00",
+            "Natural Language Processing (CS107)",
+            "Room 2",
+            "Lec. Hassan Raza"
+          ],
+          [
+            "Tuesday",
+            "10:00 - 11:00",
+            "Natural Language Processing (CS107)",
+            "Room 2",
+            "Lec. Hassan Raza"
+          ],
+          [
+            "Tuesday",
+            "After 11:00 (15 min)",
+            "MANDATORY 15-MIN BREAK (After 2 Consecutive Hours)",
+            "\u2014",
+            "\u2014"
+          ],
+          [
+            "Monday\u2013Friday",
+            "12:00 - 14:00",
+            "LUNCH BREAK (Explicit Break Row)",
+            "\u2014",
+            "\u2014"
+          ]
+        ]
+      },
+      {
+        "student_group": "Group-CS108",
+        "total_weekly_hours": 2,
+        "headers": [
+          "Day",
+          "Time",
+          "Course / Break",
+          "Room",
+          "Teacher"
+        ],
+        "rows": [
+          [
+            "Wednesday",
+            "09:00 - 10:00",
+            "Information Retrieval (CS108)",
+            "Room 3",
+            "Lec. Hassan Raza"
+          ],
+          [
+            "Wednesday",
+            "10:00 - 11:00",
+            "Information Retrieval (CS108)",
+            "Room 3",
+            "Lec. Hassan Raza"
+          ],
+          [
+            "Wednesday",
+            "After 11:00 (15 min)",
+            "MANDATORY 15-MIN BREAK (After 2 Consecutive Hours)",
+            "\u2014",
+            "\u2014"
+          ],
+          [
+            "Monday\u2013Friday",
+            "12:00 - 14:00",
+            "LUNCH BREAK (Explicit Break Row)",
+            "\u2014",
+            "\u2014"
+          ]
+        ]
+      },
+      {
+        "student_group": "Group-CS109",
+        "total_weekly_hours": 4,
+        "headers": [
+          "Day",
+          "Time",
+          "Course / Break",
+          "Room",
+          "Teacher"
+        ],
+        "rows": [
+          [
+            "Monday",
+            "09:00 - 10:00",
+            "Database Systems (CS109)",
+            "Room 4",
+            "Dr. Salman Ahmed"
+          ],
+          [
+            "Monday",
+            "10:00 - 11:00",
+            "Database Systems (CS109)",
+            "Room 4",
+            "Dr. Salman Ahmed"
+          ],
+          [
+            "Monday",
+            "After 11:00 (15 min)",
+            "MANDATORY 15-MIN BREAK (After 2 Consecutive Hours)",
+            "\u2014",
+            "\u2014"
+          ],
+          [
+            "Tuesday",
+            "09:00 - 10:00",
+            "Database Systems (CS109)",
+            "Room 5",
+            "Dr. Salman Ahmed"
+          ],
+          [
+            "Tuesday",
+            "10:00 - 11:00",
+            "Database Systems (CS109)",
+            "Room 5",
+            "Dr. Salman Ahmed"
+          ],
+          [
+            "Tuesday",
+            "After 11:00 (15 min)",
+            "MANDATORY 15-MIN BREAK (After 2 Consecutive Hours)",
+            "\u2014",
+            "\u2014"
+          ],
+          [
+            "Monday\u2013Friday",
+            "12:00 - 14:00",
+            "LUNCH BREAK (Explicit Break Row)",
+            "\u2014",
+            "\u2014"
+          ]
+        ]
+      },
+      {
+        "student_group": "Group-CS110",
+        "total_weekly_hours": 3,
+        "headers": [
+          "Day",
+          "Time",
+          "Course / Break",
+          "Room",
+          "Teacher"
+        ],
+        "rows": [
+          [
+            "Wednesday",
+            "09:00 - 10:00",
+            "Data Warehousing (CS110)",
+            "Room 4",
+            "Dr. Salman Ahmed"
+          ],
+          [
+            "Thursday",
+            "09:00 - 10:00",
+            "Data Warehousing (CS110)",
+            "Room 1",
+            "Dr. Salman Ahmed"
+          ],
+          [
+            "Thursday",
+            "10:00 - 11:00",
+            "Data Warehousing (CS110)",
+            "Room 1",
+            "Dr. Salman Ahmed"
+          ],
+          [
+            "Thursday",
+            "After 11:00 (15 min)",
+            "MANDATORY 15-MIN BREAK (After 2 Consecutive Hours)",
+            "\u2014",
+            "\u2014"
+          ],
+          [
+            "Monday\u2013Friday",
+            "12:00 - 14:00",
+            "LUNCH BREAK (Explicit Break Row)",
+            "\u2014",
+            "\u2014"
+          ]
+        ]
+      },
+      {
+        "student_group": "Group-CS111",
+        "total_weekly_hours": 3,
+        "headers": [
+          "Day",
+          "Time",
+          "Course / Break",
+          "Room",
+          "Teacher"
+        ],
+        "rows": [
+          [
+            "Monday",
+            "09:00 - 10:00",
+            "Software Engineering (CS111)",
+            "Room 1",
+            "Lec. Zainab Tariq"
+          ],
+          [
+            "Tuesday",
+            "09:00 - 10:00",
+            "Software Engineering (CS111)",
+            "Room 3",
+            "Lec. Zainab Tariq"
+          ],
+          [
+            "Tuesday",
+            "10:00 - 11:00",
+            "Software Engineering (CS111)",
+            "Room 3",
+            "Lec. Zainab Tariq"
+          ],
+          [
+            "Tuesday",
+            "After 11:00 (15 min)",
+            "MANDATORY 15-MIN BREAK (After 2 Consecutive Hours)",
+            "\u2014",
+            "\u2014"
+          ],
+          [
+            "Monday\u2013Friday",
+            "12:00 - 14:00",
+            "LUNCH BREAK (Explicit Break Row)",
+            "\u2014",
+            "\u2014"
+          ]
+        ]
+      },
+      {
+        "student_group": "Group-CS112",
+        "total_weekly_hours": 2,
+        "headers": [
+          "Day",
+          "Time",
+          "Course / Break",
+          "Room",
+          "Teacher"
+        ],
+        "rows": [
+          [
+            "Wednesday",
+            "09:00 - 10:00",
+            "Technical & Business Writing (CS112)",
+            "Room 5",
+            "Lec. Zainab Tariq"
+          ],
+          [
+            "Wednesday",
+            "10:00 - 11:00",
+            "Technical & Business Writing (CS112)",
+            "Room 5",
+            "Lec. Zainab Tariq"
+          ],
+          [
+            "Wednesday",
+            "After 11:00 (15 min)",
+            "MANDATORY 15-MIN BREAK (After 2 Consecutive Hours)",
+            "\u2014",
+            "\u2014"
+          ],
+          [
+            "Monday\u2013Friday",
+            "12:00 - 14:00",
+            "LUNCH BREAK (Explicit Break Row)",
+            "\u2014",
+            "\u2014"
+          ]
+        ]
+      }
+    ]
+  },
+  "staff": {
+    "view_type": "staff",
+    "title": "Support, Maintenance & Security Staff View (Hourly Active Rooms & Load)",
+    "schedule_id": 1,
+    "generated_at": "2026-10-12T09:00:00+00:00",
+    "section_title": "AI 2024 - Section A",
+    "headers": [
+      "Day",
+      "Hour Window",
+      "Active Rooms Count",
+      "Activity Level",
+      "Rooms Active"
+    ],
+    "rows": [
+      [
+        "Monday",
+        "09:00 - 10:00",
+        "5",
+        "Busy",
+        "Room 1, Room 2, Room 3, Room 4, Room 5"
+      ],
+      [
+        "Monday",
+        "10:00 - 11:00",
+        "4",
+        "Busy",
+        "Room 2, Room 3, Room 4, Room 5"
+      ],
+      [
+        "Monday",
+        "11:00 - 12:00",
+        "0",
+        "Quiet",
+        "None"
+      ],
+      [
+        "Monday",
+        "12:00 - 14:00",
+        "0",
+        "Quiet (Lunch / Room Maintenance Window)",
+        "None (All rooms open for cleaning/AV check)"
+      ],
+      [
+        "Monday",
+        "14:00 - 15:00",
+        "0",
+        "Quiet",
+        "None"
+      ],
+      [
+        "Monday",
+        "15:00 - 16:00",
+        "0",
+        "Quiet",
+        "None"
+      ],
+      [
+        "Monday",
+        "16:00 - 17:00",
+        "0",
+        "Quiet",
+        "None"
+      ],
+      [
+        "Tuesday",
+        "09:00 - 10:00",
+        "5",
+        "Busy",
+        "Room 1, Room 2, Room 3, Room 4, Room 5"
+      ],
+      [
+        "Tuesday",
+        "10:00 - 11:00",
+        "5",
+        "Busy",
+        "Room 1, Room 2, Room 3, Room 4, Room 5"
+      ],
+      [
+        "Tuesday",
+        "11:00 - 12:00",
+        "0",
+        "Quiet",
+        "None"
+      ],
+      [
+        "Tuesday",
+        "12:00 - 14:00",
+        "0",
+        "Quiet (Lunch / Room Maintenance Window)",
+        "None (All rooms open for cleaning/AV check)"
+      ],
+      [
+        "Tuesday",
+        "14:00 - 15:00",
+        "0",
+        "Quiet",
+        "None"
+      ],
+      [
+        "Tuesday",
+        "15:00 - 16:00",
+        "0",
+        "Quiet",
+        "None"
+      ],
+      [
+        "Tuesday",
+        "16:00 - 17:00",
+        "0",
+        "Quiet",
+        "None"
+      ],
+      [
+        "Wednesday",
+        "09:00 - 10:00",
+        "5",
+        "Busy",
+        "Room 1, Room 2, Room 3, Room 4, Room 5"
+      ],
+      [
+        "Wednesday",
+        "10:00 - 11:00",
+        "4",
+        "Busy",
+        "Room 1, Room 2, Room 3, Room 5"
+      ],
+      [
+        "Wednesday",
+        "11:00 - 12:00",
+        "1",
+        "Moderate",
+        "Room 5"
+      ],
+      [
+        "Wednesday",
+        "12:00 - 14:00",
+        "0",
+        "Quiet (Lunch / Room Maintenance Window)",
+        "None (All rooms open for cleaning/AV check)"
+      ],
+      [
+        "Wednesday",
+        "14:00 - 15:00",
+        "0",
+        "Quiet",
+        "None"
+      ],
+      [
+        "Wednesday",
+        "15:00 - 16:00",
+        "0",
+        "Quiet",
+        "None"
+      ],
+      [
+        "Wednesday",
+        "16:00 - 17:00",
+        "0",
+        "Quiet",
+        "None"
+      ],
+      [
+        "Thursday",
+        "09:00 - 10:00",
+        "2",
+        "Moderate",
+        "Room 1, Room 2"
+      ],
+      [
+        "Thursday",
+        "10:00 - 11:00",
+        "2",
+        "Moderate",
+        "Room 1, Room 2"
+      ],
+      [
+        "Thursday",
+        "11:00 - 12:00",
+        "0",
+        "Quiet",
+        "None"
+      ],
+      [
+        "Thursday",
+        "12:00 - 14:00",
+        "0",
+        "Quiet (Lunch / Room Maintenance Window)",
+        "None (All rooms open for cleaning/AV check)"
+      ],
+      [
+        "Thursday",
+        "14:00 - 15:00",
+        "0",
+        "Quiet",
+        "None"
+      ],
+      [
+        "Thursday",
+        "15:00 - 16:00",
+        "0",
+        "Quiet",
+        "None"
+      ],
+      [
+        "Thursday",
+        "16:00 - 17:00",
+        "0",
+        "Quiet",
+        "None"
+      ],
+      [
+        "Friday",
+        "09:00 - 10:00",
+        "1",
+        "Moderate",
+        "Room 5"
+      ],
+      [
+        "Friday",
+        "10:00 - 11:00",
+        "1",
+        "Moderate",
+        "Room 5"
+      ],
+      [
+        "Friday",
+        "11:00 - 12:00",
+        "0",
+        "Quiet",
+        "None"
+      ],
+      [
+        "Friday",
+        "12:00 - 14:00",
+        "0",
+        "Quiet (Lunch / Room Maintenance Window)",
+        "None (All rooms open for cleaning/AV check)"
+      ],
+      [
+        "Friday",
+        "14:00 - 15:00",
+        "0",
+        "Quiet",
+        "None"
+      ],
+      [
+        "Friday",
+        "15:00 - 16:00",
+        "0",
+        "Quiet",
+        "None"
+      ],
+      [
+        "Friday",
+        "16:00 - 17:00",
+        "0",
+        "Quiet",
+        "None"
+      ]
+    ],
+    "sheet": {
+      "section_title": "AI 2024 - Section A",
+      "slot_headers": [
+        "",
+        "Slot 1",
+        "Slot 2",
+        "Slot 3",
+        "Slot 4",
+        "Slot 5",
+        "Slot 6",
+        "Slot 7",
+        "Slot 8",
+        "Slot 9"
+      ],
+      "time_headers": [
+        "Day/Time",
+        "0830-9020",
+        "0920-1010",
+        "1010-1100",
+        "1100-1150",
+        "1150-1240",
+        "1240-1330",
+        "1330-1420",
+        "1420-1510",
+        "1510-1600"
+      ],
+      "days": [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday"
+      ],
+      "day_cells": {
+        "Monday": [
+          "5 Active Room(s) [Busy]\nRoom 5, Room 3, Room 2, Room 4, Room 1",
+          "4 Active Room(s) [Busy]\nRoom 2, Room 5, Room 3, Room 4",
+          "",
+          "",
+          "0 Active Rooms\n[Quiet - Lunch Window]",
+          "0 Active Rooms\n[Quiet - Lunch Window]",
+          "",
+          "",
+          ""
+        ],
+        "Tuesday": [
+          "5 Active Room(s) [Busy]\nRoom 4, Room 1, Room 2, Room 5, Room 3",
+          "5 Active Room(s) [Busy]\nRoom 4, Room 1, Room 2, Room 5, Room 3",
+          "",
+          "",
+          "0 Active Rooms\n[Quiet - Lunch Window]",
+          "0 Active Rooms\n[Quiet - Lunch Window]",
+          "",
+          "",
+          ""
+        ],
+        "Wednesday": [
+          "5 Active Room(s) [Busy]\nRoom 1, Room 2, Room 3, Room 4, Room 5",
+          "4 Active Room(s) [Busy]\nRoom 1, Room 2, Room 3, Room 5",
+          "",
+          "1 Active Room(s) [Moderate]\nRoom 5",
+          "0 Active Rooms\n[Quiet - Lunch Window]",
+          "0 Active Rooms\n[Quiet - Lunch Window]",
+          "",
+          "",
+          ""
+        ],
+        "Thursday": [
+          "2 Active Room(s) [Moderate]\nRoom 2, Room 1",
+          "2 Active Room(s) [Moderate]\nRoom 2, Room 1",
+          "",
+          "",
+          "0 Active Rooms\n[Quiet - Lunch Window]",
+          "0 Active Rooms\n[Quiet - Lunch Window]",
+          "",
+          "",
+          ""
+        ],
+        "Friday": [
+          "1 Active Room(s) [Moderate]\nRoom 5",
+          "1 Active Room(s) [Moderate]\nRoom 5",
+          "",
+          "",
+          "0 Active Rooms\n[Quiet - Lunch Window]",
+          "0 Active Rooms\n[Quiet - Lunch Window]",
+          "",
+          "",
+          ""
+        ]
+      },
+      "merged_day_cells": {
+        "Monday": [
+          {
+            "text": "5 Active Room(s) [Busy]\nRoom 5, Room 3, Room 2, Room 4, Room 1",
+            "colSpan": 1,
+            "startSlot": 1
+          },
+          {
+            "text": "4 Active Room(s) [Busy]\nRoom 2, Room 5, Room 3, Room 4",
+            "colSpan": 1,
+            "startSlot": 2
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 3
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 4
+          },
+          {
+            "text": "0 Active Rooms\n[Quiet - Lunch Window]",
+            "colSpan": 2,
+            "startSlot": 5
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 7
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 8
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 9
+          }
+        ],
+        "Tuesday": [
+          {
+            "text": "5 Active Room(s) [Busy]\nRoom 4, Room 1, Room 2, Room 5, Room 3",
+            "colSpan": 2,
+            "startSlot": 1
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 3
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 4
+          },
+          {
+            "text": "0 Active Rooms\n[Quiet - Lunch Window]",
+            "colSpan": 2,
+            "startSlot": 5
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 7
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 8
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 9
+          }
+        ],
+        "Wednesday": [
+          {
+            "text": "5 Active Room(s) [Busy]\nRoom 1, Room 2, Room 3, Room 4, Room 5",
+            "colSpan": 1,
+            "startSlot": 1
+          },
+          {
+            "text": "4 Active Room(s) [Busy]\nRoom 1, Room 2, Room 3, Room 5",
+            "colSpan": 1,
+            "startSlot": 2
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 3
+          },
+          {
+            "text": "1 Active Room(s) [Moderate]\nRoom 5",
+            "colSpan": 1,
+            "startSlot": 4
+          },
+          {
+            "text": "0 Active Rooms\n[Quiet - Lunch Window]",
+            "colSpan": 2,
+            "startSlot": 5
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 7
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 8
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 9
+          }
+        ],
+        "Thursday": [
+          {
+            "text": "2 Active Room(s) [Moderate]\nRoom 2, Room 1",
+            "colSpan": 2,
+            "startSlot": 1
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 3
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 4
+          },
+          {
+            "text": "0 Active Rooms\n[Quiet - Lunch Window]",
+            "colSpan": 2,
+            "startSlot": 5
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 7
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 8
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 9
+          }
+        ],
+        "Friday": [
+          {
+            "text": "1 Active Room(s) [Moderate]\nRoom 5",
+            "colSpan": 2,
+            "startSlot": 1
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 3
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 4
+          },
+          {
+            "text": "0 Active Rooms\n[Quiet - Lunch Window]",
+            "colSpan": 2,
+            "startSlot": 5
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 7
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 8
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 9
+          }
+        ]
+      },
+      "course_legend": [
+        {
+          "serial": 1,
+          "course_code": "CS101",
+          "course_title": "Artificial Intelligence",
+          "credit_hours": 3,
+          "faculty_name": "Dr. Tariq Mehmood",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 5, Room 2",
+          "remarks": ""
+        },
+        {
+          "serial": 2,
+          "course_code": "CS102",
+          "course_title": "Machine Learning Fundamentals",
+          "credit_hours": 4,
+          "faculty_name": "Dr. Tariq Mehmood",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 2, Room 1",
+          "remarks": ""
+        },
+        {
+          "serial": 3,
+          "course_code": "CS103",
+          "course_title": "Computer Vision",
+          "credit_hours": 3,
+          "faculty_name": "Lec. Faria Sajjad",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 5",
+          "remarks": ""
+        },
+        {
+          "serial": 4,
+          "course_code": "CS104",
+          "course_title": "Digital Image Processing",
+          "credit_hours": 2,
+          "faculty_name": "Lec. Faria Sajjad",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 4",
+          "remarks": ""
+        },
+        {
+          "serial": 5,
+          "course_code": "CS105",
+          "course_title": "Operating Systems",
+          "credit_hours": 4,
+          "faculty_name": "Dr. Ayesha Siddiqui",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 3, Room 1",
+          "remarks": ""
+        },
+        {
+          "serial": 6,
+          "course_code": "CS106",
+          "course_title": "System Programming",
+          "credit_hours": 2,
+          "faculty_name": "Dr. Ayesha Siddiqui",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 2",
+          "remarks": ""
+        },
+        {
+          "serial": 7,
+          "course_code": "CS107",
+          "course_title": "Natural Language Processing",
+          "credit_hours": 3,
+          "faculty_name": "Lec. Hassan Raza",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 2",
+          "remarks": ""
+        },
+        {
+          "serial": 8,
+          "course_code": "CS108",
+          "course_title": "Information Retrieval",
+          "credit_hours": 2,
+          "faculty_name": "Lec. Hassan Raza",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 3",
+          "remarks": ""
+        },
+        {
+          "serial": 9,
+          "course_code": "CS109",
+          "course_title": "Database Systems",
+          "credit_hours": 4,
+          "faculty_name": "Dr. Salman Ahmed",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 4, Room 5",
+          "remarks": ""
+        },
+        {
+          "serial": 10,
+          "course_code": "CS110",
+          "course_title": "Data Warehousing",
+          "credit_hours": 3,
+          "faculty_name": "Dr. Salman Ahmed",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 1, Room 4",
+          "remarks": ""
+        },
+        {
+          "serial": 11,
+          "course_code": "CS111",
+          "course_title": "Software Engineering",
+          "credit_hours": 3,
+          "faculty_name": "Lec. Zainab Tariq",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 3, Room 1",
+          "remarks": ""
+        },
+        {
+          "serial": 12,
+          "course_code": "CS112",
+          "course_title": "Technical & Business Writing",
+          "credit_hours": 2,
+          "faculty_name": "Lec. Zainab Tariq",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 5",
+          "remarks": ""
+        }
+      ]
+    },
+    "metadata": {
+      "schedule_id": 1,
+      "generated_at": "2026-10-12T09:00:00+00:00",
+      "section_title": "AI 2024 - Section A",
+      "total_courses": 35,
+      "total_teachers": 6,
+      "fairness_score": 0.946,
+      "preference_satisfaction": 0.96,
+      "config": {
+        "days": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday"
+        ],
+        "day_start": "09:00",
+        "day_end": "17:00",
+        "slot_minutes": 60,
+        "lunch_start": "12:00",
+        "lunch_end": "14:00",
+        "break_minutes": 15,
+        "min_gap_minutes": 30,
+        "max_teaching_hours_per_day": 6,
+        "rooms": [
+          "Room 1",
+          "Room 2",
+          "Room 3",
+          "Room 4",
+          "Room 5"
+        ]
+      }
+    }
+  },
+  "canteen": {
+    "view_type": "canteen",
+    "title": "Canteen & Dining Demand View (Hourly Estimated Diners & Rush Windows)",
+    "schedule_id": 1,
+    "generated_at": "2026-10-12T09:00:00+00:00",
+    "section_title": "AI 2024 - Section A",
+    "headers": [
+      "Day",
+      "Hour Window",
+      "Classes in Session",
+      "Expected Diners (Estimate)",
+      "Demand Window Status"
+    ],
+    "rows": [
+      [
+        "Monday",
+        "09:00 - 10:00",
+        "5 group(s) (175 students in class, Estimate)",
+        "~61 diners (Estimate)",
+        "Moderate Beverage/Snack Demand"
+      ],
+      [
+        "Monday",
+        "10:00 - 11:00",
+        "4 group(s) (140 students in class, Estimate)",
+        "~49 diners (Estimate)",
+        "Moderate Beverage/Snack Demand"
+      ],
+      [
+        "Monday",
+        "11:00 - 12:00",
+        "0 group(s) (0 students in class, Estimate)",
+        "~15 diners (Estimate)",
+        "Pre-Lunch Prep Rush"
+      ],
+      [
+        "Monday",
+        "12:00 - 14:00 (LUNCH BREAK)",
+        "0 (Protected Lunch Window)",
+        "~210 diners (Estimate)",
+        "PEAK RUSH WINDOW \u2014 All Counters Open"
+      ],
+      [
+        "Monday",
+        "14:00 - 15:00",
+        "0 group(s) (0 students in class, Estimate)",
+        "~15 diners (Estimate)",
+        "Low / Quiet Window"
+      ],
+      [
+        "Monday",
+        "15:00 - 16:00",
+        "0 group(s) (0 students in class, Estimate)",
+        "~15 diners (Estimate)",
+        "Low / Quiet Window"
+      ],
+      [
+        "Monday",
+        "16:00 - 17:00",
+        "0 group(s) (0 students in class, Estimate)",
+        "~15 diners (Estimate)",
+        "Low / Quiet Window"
+      ],
+      [
+        "Tuesday",
+        "09:00 - 10:00",
+        "5 group(s) (175 students in class, Estimate)",
+        "~61 diners (Estimate)",
+        "Moderate Beverage/Snack Demand"
+      ],
+      [
+        "Tuesday",
+        "10:00 - 11:00",
+        "5 group(s) (175 students in class, Estimate)",
+        "~61 diners (Estimate)",
+        "Moderate Beverage/Snack Demand"
+      ],
+      [
+        "Tuesday",
+        "11:00 - 12:00",
+        "0 group(s) (0 students in class, Estimate)",
+        "~15 diners (Estimate)",
+        "Pre-Lunch Prep Rush"
+      ],
+      [
+        "Tuesday",
+        "12:00 - 14:00 (LUNCH BREAK)",
+        "0 (Protected Lunch Window)",
+        "~175 diners (Estimate)",
+        "PEAK RUSH WINDOW \u2014 All Counters Open"
+      ],
+      [
+        "Tuesday",
+        "14:00 - 15:00",
+        "0 group(s) (0 students in class, Estimate)",
+        "~15 diners (Estimate)",
+        "Low / Quiet Window"
+      ],
+      [
+        "Tuesday",
+        "15:00 - 16:00",
+        "0 group(s) (0 students in class, Estimate)",
+        "~15 diners (Estimate)",
+        "Low / Quiet Window"
+      ],
+      [
+        "Tuesday",
+        "16:00 - 17:00",
+        "0 group(s) (0 students in class, Estimate)",
+        "~15 diners (Estimate)",
+        "Low / Quiet Window"
+      ],
+      [
+        "Wednesday",
+        "09:00 - 10:00",
+        "5 group(s) (175 students in class, Estimate)",
+        "~61 diners (Estimate)",
+        "Moderate Beverage/Snack Demand"
+      ],
+      [
+        "Wednesday",
+        "10:00 - 11:00",
+        "4 group(s) (140 students in class, Estimate)",
+        "~49 diners (Estimate)",
+        "Moderate Beverage/Snack Demand"
+      ],
+      [
+        "Wednesday",
+        "11:00 - 12:00",
+        "1 group(s) (35 students in class, Estimate)",
+        "~12 diners (Estimate)",
+        "Pre-Lunch Prep Rush"
+      ],
+      [
+        "Wednesday",
+        "12:00 - 14:00 (LUNCH BREAK)",
+        "0 (Protected Lunch Window)",
+        "~210 diners (Estimate)",
+        "PEAK RUSH WINDOW \u2014 All Counters Open"
+      ],
+      [
+        "Wednesday",
+        "14:00 - 15:00",
+        "0 group(s) (0 students in class, Estimate)",
+        "~15 diners (Estimate)",
+        "Low / Quiet Window"
+      ],
+      [
+        "Wednesday",
+        "15:00 - 16:00",
+        "0 group(s) (0 students in class, Estimate)",
+        "~15 diners (Estimate)",
+        "Low / Quiet Window"
+      ],
+      [
+        "Wednesday",
+        "16:00 - 17:00",
+        "0 group(s) (0 students in class, Estimate)",
+        "~15 diners (Estimate)",
+        "Low / Quiet Window"
+      ],
+      [
+        "Thursday",
+        "09:00 - 10:00",
+        "2 group(s) (70 students in class, Estimate)",
+        "~24 diners (Estimate)",
+        "Moderate Beverage/Snack Demand"
+      ],
+      [
+        "Thursday",
+        "10:00 - 11:00",
+        "2 group(s) (70 students in class, Estimate)",
+        "~24 diners (Estimate)",
+        "Moderate Beverage/Snack Demand"
+      ],
+      [
+        "Thursday",
+        "11:00 - 12:00",
+        "0 group(s) (0 students in class, Estimate)",
+        "~15 diners (Estimate)",
+        "Pre-Lunch Prep Rush"
+      ],
+      [
+        "Thursday",
+        "12:00 - 14:00 (LUNCH BREAK)",
+        "0 (Protected Lunch Window)",
+        "~70 diners (Estimate)",
+        "PEAK RUSH WINDOW \u2014 All Counters Open"
+      ],
+      [
+        "Thursday",
+        "14:00 - 15:00",
+        "0 group(s) (0 students in class, Estimate)",
+        "~15 diners (Estimate)",
+        "Low / Quiet Window"
+      ],
+      [
+        "Thursday",
+        "15:00 - 16:00",
+        "0 group(s) (0 students in class, Estimate)",
+        "~15 diners (Estimate)",
+        "Low / Quiet Window"
+      ],
+      [
+        "Thursday",
+        "16:00 - 17:00",
+        "0 group(s) (0 students in class, Estimate)",
+        "~15 diners (Estimate)",
+        "Low / Quiet Window"
+      ],
+      [
+        "Friday",
+        "09:00 - 10:00",
+        "1 group(s) (35 students in class, Estimate)",
+        "~12 diners (Estimate)",
+        "Moderate Beverage/Snack Demand"
+      ],
+      [
+        "Friday",
+        "10:00 - 11:00",
+        "1 group(s) (35 students in class, Estimate)",
+        "~12 diners (Estimate)",
+        "Moderate Beverage/Snack Demand"
+      ],
+      [
+        "Friday",
+        "11:00 - 12:00",
+        "0 group(s) (0 students in class, Estimate)",
+        "~15 diners (Estimate)",
+        "Pre-Lunch Prep Rush"
+      ],
+      [
+        "Friday",
+        "12:00 - 14:00 (LUNCH BREAK)",
+        "0 (Protected Lunch Window)",
+        "~40 diners (Estimate)",
+        "PEAK RUSH WINDOW \u2014 All Counters Open"
+      ],
+      [
+        "Friday",
+        "14:00 - 15:00",
+        "0 group(s) (0 students in class, Estimate)",
+        "~15 diners (Estimate)",
+        "Low / Quiet Window"
+      ],
+      [
+        "Friday",
+        "15:00 - 16:00",
+        "0 group(s) (0 students in class, Estimate)",
+        "~15 diners (Estimate)",
+        "Low / Quiet Window"
+      ],
+      [
+        "Friday",
+        "16:00 - 17:00",
+        "0 group(s) (0 students in class, Estimate)",
+        "~15 diners (Estimate)",
+        "Low / Quiet Window"
+      ]
+    ],
+    "sheet": {
+      "section_title": "AI 2024 - Section A",
+      "slot_headers": [
+        "",
+        "Slot 1",
+        "Slot 2",
+        "Slot 3",
+        "Slot 4",
+        "Slot 5",
+        "Slot 6",
+        "Slot 7",
+        "Slot 8",
+        "Slot 9"
+      ],
+      "time_headers": [
+        "Day/Time",
+        "0830-9020",
+        "0920-1010",
+        "1010-1100",
+        "1100-1150",
+        "1150-1240",
+        "1240-1330",
+        "1330-1420",
+        "1420-1510",
+        "1510-1600"
+      ],
+      "days": [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday"
+      ],
+      "day_cells": {
+        "Monday": [
+          "Est. 200 Students in Class\n(5 Groups Active - Estimate)",
+          "Est. 160 Students in Class\n(4 Groups Active - Estimate)",
+          "",
+          "",
+          "PEAK LUNCH RUSH\n(Est. 240+ Diners)",
+          "PEAK LUNCH RUSH\n(Est. 240+ Diners)",
+          "",
+          "",
+          ""
+        ],
+        "Tuesday": [
+          "Est. 200 Students in Class\n(5 Groups Active - Estimate)",
+          "Est. 200 Students in Class\n(5 Groups Active - Estimate)",
+          "",
+          "",
+          "PEAK LUNCH RUSH\n(Est. 240+ Diners)",
+          "PEAK LUNCH RUSH\n(Est. 240+ Diners)",
+          "",
+          "",
+          ""
+        ],
+        "Wednesday": [
+          "Est. 200 Students in Class\n(5 Groups Active - Estimate)",
+          "Est. 160 Students in Class\n(4 Groups Active - Estimate)",
+          "",
+          "Est. 40 Students in Class\n(1 Groups Active - Estimate)",
+          "PEAK LUNCH RUSH\n(Est. 240+ Diners)",
+          "PEAK LUNCH RUSH\n(Est. 240+ Diners)",
+          "",
+          "",
+          ""
+        ],
+        "Thursday": [
+          "Est. 80 Students in Class\n(2 Groups Active - Estimate)",
+          "Est. 80 Students in Class\n(2 Groups Active - Estimate)",
+          "",
+          "",
+          "PEAK LUNCH RUSH\n(Est. 240+ Diners)",
+          "PEAK LUNCH RUSH\n(Est. 240+ Diners)",
+          "",
+          "",
+          ""
+        ],
+        "Friday": [
+          "Est. 40 Students in Class\n(1 Groups Active - Estimate)",
+          "Est. 40 Students in Class\n(1 Groups Active - Estimate)",
+          "",
+          "",
+          "PEAK LUNCH RUSH\n(Est. 240+ Diners)",
+          "PEAK LUNCH RUSH\n(Est. 240+ Diners)",
+          "",
+          "",
+          ""
+        ]
+      },
+      "merged_day_cells": {
+        "Monday": [
+          {
+            "text": "Est. 200 Students in Class\n(5 Groups Active - Estimate)",
+            "colSpan": 1,
+            "startSlot": 1
+          },
+          {
+            "text": "Est. 160 Students in Class\n(4 Groups Active - Estimate)",
+            "colSpan": 1,
+            "startSlot": 2
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 3
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 4
+          },
+          {
+            "text": "PEAK LUNCH RUSH\n(Est. 240+ Diners)",
+            "colSpan": 2,
+            "startSlot": 5
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 7
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 8
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 9
+          }
+        ],
+        "Tuesday": [
+          {
+            "text": "Est. 200 Students in Class\n(5 Groups Active - Estimate)",
+            "colSpan": 2,
+            "startSlot": 1
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 3
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 4
+          },
+          {
+            "text": "PEAK LUNCH RUSH\n(Est. 240+ Diners)",
+            "colSpan": 2,
+            "startSlot": 5
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 7
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 8
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 9
+          }
+        ],
+        "Wednesday": [
+          {
+            "text": "Est. 200 Students in Class\n(5 Groups Active - Estimate)",
+            "colSpan": 1,
+            "startSlot": 1
+          },
+          {
+            "text": "Est. 160 Students in Class\n(4 Groups Active - Estimate)",
+            "colSpan": 1,
+            "startSlot": 2
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 3
+          },
+          {
+            "text": "Est. 40 Students in Class\n(1 Groups Active - Estimate)",
+            "colSpan": 1,
+            "startSlot": 4
+          },
+          {
+            "text": "PEAK LUNCH RUSH\n(Est. 240+ Diners)",
+            "colSpan": 2,
+            "startSlot": 5
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 7
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 8
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 9
+          }
+        ],
+        "Thursday": [
+          {
+            "text": "Est. 80 Students in Class\n(2 Groups Active - Estimate)",
+            "colSpan": 2,
+            "startSlot": 1
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 3
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 4
+          },
+          {
+            "text": "PEAK LUNCH RUSH\n(Est. 240+ Diners)",
+            "colSpan": 2,
+            "startSlot": 5
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 7
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 8
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 9
+          }
+        ],
+        "Friday": [
+          {
+            "text": "Est. 40 Students in Class\n(1 Groups Active - Estimate)",
+            "colSpan": 2,
+            "startSlot": 1
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 3
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 4
+          },
+          {
+            "text": "PEAK LUNCH RUSH\n(Est. 240+ Diners)",
+            "colSpan": 2,
+            "startSlot": 5
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 7
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 8
+          },
+          {
+            "text": "",
+            "colSpan": 1,
+            "startSlot": 9
+          }
+        ]
+      },
+      "course_legend": [
+        {
+          "serial": 1,
+          "course_code": "CS101",
+          "course_title": "Artificial Intelligence",
+          "credit_hours": 3,
+          "faculty_name": "Dr. Tariq Mehmood",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 5, Room 2",
+          "remarks": ""
+        },
+        {
+          "serial": 2,
+          "course_code": "CS102",
+          "course_title": "Machine Learning Fundamentals",
+          "credit_hours": 4,
+          "faculty_name": "Dr. Tariq Mehmood",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 2, Room 1",
+          "remarks": ""
+        },
+        {
+          "serial": 3,
+          "course_code": "CS103",
+          "course_title": "Computer Vision",
+          "credit_hours": 3,
+          "faculty_name": "Lec. Faria Sajjad",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 5",
+          "remarks": ""
+        },
+        {
+          "serial": 4,
+          "course_code": "CS104",
+          "course_title": "Digital Image Processing",
+          "credit_hours": 2,
+          "faculty_name": "Lec. Faria Sajjad",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 4",
+          "remarks": ""
+        },
+        {
+          "serial": 5,
+          "course_code": "CS105",
+          "course_title": "Operating Systems",
+          "credit_hours": 4,
+          "faculty_name": "Dr. Ayesha Siddiqui",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 3, Room 1",
+          "remarks": ""
+        },
+        {
+          "serial": 6,
+          "course_code": "CS106",
+          "course_title": "System Programming",
+          "credit_hours": 2,
+          "faculty_name": "Dr. Ayesha Siddiqui",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 2",
+          "remarks": ""
+        },
+        {
+          "serial": 7,
+          "course_code": "CS107",
+          "course_title": "Natural Language Processing",
+          "credit_hours": 3,
+          "faculty_name": "Lec. Hassan Raza",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 2",
+          "remarks": ""
+        },
+        {
+          "serial": 8,
+          "course_code": "CS108",
+          "course_title": "Information Retrieval",
+          "credit_hours": 2,
+          "faculty_name": "Lec. Hassan Raza",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 3",
+          "remarks": ""
+        },
+        {
+          "serial": 9,
+          "course_code": "CS109",
+          "course_title": "Database Systems",
+          "credit_hours": 4,
+          "faculty_name": "Dr. Salman Ahmed",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 4, Room 5",
+          "remarks": ""
+        },
+        {
+          "serial": 10,
+          "course_code": "CS110",
+          "course_title": "Data Warehousing",
+          "credit_hours": 3,
+          "faculty_name": "Dr. Salman Ahmed",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 1, Room 4",
+          "remarks": ""
+        },
+        {
+          "serial": 11,
+          "course_code": "CS111",
+          "course_title": "Software Engineering",
+          "credit_hours": 3,
+          "faculty_name": "Lec. Zainab Tariq",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 3, Room 1",
+          "remarks": ""
+        },
+        {
+          "serial": 12,
+          "course_code": "CS112",
+          "course_title": "Technical & Business Writing",
+          "credit_hours": 2,
+          "faculty_name": "Lec. Zainab Tariq",
+          "elective_compulsory": "Compulsory",
+          "venues": "Room 5",
+          "remarks": ""
+        }
+      ]
+    },
+    "metadata": {
+      "schedule_id": 1,
+      "generated_at": "2026-10-12T09:00:00+00:00",
+      "section_title": "AI 2024 - Section A",
+      "total_courses": 35,
+      "total_teachers": 6,
+      "fairness_score": 0.946,
+      "preference_satisfaction": 0.96,
+      "config": {
+        "days": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday"
+        ],
+        "day_start": "09:00",
+        "day_end": "17:00",
+        "slot_minutes": 60,
+        "lunch_start": "12:00",
+        "lunch_end": "14:00",
+        "break_minutes": 15,
+        "min_gap_minutes": 30,
+        "max_teaching_hours_per_day": 6,
+        "rooms": [
+          "Room 1",
+          "Room 2",
+          "Room 3",
+          "Room 4",
+          "Room 5"
+        ]
+      }
+    }
+  }
+}

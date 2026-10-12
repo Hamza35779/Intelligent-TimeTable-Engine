@@ -161,7 +161,8 @@ def test_csv_upload_endpoint():
         files={"file": ("courses.csv", csv_content.encode("utf-8"), "text/csv")},
     )
     assert resp.status_code == 201
-    assert len(resp.json()["schedule"]) == 2
+    # 3 credit hours + 4 credit hours = 7 contact hour slot entries
+    assert len(resp.json()["schedule"]) == 7
 
 
 def test_reschedule_scoping_and_unseated_slot_exclusion():
@@ -270,3 +271,149 @@ def test_exporter_xss_and_formula_injection_sanitization():
     assert csv_resp.status_code == 200
     csv_text = csv_resp.content.decode("utf-8")
     assert "'=CMD|' /C calc'!A0" in csv_text
+
+
+def test_chatbot_keyword_fallback_and_invalid_rejection():
+    """
+    Step 9 Chatbot Test:
+    - Keyword fallback parses "Give me teacher and student schedules in PDF and Excel"
+      into views=["teacher","student"], formats=["pdf","xlsx"].
+    - Invalid view or format is rejected (400 Bad Request).
+    """
+    msg_resp = client.post(
+        "/chat/message",
+        json={"message": "Give me teacher and student schedules in PDF and Excel"},
+    )
+    assert msg_resp.status_code == 200
+    data = msg_resp.json()
+    assert data["detected_views"] == ["teacher", "student"]
+    assert data["detected_formats"] == ["pdf", "xlsx"]
+    assert data["mode"] in ("keyword_fallback", "gemini")
+
+    # Reject invalid view in /chat/message
+    bad_msg = client.post(
+        "/chat/message",
+        json={"message": "Give me dean view in pdf"},
+    )
+    assert bad_msg.status_code == 400
+
+    # Reject invalid format in /chat/generate-schedules
+    bad_gen = client.post(
+        "/chat/generate-schedules",
+        json={"views": ["teacher"], "formats": ["docx"]},
+    )
+    assert bad_gen.status_code == 400
+
+
+def test_all_7_exports_size_and_content_validation():
+    """
+    Step 9 Export Test:
+    Each of the 7 formats produces a non-empty file > 100 bytes and containing
+    at least one known course name from the schedule (for text formats: CSV, JSON, HTML;
+    for XLSX, readable via openpyxl; for PDF/PNG/JPG, non-empty valid file header).
+    """
+    import io
+    from openpyxl import load_workbook
+
+    demo_resp = client.post("/demo/run")
+    assert demo_resp.status_code == 201
+    sched_id = demo_resp.json()["schedule_id"]
+    known_course = "Artificial Intelligence"
+
+    for fmt in ("csv", "xlsx", "pdf", "png", "jpg", "json", "html"):
+        resp = client.get(f"/export/{sched_id}?format={fmt}&view=master")
+        assert resp.status_code == 200
+        raw = resp.content
+        assert len(raw) > 100, f"Format {fmt} returned <= 100 bytes ({len(raw)})"
+
+        if fmt in ("csv", "json", "html"):
+            text = raw.decode("utf-8")
+            assert known_course in text, f"Known course '{known_course}' missing in {fmt} export"
+        elif fmt == "xlsx":
+            wb = load_workbook(io.BytesIO(raw))
+            assert "Metrics" in wb.sheetnames
+            all_cells_text = " ".join(
+                str(cell)
+                for sheet in wb.worksheets
+                for row in sheet.iter_rows(values_only=True)
+                for cell in row
+                if cell is not None
+            )
+            assert known_course in all_cells_text
+        elif fmt == "pdf":
+            assert raw.startswith(b"%PDF-")
+        elif fmt == "png":
+            assert raw.startswith(b"\x89PNG\r\n\x1a\n")
+        elif fmt == "jpg":
+            assert raw.startswith(b"\xff\xd8\xff")
+
+
+def test_end_to_end_demo_courses_workflow():
+    """
+    Step 9 API End-to-End Test:
+    upload demo_courses.csv -> generate -> fetch all 5 views -> export CSV and PDF -> submit 1 feedback row -> all succeed.
+    """
+    import os
+
+    repo_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    demo_csv_path = os.path.join(repo_root, "data", "demo_courses.csv")
+    with open(demo_csv_path, "rb") as f:
+        csv_bytes = f.read()
+
+    # 1. Upload demo_courses.csv -> generate
+    up_resp = client.post(
+        "/schedule/upload-csv",
+        files={"file": ("demo_courses.csv", csv_bytes, "text/csv")},
+    )
+    assert up_resp.status_code in (200, 201)
+    sched_id = up_resp.json()["schedule_id"]
+
+    # 2. Fetch all 5 views
+    views_resp = client.get(f"/schedule/{sched_id}/views")
+    assert views_resp.status_code == 200
+    views = views_resp.json()["views"]
+    for v_name in ("master", "teacher", "student", "staff", "canteen"):
+        assert v_name in views
+        assert views[v_name]["schedule_id"] == sched_id
+        assert "title" in views[v_name]
+        assert "generated_at" in views[v_name]
+
+    # 3. Export CSV and PDF
+    for fmt in ("csv", "pdf"):
+        exp_resp = client.get(f"/export/{sched_id}?format={fmt}&view=teacher")
+        assert exp_resp.status_code == 200
+        assert len(exp_resp.content) > 100
+
+    # 4. Submit 1 feedback row
+    fb_resp = client.post(
+        f"/feedback/{sched_id}",
+        json={
+            "teacher_id": 1,
+            "teacher_name": "Dr. Sarah Ahmed",
+            "satisfaction_score": 5,
+            "preferred_time": "Morning",
+            "workload_satisfaction": 5,
+            "comments": "Balanced schedule with protected lunch break.",
+        },
+    )
+    assert fb_resp.status_code in (200, 201)
+    assert fb_resp.json()["received"] is True
+
+
+def test_demo_seed_and_shared_fixtures(
+    client,
+    parsed_demo_schedule,
+    solved_demo_entries,
+    sample_schedule_payload,
+):
+    """Verify conftest.py fixtures and POST /demo/seed database fixture seeding."""
+    assert len(parsed_demo_schedule["courses"]) == 12
+    assert len(solved_demo_entries) == 35
+    assert "faculty" in sample_schedule_payload
+
+    seed_resp = client.post("/demo/seed")
+    assert seed_resp.status_code == 200
+    seed_data = seed_resp.json()
+    assert seed_data["schedule_id"] >= 1
+
+

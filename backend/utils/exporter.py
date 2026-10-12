@@ -2,6 +2,7 @@ import csv
 import html
 import io
 import json
+import textwrap
 from datetime import datetime, timezone
 from typing import List, Dict, Any, Tuple
 from openpyxl import Workbook
@@ -13,17 +14,14 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 from reportlab.lib import colors
 from PIL import Image, ImageDraw, ImageFont
-from utils.timetable_formatter import build_table_rows, build_university_sheet_data
+from utils.timetable_formatter import (
+    build_table_rows,
+    build_university_sheet_data,
+    VIEW_TITLES,
+)
 
 
-VIEW_TITLES = {
-    "master": "AI 2024 - Section A",
-    "teacher": "Faculty & Teacher Schedule View",
-    "student": "Student Cohort Schedule View",
-    "staff": "Support & Facilities Staff View",
-    "canteen": "Canteen & Dining Demand Schedule",
-}
-
+ALLOWED_EXPORT_VIEWS = ("master", "teacher", "student", "staff", "canteen")
 DANGEROUS_FORMULA_PREFIXES = ("=", "+", "-", "@", "\t", "\r")
 
 
@@ -35,6 +33,28 @@ def _sanitize_spreadsheet_cell(value: Any) -> str:
     return text
 
 
+def _wrap_and_truncate_cell_text(text: str, max_chars_per_line: int = 22, max_lines: int = 3) -> List[str]:
+    """
+    Wrap text to fit within cell width and truncate with an ellipsis (...) if it exceeds max_lines.
+    Prevents any text overflow in PNG/JPG image renders (Step 6).
+    """
+    raw_lines = [ln.strip() for ln in str(text or "").split("\n") if ln.strip()]
+    wrapped: List[str] = []
+    for raw in raw_lines:
+        chunks = textwrap.wrap(raw, width=max_chars_per_line) or [raw[:max_chars_per_line]]
+        wrapped.extend(chunks)
+
+    if len(wrapped) > max_lines:
+        kept = wrapped[:max_lines]
+        last = kept[-1]
+        if len(last) > max_chars_per_line - 3:
+            kept[-1] = last[: max_chars_per_line - 3] + "..."
+        else:
+            kept[-1] = last + "..."
+        return kept
+    return wrapped
+
+
 class TimetableExporter:
     def __init__(
         self,
@@ -44,15 +64,23 @@ class TimetableExporter:
     ):
         self.entries = entries
         self.metadata = metadata or {}
-        self.view_type = view_type if view_type in VIEW_TITLES else "master"
-        self.section_title = (
-            self.metadata.get("section_title")
-            or (VIEW_TITLES[self.view_type] if self.view_type != "master" else "AI 2024 - Section A")
+        v_clean = (view_type or "master").strip().lower()
+        if v_clean not in ALLOWED_EXPORT_VIEWS:
+            raise ValueError(
+                f"Invalid view '{view_type}'. Allowed views: {list(ALLOWED_EXPORT_VIEWS)}"
+            )
+        self.view_type = v_clean
+        self.schedule_id = self.metadata.get("schedule_id", 1)
+        self.generated_at = (
+            self.metadata.get("generated_at") or datetime.now(timezone.utc).isoformat()
         )
-        self.title = self.section_title
-        self.rows = build_table_rows(entries, view_type=self.view_type)
+        self.section_title = self.metadata.get("section_title") or "AI 2024 - Section A"
+        self.title = VIEW_TITLES.get(self.view_type, self.section_title)
+        self.rows = build_table_rows(
+            entries, view_type=self.view_type, section_title=self.section_title
+        )
         self.sheet = build_university_sheet_data(
-            entries, section_title=self.section_title, view_type=self.view_type
+            entries, view_type=self.view_type, section_title=self.section_title
         )
 
     def export(self, format_type: str) -> Tuple[bytes, str, str]:
@@ -84,7 +112,13 @@ class TimetableExporter:
     def _export_csv(self) -> bytes:
         buf = io.StringIO()
         writer = csv.writer(buf)
-        writer.writerow([_sanitize_spreadsheet_cell(self.section_title)])
+        writer.writerow(
+            [
+                _sanitize_spreadsheet_cell(self.title),
+                f"Schedule ID: {self.schedule_id}",
+                f"Generated At: {self.generated_at}",
+            ]
+        )
         sanitized_rows = [
             [_sanitize_spreadsheet_cell(cell) for cell in row] for row in self.rows
         ]
@@ -117,11 +151,7 @@ class TimetableExporter:
             )
         return buf.getvalue().encode("utf-8")
 
-    def _export_xlsx(self) -> bytes:
-        wb = Workbook()
-        ws = wb.active
-        ws.title = self.section_title[:31]
-
+    def _populate_view_worksheet(self, ws, v_type: str):
         black_border = Border(
             left=Side(style="thin", color="000000"),
             right=Side(style="thin", color="000000"),
@@ -131,71 +161,42 @@ class TimetableExporter:
         blue_fill = PatternFill(start_color="2E75B6", end_color="2E75B6", fill_type="solid")
         center_align = Alignment(horizontal="center", vertical="center", wrap_text=True)
 
-        # Row 1: Blue Section Banner merged across columns A..J (10 columns)
-        ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=10)
-        for col_idx in range(1, 11):
+        v_rows = build_table_rows(
+            self.entries, view_type=v_type, section_title=self.section_title
+        )
+        v_sheet = build_university_sheet_data(
+            self.entries, view_type=v_type, section_title=self.section_title
+        )
+        v_title = f"{VIEW_TITLES.get(v_type, self.section_title)} (Schedule #{self.schedule_id})"
+
+        num_cols = max(10, len(v_rows[0]) if v_rows else 6)
+        ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=num_cols)
+        for col_idx in range(1, num_cols + 1):
             c = ws.cell(row=1, column=col_idx)
             c.fill = blue_fill
             c.border = black_border
-        banner_cell = ws.cell(row=1, column=1, value=_sanitize_spreadsheet_cell(self.section_title))
-        banner_cell.font = Font(name="Calibri", color="FFFFFF", bold=True, size=12)
-        banner_cell.alignment = center_align
+        banner = ws.cell(row=1, column=1, value=_sanitize_spreadsheet_cell(v_title))
+        banner.font = Font(name="Calibri", color="FFFFFF", bold=True, size=11)
+        banner.alignment = center_align
         ws.row_dimensions[1].height = 24
 
-        # Row 2: Slot 1 .. Slot 9
-        for col_idx, val in enumerate(self.sheet["slot_headers"], start=1):
-            c = ws.cell(row=2, column=col_idx, value=_sanitize_spreadsheet_cell(val))
-            c.font = Font(name="Calibri", bold=True, size=10)
-            c.alignment = center_align
-            c.border = black_border
-        ws.row_dimensions[2].height = 20
-
-        # Row 3: Day/Time | 0830-9020 .. 1510-1600
-        for col_idx, val in enumerate(self.sheet["time_headers"], start=1):
-            c = ws.cell(row=3, column=col_idx, value=_sanitize_spreadsheet_cell(val))
-            c.font = Font(name="Calibri", bold=True, size=10)
-            c.alignment = center_align
-            c.border = black_border
-        ws.row_dimensions[3].height = 20
-
-        # Rows 4..8: Days with merged horizontal spans
-        current_row = 4
-        for day in self.sheet["days"]:
-            day_cell = ws.cell(row=current_row, column=1, value=_sanitize_spreadsheet_cell(day))
-            day_cell.font = Font(name="Calibri", bold=True, size=10)
-            day_cell.alignment = center_align
-            day_cell.border = black_border
-
-            spans = self.sheet["merged_day_cells"].get(day, [])
-            for span in spans:
-                start_col = span["startSlot"] + 1  # Slot 1 is column 2
-                end_col = start_col + span["colSpan"] - 1
-                if end_col > start_col:
-                    ws.merge_cells(
-                        start_row=current_row,
-                        start_column=start_col,
-                        end_row=current_row,
-                        end_column=end_col,
-                    )
-                for col_i in range(start_col, end_col + 1):
-                    c = ws.cell(row=current_row, column=col_i)
-                    c.border = black_border
-                    c.alignment = center_align
-                top_cell = ws.cell(
+        current_row = 2
+        for r_idx, row in enumerate(v_rows):
+            for c_idx, val in enumerate(row, start=1):
+                c = ws.cell(
                     row=current_row,
-                    column=start_col,
-                    value=_sanitize_spreadsheet_cell(span["text"]),
+                    column=c_idx,
+                    value=_sanitize_spreadsheet_cell(val),
                 )
-                top_cell.font = Font(name="Calibri", size=10)
-                top_cell.alignment = center_align
-            ws.row_dimensions[current_row].height = 42
+                c.border = black_border
+                c.alignment = center_align
+                c.font = Font(name="Calibri", bold=(r_idx == 0 or c_idx == 1), size=10)
+            ws.row_dimensions[current_row].height = 24 if r_idx == 0 else 38
             current_row += 1
 
-        # Blank separator row
         current_row += 1
-
-        # Lower Table: Course & Faculty Summary Legend
-        legend_headers = [
+        # Append Course Legend table
+        leg_headers = [
             "Serial",
             "Course Code",
             "Course Titles",
@@ -205,30 +206,14 @@ class TimetableExporter:
             "Venues",
             "Remarks",
         ]
-        # Map 8 legend columns neatly across the 10-column sheet (Course Titles spans C..D, Name of Faculty spans F..G)
-        legend_col_spans = [
-            (1, 1),   # Serial
-            (2, 2),   # Course Code
-            (3, 4),   # Course Titles
-            (5, 5),   # CHs
-            (6, 7),   # Name of Faculty
-            (8, 8),   # Elective / Compulsory
-            (9, 9),   # Venues
-            (10, 10), # Remarks
-        ]
-        for h_val, (sc, ec) in zip(legend_headers, legend_col_spans):
-            if ec > sc:
-                ws.merge_cells(start_row=current_row, start_column=sc, end_row=current_row, end_column=ec)
-            for col_i in range(sc, ec + 1):
-                c = ws.cell(row=current_row, column=col_i)
-                c.border = black_border
-                c.alignment = center_align
-            hc = ws.cell(row=current_row, column=sc, value=h_val)
+        for c_idx, h_val in enumerate(leg_headers, start=1):
+            hc = ws.cell(row=current_row, column=c_idx, value=h_val)
             hc.font = Font(name="Calibri", bold=True, size=10)
-        ws.row_dimensions[current_row].height = 24
+            hc.border = black_border
+            hc.alignment = center_align
         current_row += 1
 
-        for c_row in self.sheet["course_legend"]:
+        for c_row in v_sheet["course_legend"]:
             vals = [
                 c_row["serial"],
                 c_row["course_code"],
@@ -239,27 +224,60 @@ class TimetableExporter:
                 c_row["venues"],
                 c_row["remarks"],
             ]
-            for val, (sc, ec) in zip(vals, legend_col_spans):
-                if ec > sc:
-                    ws.merge_cells(start_row=current_row, start_column=sc, end_row=current_row, end_column=ec)
-                for col_i in range(sc, ec + 1):
-                    c = ws.cell(row=current_row, column=col_i)
-                    c.border = black_border
-                    c.alignment = center_align
-                vc = ws.cell(row=current_row, column=sc, value=_sanitize_spreadsheet_cell(val))
+            for c_idx, val in enumerate(vals, start=1):
+                vc = ws.cell(
+                    row=current_row,
+                    column=c_idx,
+                    value=_sanitize_spreadsheet_cell(val),
+                )
                 vc.font = Font(name="Calibri", size=10)
-            ws.row_dimensions[current_row].height = 22
+                vc.border = black_border
+                vc.alignment = center_align
             current_row += 1
 
-        for col_idx in range(1, 11):
-            col_letter = get_column_letter(col_idx)
-            ws.column_dimensions[col_letter].width = 16 if col_idx > 1 else 15
+        for col_idx in range(1, num_cols + 1):
+            ws.column_dimensions[get_column_letter(col_idx)].width = 20
+
+    def _export_xlsx(self) -> bytes:
+        """
+        Step 6 XLSX rule:
+        One sheet per view (with the requested view placed first), plus a Metrics sheet.
+        """
+        wb = Workbook()
+        ordered_views = [self.view_type] + [
+            v for v in ALLOWED_EXPORT_VIEWS if v != self.view_type
+        ]
+
+        for idx, v_type in enumerate(ordered_views):
+            sheet_title = f"{v_type.capitalize()} View"
+            ws = wb.active if idx == 0 else wb.create_sheet(sheet_title)
+            ws.title = sheet_title
+            self._populate_view_worksheet(ws, v_type)
+
+        ws_meta = wb.create_sheet("Metrics")
+        ws_meta.append(["Metric", "Value"])
+        ws_meta.append(["Schedule ID", self.schedule_id])
+        ws_meta.append(["Generated Timestamp", self.generated_at])
+        ws_meta.append(["Primary Requested View", self.title])
+        ws_meta.append(["Fairness Score", self.metadata.get("fairness_score", 0.92)])
+        ws_meta.append(
+            ["Preference Satisfaction", self.metadata.get("preference_satisfaction", 0.88)]
+        )
+        ws_meta.append(
+            ["Total Scheduled Hours", self.metadata.get("total_courses", len(self.entries))]
+        )
+        ws_meta.append(["Total Teachers", self.metadata.get("total_teachers", 6)])
 
         out = io.BytesIO()
         wb.save(out)
         return out.getvalue()
 
     def _export_pdf(self) -> bytes:
+        """
+        Step 6 PDF rule:
+        Landscape A4, header with schedule ID, view title, and timestamp, rendering
+        the requested view's table and course summary legend.
+        """
         buf = io.BytesIO()
         doc = SimpleDocTemplate(
             buf,
@@ -270,65 +288,85 @@ class TimetableExporter:
             bottomMargin=20,
         )
         elements = []
+        styles = getSampleStyleSheet()
+        header_style = ParagraphStyle(
+            "PDFHeader",
+            parent=styles["Heading2"],
+            fontName="Helvetica-Bold",
+            fontSize=12,
+            textColor=colors.HexColor("#1F4E78"),
+            alignment=1,
+            spaceAfter=4,
+        )
+        sub_style = ParagraphStyle(
+            "PDFSubHeader",
+            parent=styles["Normal"],
+            fontName="Helvetica",
+            fontSize=8.5,
+            textColor=colors.HexColor("#334155"),
+            alignment=1,
+            spaceAfter=10,
+        )
         cell_style = ParagraphStyle(
             "CellText",
             fontName="Helvetica",
-            fontSize=8,
-            leading=10,
+            fontSize=7.5,
+            leading=9.5,
             alignment=1,
         )
         bold_style = ParagraphStyle(
             "CellBold",
             fontName="Helvetica-Bold",
-            fontSize=8.5,
+            fontSize=8,
             leading=10,
             alignment=1,
         )
-        banner_style = ParagraphStyle(
-            "BannerText",
-            fontName="Helvetica-Bold",
-            fontSize=11,
-            leading=14,
-            textColor=colors.white,
-            alignment=1,
+
+        elements.append(
+            Paragraph(
+                f"{html.escape(self.title)} — Schedule #{self.schedule_id}",
+                header_style,
+            )
+        )
+        elements.append(
+            Paragraph(
+                f"Generated At: {html.escape(str(self.generated_at))} | View: {html.escape(self.view_type.upper())}",
+                sub_style,
+            )
         )
 
-        # Build Upper Table (Banner + Slot Headers + Time Headers + Days)
-        upper_data = []
-        upper_data.append([Paragraph(html.escape(self.section_title), banner_style)] + [""] * 9)
-        upper_data.append([Paragraph(html.escape(s), bold_style) for s in self.sheet["slot_headers"]])
-        upper_data.append([Paragraph(html.escape(t), bold_style) for t in self.sheet["time_headers"]])
+        # Render the requested view's table rows
+        num_cols = len(self.rows[0]) if self.rows else 6
+        avail_w = 10.6 * inch
+        col_widths = [avail_w / num_cols] * num_cols
 
-        upper_styles = [
-            ("SPAN", (0, 0), (9, 0)),
-            ("BACKGROUND", (0, 0), (9, 0), colors.HexColor("#2E75B6")),
-            ("TEXTCOLOR", (0, 0), (9, 0), colors.white),
-            ("ALIGN", (0, 0), (-1, -1), "CENTER"),
-            ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-            ("GRID", (0, 0), (-1, -1), 0.75, colors.black),
-            ("BACKGROUND", (0, 1), (-1, -1), colors.white),
-        ]
+        pdf_table_data = []
+        for r_idx, row in enumerate(self.rows):
+            st = bold_style if r_idx == 0 else cell_style
+            pdf_table_data.append(
+                [
+                    Paragraph(html.escape(str(c)).replace("\n", "<br/>"), st)
+                    for c in row
+                ]
+            )
 
-        for d_idx, day in enumerate(self.sheet["days"]):
-            r_idx = 3 + d_idx
-            row_cells = [Paragraph(html.escape(day), bold_style)] + [""] * 9
-            spans = self.sheet["merged_day_cells"].get(day, [])
-            for sp in spans:
-                sc = sp["startSlot"]
-                ec = sc + sp["colSpan"] - 1
-                txt_html = html.escape(sp["text"]).replace("\n", "<br/>")
-                row_cells[sc] = Paragraph(txt_html, cell_style)
-                if ec > sc:
-                    upper_styles.append(("SPAN", (sc, r_idx), (ec, r_idx)))
-            upper_data.append(row_cells)
+        view_table = Table(pdf_table_data, colWidths=col_widths, repeatRows=1)
+        view_table.setStyle(
+            TableStyle(
+                [
+                    ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#2E75B6")),
+                    ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                    ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+                    ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                    ("GRID", (0, 0), (-1, -1), 0.6, colors.black),
+                    ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#F8FAFC")]),
+                ]
+            )
+        )
+        elements.append(view_table)
+        elements.append(Spacer(1, 12))
 
-        col_widths = [1.05 * inch] + [1.06 * inch] * 9
-        upper_table = Table(upper_data, colWidths=col_widths)
-        upper_table.setStyle(TableStyle(upper_styles))
-        elements.append(upper_table)
-        elements.append(Spacer(1, 14))
-
-        # Lower Table: 8-Column Course Legend
+        # Course Summary Legend
         legend_headers = [
             "Serial",
             "Course Code",
@@ -353,7 +391,6 @@ class TimetableExporter:
                     Paragraph(html.escape(str(c_row["remarks"])), cell_style),
                 ]
             )
-
         lower_col_widths = [
             0.6 * inch,
             1.0 * inch,
@@ -370,7 +407,7 @@ class TimetableExporter:
                 [
                     ("ALIGN", (0, 0), (-1, -1), "CENTER"),
                     ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-                    ("GRID", (0, 0), (-1, -1), 0.75, colors.black),
+                    ("GRID", (0, 0), (-1, -1), 0.6, colors.black),
                     ("BACKGROUND", (0, 0), (-1, -1), colors.white),
                 ]
             )
@@ -381,120 +418,64 @@ class TimetableExporter:
         return buf.getvalue()
 
     def _export_image(self, ext: str = "png") -> bytes:
+        """
+        Step 6 PNG/JPG rule:
+        Text must not overflow cells. Wrap or truncate with an ellipsis (...).
+        """
         margin = 20
-        col_w = 135
-        total_w = col_w * 10
-        banner_h = 34
-        hdr_h = 28
-        day_h = 64
-        gap_h = 26
-        leg_row_h = 30
+        num_cols = max(1, len(self.rows[0]) if self.rows else 6)
+        col_w = 175
+        total_w = col_w * num_cols
+        banner_h = 38
+        row_h = 62
 
-        num_days = len(self.sheet["days"])
-        num_legend_rows = len(self.sheet["course_legend"]) + 1
+        num_rows = len(self.rows)
         img_w = total_w + margin * 2
-        img_h = (
-            margin * 2
-            + banner_h
-            + hdr_h * 2
-            + num_days * day_h
-            + gap_h
-            + num_legend_rows * leg_row_h
-        )
+        img_h = margin * 2 + banner_h + num_rows * row_h
 
         img = Image.new("RGB", (img_w, img_h), color=(255, 255, 255))
         draw = ImageDraw.Draw(img)
         font = ImageFont.load_default()
 
-        def draw_centered_text(box: Tuple[int, int, int, int], text: str, fill=(0, 0, 0)):
+        def draw_fitted_cell(box: Tuple[int, int, int, int], text: str, fill=(0, 0, 0)):
             x0, y0, x1, y1 = box
-            lines = [line.strip() for line in str(text).split("\n") if line.strip()]
+            cell_width_px = max(40, x1 - x0 - 10)
+            max_chars = max(10, cell_width_px // 6)
+            lines = _wrap_and_truncate_cell_text(text, max_chars_per_line=max_chars, max_lines=3)
             if not lines:
                 return
             line_h = 14
             total_txt_h = len(lines) * line_h
             start_y = y0 + max(4, (y1 - y0 - total_txt_h) // 2)
-            for idx, line in enumerate(lines[:3]):
-                approx_w = len(line) * 6
-                start_x = x0 + max(4, (x1 - x0 - approx_w) // 2)
+            for idx, line in enumerate(lines):
+                approx_w = min(cell_width_px, len(line) * 6)
+                start_x = x0 + max(5, (x1 - x0 - approx_w) // 2)
                 draw.text((start_x, start_y + idx * line_h), line, fill=fill, font=font)
 
         y = margin
-        # 1. Blue Section Banner
+        # Header Banner with View Title, Schedule ID & Timestamp
         draw.rectangle(
             [(margin, y), (margin + total_w, y + banner_h)],
             fill=(46, 117, 182),
             outline=(0, 0, 0),
             width=1,
         )
-        draw_centered_text((margin, y, margin + total_w, y + banner_h), self.section_title, fill=(255, 255, 255))
+        banner_txt = f"{self.title} | Schedule #{self.schedule_id} | {self.generated_at[:19]}"
+        draw_fitted_cell((margin, y, margin + total_w, y + banner_h), banner_txt, fill=(255, 255, 255))
         y += banner_h
 
-        # 2. Slot Headers
-        for c_idx, val in enumerate(self.sheet["slot_headers"]):
-            x0 = margin + c_idx * col_w
-            draw.rectangle([(x0, y), (x0 + col_w, y + hdr_h)], fill=(255, 255, 255), outline=(0, 0, 0), width=1)
-            draw_centered_text((x0, y, x0 + col_w, y + hdr_h), val)
-        y += hdr_h
-
-        # 3. Time Headers
-        for c_idx, val in enumerate(self.sheet["time_headers"]):
-            x0 = margin + c_idx * col_w
-            draw.rectangle([(x0, y), (x0 + col_w, y + hdr_h)], fill=(255, 255, 255), outline=(0, 0, 0), width=1)
-            draw_centered_text((x0, y, x0 + col_w, y + hdr_h), val)
-        y += hdr_h
-
-        # 4. Day Rows with merged cells
-        for day in self.sheet["days"]:
-            draw.rectangle([(margin, y), (margin + col_w, y + day_h)], fill=(255, 255, 255), outline=(0, 0, 0), width=1)
-            draw_centered_text((margin, y, margin + col_w, y + day_h), day)
-
-            spans = self.sheet["merged_day_cells"].get(day, [])
-            for sp in spans:
-                x0 = margin + sp["startSlot"] * col_w
-                w = sp["colSpan"] * col_w
-                draw.rectangle([(x0, y), (x0 + w, y + day_h)], fill=(255, 255, 255), outline=(0, 0, 0), width=1)
-                draw_centered_text((x0, y, x0 + w, y + day_h), sp["text"])
-            y += day_h
-
-        y += gap_h
-
-        # 5. Lower Table (8 columns across total_w)
-        leg_widths = [70, 120, 310, 70, 260, 190, 165, 165]
-        leg_headers = [
-            "Serial",
-            "Course Code",
-            "Course Titles",
-            "CHs",
-            "Name of Faculty",
-            "Elective / Compulsory",
-            "Venues",
-            "Remarks",
-        ]
-        cx = margin
-        for h_txt, lw in zip(leg_headers, leg_widths):
-            draw.rectangle([(cx, y), (cx + lw, y + leg_row_h)], fill=(255, 255, 255), outline=(0, 0, 0), width=1)
-            draw_centered_text((cx, y, cx + lw, y + leg_row_h), h_txt)
-            cx += lw
-        y += leg_row_h
-
-        for c_row in self.sheet["course_legend"]:
-            vals = [
-                c_row["serial"],
-                c_row["course_code"],
-                c_row["course_title"],
-                c_row["credit_hours"],
-                c_row["faculty_name"],
-                c_row["elective_compulsory"],
-                c_row["venues"],
-                c_row["remarks"],
-            ]
-            cx = margin
-            for val, lw in zip(vals, leg_widths):
-                draw.rectangle([(cx, y), (cx + lw, y + leg_row_h)], fill=(255, 255, 255), outline=(0, 0, 0), width=1)
-                draw_centered_text((cx, y, cx + lw, y + leg_row_h), str(val))
-                cx += lw
-            y += leg_row_h
+        for r_idx, row in enumerate(self.rows):
+            bg = (235, 243, 250) if r_idx == 0 else (255, 255, 255)
+            for c_idx, cell_val in enumerate(row):
+                x0 = margin + c_idx * col_w
+                draw.rectangle(
+                    [(x0, y), (x0 + col_w, y + row_h)],
+                    fill=bg,
+                    outline=(0, 0, 0),
+                    width=1,
+                )
+                draw_fitted_cell((x0, y, x0 + col_w, y + row_h), str(cell_val))
+            y += row_h
 
         buf = io.BytesIO()
         if ext == "jpg":
@@ -505,15 +486,18 @@ class TimetableExporter:
 
     def _export_json(self) -> bytes:
         payload = {
+            "schedule_id": self.schedule_id,
+            "generated_at": self.generated_at,
             "view_type": self.view_type,
             "title": self.title,
             "section_title": self.section_title,
             "metadata": {
-                "generated_at": datetime.now(timezone.utc).isoformat(),
+                "schedule_id": self.schedule_id,
+                "generated_at": self.generated_at,
                 "fairness_score": self.metadata.get("fairness_score", 0.92),
                 "preference_satisfaction": self.metadata.get("preference_satisfaction", 0.88),
                 "total_courses": self.metadata.get("total_courses", len(self.entries)),
-                "total_teachers": self.metadata.get("total_teachers", 5),
+                "total_teachers": self.metadata.get("total_teachers", 6),
             },
             "headers": self.rows[0] if self.rows else [],
             "table_rows": self.rows[1:] if len(self.rows) > 1 else [],
@@ -523,32 +507,36 @@ class TimetableExporter:
         return json.dumps(payload, indent=2).encode("utf-8")
 
     def _export_html(self) -> bytes:
-        safe_title = html.escape(self.section_title)
+        safe_title = html.escape(self.title)
+        safe_ts = html.escape(str(self.generated_at))
         html_lines = [
             "<!DOCTYPE html>",
             "<html><head><meta charset='UTF-8'>",
-            f"<title>{safe_title}</title>",
+            f"<title>{safe_title} - Schedule #{self.schedule_id}</title>",
             "<style>",
             "body { font-family: Calibri, 'Segoe UI', Arial, sans-serif; margin: 24px; background: #ffffff; color: #000000; }",
             "table { border-collapse: collapse; width: 100%; background: #ffffff; margin-bottom: 24px; }",
             "th, td { border: 1px solid #000000; padding: 8px 6px; text-align: center; vertical-align: middle; font-size: 13px; white-space: pre-line; }",
-            ".banner { background: #2E75B6; color: #ffffff; font-weight: 700; font-size: 16px; padding: 8px; }",
-            ".bold-cell { font-weight: 700; }",
+            ".banner { background: #2E75B6; color: #ffffff; font-weight: 700; font-size: 15px; padding: 8px; }",
+            ".bold-cell { font-weight: 700; background: #f1f5f9; }",
             "</style></head><body>",
             "<table>",
-            f"<thead><tr><th colspan='10' class='banner'>{safe_title}</th></tr>",
-            "<tr>" + "".join(f"<th class='bold-cell'>{html.escape(s)}</th>" for s in self.sheet["slot_headers"]) + "</tr>",
-            "<tr>" + "".join(f"<th class='bold-cell'>{html.escape(t)}</th>" for t in self.sheet["time_headers"]) + "</tr>",
-            "</thead><tbody>",
+            f"<thead><tr><th colspan='{len(self.rows[0]) if self.rows else 6}' class='banner'>{safe_title} (Schedule #{self.schedule_id} | {safe_ts})</th></tr>",
         ]
 
-        for day in self.sheet["days"]:
-            row_html = [f"<tr><td class='bold-cell'>{html.escape(day)}</td>"]
-            for sp in self.sheet["merged_day_cells"].get(day, []):
-                colspan = f" colspan='{sp['colSpan']}'" if sp["colSpan"] > 1 else ""
-                row_html.append(f"<td{colspan}>{html.escape(sp['text'])}</td>")
-            row_html.append("</tr>")
-            html_lines.append("".join(row_html))
+        for r_idx, row in enumerate(self.rows):
+            if r_idx == 0:
+                html_lines.append(
+                    "<tr>"
+                    + "".join(f"<th class='bold-cell'>{html.escape(str(c))}</th>" for c in row)
+                    + "</tr></thead><tbody>"
+                )
+            else:
+                html_lines.append(
+                    "<tr>"
+                    + "".join(f"<td>{html.escape(str(c))}</td>" for c in row)
+                    + "</tr>"
+                )
 
         html_lines.append("</tbody></table>")
 
@@ -576,3 +564,60 @@ class TimetableExporter:
             )
         html_lines.append("</tbody></table></body></html>")
         return "\n".join(html_lines).encode("utf-8")
+
+
+def export_to_csv(
+    entries: List[Dict[str, Any]],
+    view_type: str = "master",
+    metadata: Dict[str, Any] = None,
+) -> bytes:
+    exporter = TimetableExporter(entries=entries, metadata=metadata or {}, view_type=view_type)
+    return exporter.export("csv")[0]
+
+
+def export_to_excel(
+    entries: List[Dict[str, Any]],
+    metadata: Dict[str, Any] = None,
+    view_type: str = "master",
+) -> bytes:
+    exporter = TimetableExporter(entries=entries, metadata=metadata or {}, view_type=view_type)
+    return exporter.export("xlsx")[0]
+
+
+def export_to_pdf(
+    entries: List[Dict[str, Any]],
+    metadata: Dict[str, Any] = None,
+    view_type: str = "master",
+) -> bytes:
+    exporter = TimetableExporter(entries=entries, metadata=metadata or {}, view_type=view_type)
+    return exporter.export("pdf")[0]
+
+
+def export_to_image(
+    entries: List[Dict[str, Any]],
+    img_format: str = "PNG",
+    view_type: str = "master",
+    metadata: Dict[str, Any] = None,
+) -> bytes:
+    fmt = "jpg" if img_format.upper() in ("JPG", "JPEG") else "png"
+    exporter = TimetableExporter(entries=entries, metadata=metadata or {}, view_type=view_type)
+    return exporter.export(fmt)[0]
+
+
+def export_to_json(
+    entries: List[Dict[str, Any]],
+    metadata: Dict[str, Any] = None,
+    view_type: str = "master",
+) -> bytes:
+    exporter = TimetableExporter(entries=entries, metadata=metadata or {}, view_type=view_type)
+    return exporter.export("json")[0]
+
+
+def export_to_html(
+    entries: List[Dict[str, Any]],
+    metadata: Dict[str, Any] = None,
+    view_type: str = "master",
+) -> bytes:
+    exporter = TimetableExporter(entries=entries, metadata=metadata or {}, view_type=view_type)
+    return exporter.export("html")[0]
+

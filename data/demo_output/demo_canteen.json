@@ -1,0 +1,1206 @@
+{
+  "schedule_id": 1,
+  "generated_at": "2026-10-12T09:00:00+00:00",
+  "view_type": "canteen",
+  "title": "Canteen & Dining Demand View (Hourly Estimated Diners & Rush Windows)",
+  "section_title": "AI 2024 - Section A",
+  "metadata": {
+    "schedule_id": 1,
+    "generated_at": "2026-10-12T09:00:00+00:00",
+    "fairness_score": 0.946,
+    "preference_satisfaction": 0.96,
+    "total_courses": 35,
+    "total_teachers": 6
+  },
+  "headers": [
+    "Day",
+    "Hour Window",
+    "Classes in Session",
+    "Expected Diners (Estimate)",
+    "Demand Window Status"
+  ],
+  "table_rows": [
+    [
+      "Monday",
+      "09:00 - 10:00",
+      "5 group(s) (175 students in class, Estimate)",
+      "~61 diners (Estimate)",
+      "Moderate Beverage/Snack Demand"
+    ],
+    [
+      "Monday",
+      "10:00 - 11:00",
+      "4 group(s) (140 students in class, Estimate)",
+      "~49 diners (Estimate)",
+      "Moderate Beverage/Snack Demand"
+    ],
+    [
+      "Monday",
+      "11:00 - 12:00",
+      "0 group(s) (0 students in class, Estimate)",
+      "~15 diners (Estimate)",
+      "Pre-Lunch Prep Rush"
+    ],
+    [
+      "Monday",
+      "12:00 - 14:00 (LUNCH BREAK)",
+      "0 (Protected Lunch Window)",
+      "~210 diners (Estimate)",
+      "PEAK RUSH WINDOW \u2014 All Counters Open"
+    ],
+    [
+      "Monday",
+      "14:00 - 15:00",
+      "0 group(s) (0 students in class, Estimate)",
+      "~15 diners (Estimate)",
+      "Low / Quiet Window"
+    ],
+    [
+      "Monday",
+      "15:00 - 16:00",
+      "0 group(s) (0 students in class, Estimate)",
+      "~15 diners (Estimate)",
+      "Low / Quiet Window"
+    ],
+    [
+      "Monday",
+      "16:00 - 17:00",
+      "0 group(s) (0 students in class, Estimate)",
+      "~15 diners (Estimate)",
+      "Low / Quiet Window"
+    ],
+    [
+      "Tuesday",
+      "09:00 - 10:00",
+      "5 group(s) (175 students in class, Estimate)",
+      "~61 diners (Estimate)",
+      "Moderate Beverage/Snack Demand"
+    ],
+    [
+      "Tuesday",
+      "10:00 - 11:00",
+      "5 group(s) (175 students in class, Estimate)",
+      "~61 diners (Estimate)",
+      "Moderate Beverage/Snack Demand"
+    ],
+    [
+      "Tuesday",
+      "11:00 - 12:00",
+      "0 group(s) (0 students in class, Estimate)",
+      "~15 diners (Estimate)",
+      "Pre-Lunch Prep Rush"
+    ],
+    [
+      "Tuesday",
+      "12:00 - 14:00 (LUNCH BREAK)",
+      "0 (Protected Lunch Window)",
+      "~175 diners (Estimate)",
+      "PEAK RUSH WINDOW \u2014 All Counters Open"
+    ],
+    [
+      "Tuesday",
+      "14:00 - 15:00",
+      "0 group(s) (0 students in class, Estimate)",
+      "~15 diners (Estimate)",
+      "Low / Quiet Window"
+    ],
+    [
+      "Tuesday",
+      "15:00 - 16:00",
+      "0 group(s) (0 students in class, Estimate)",
+      "~15 diners (Estimate)",
+      "Low / Quiet Window"
+    ],
+    [
+      "Tuesday",
+      "16:00 - 17:00",
+      "0 group(s) (0 students in class, Estimate)",
+      "~15 diners (Estimate)",
+      "Low / Quiet Window"
+    ],
+    [
+      "Wednesday",
+      "09:00 - 10:00",
+      "5 group(s) (175 students in class, Estimate)",
+      "~61 diners (Estimate)",
+      "Moderate Beverage/Snack Demand"
+    ],
+    [
+      "Wednesday",
+      "10:00 - 11:00",
+      "4 group(s) (140 students in class, Estimate)",
+      "~49 diners (Estimate)",
+      "Moderate Beverage/Snack Demand"
+    ],
+    [
+      "Wednesday",
+      "11:00 - 12:00",
+      "1 group(s) (35 students in class, Estimate)",
+      "~12 diners (Estimate)",
+      "Pre-Lunch Prep Rush"
+    ],
+    [
+      "Wednesday",
+      "12:00 - 14:00 (LUNCH BREAK)",
+      "0 (Protected Lunch Window)",
+      "~210 diners (Estimate)",
+      "PEAK RUSH WINDOW \u2014 All Counters Open"
+    ],
+    [
+      "Wednesday",
+      "14:00 - 15:00",
+      "0 group(s) (0 students in class, Estimate)",
+      "~15 diners (Estimate)",
+      "Low / Quiet Window"
+    ],
+    [
+      "Wednesday",
+      "15:00 - 16:00",
+      "0 group(s) (0 students in class, Estimate)",
+      "~15 diners (Estimate)",
+      "Low / Quiet Window"
+    ],
+    [
+      "Wednesday",
+      "16:00 - 17:00",
+      "0 group(s) (0 students in class, Estimate)",
+      "~15 diners (Estimate)",
+      "Low / Quiet Window"
+    ],
+    [
+      "Thursday",
+      "09:00 - 10:00",
+      "2 group(s) (70 students in class, Estimate)",
+      "~24 diners (Estimate)",
+      "Moderate Beverage/Snack Demand"
+    ],
+    [
+      "Thursday",
+      "10:00 - 11:00",
+      "2 group(s) (70 students in class, Estimate)",
+      "~24 diners (Estimate)",
+      "Moderate Beverage/Snack Demand"
+    ],
+    [
+      "Thursday",
+      "11:00 - 12:00",
+      "0 group(s) (0 students in class, Estimate)",
+      "~15 diners (Estimate)",
+      "Pre-Lunch Prep Rush"
+    ],
+    [
+      "Thursday",
+      "12:00 - 14:00 (LUNCH BREAK)",
+      "0 (Protected Lunch Window)",
+      "~70 diners (Estimate)",
+      "PEAK RUSH WINDOW \u2014 All Counters Open"
+    ],
+    [
+      "Thursday",
+      "14:00 - 15:00",
+      "0 group(s) (0 students in class, Estimate)",
+      "~15 diners (Estimate)",
+      "Low / Quiet Window"
+    ],
+    [
+      "Thursday",
+      "15:00 - 16:00",
+      "0 group(s) (0 students in class, Estimate)",
+      "~15 diners (Estimate)",
+      "Low / Quiet Window"
+    ],
+    [
+      "Thursday",
+      "16:00 - 17:00",
+      "0 group(s) (0 students in class, Estimate)",
+      "~15 diners (Estimate)",
+      "Low / Quiet Window"
+    ],
+    [
+      "Friday",
+      "09:00 - 10:00",
+      "1 group(s) (35 students in class, Estimate)",
+      "~12 diners (Estimate)",
+      "Moderate Beverage/Snack Demand"
+    ],
+    [
+      "Friday",
+      "10:00 - 11:00",
+      "1 group(s) (35 students in class, Estimate)",
+      "~12 diners (Estimate)",
+      "Moderate Beverage/Snack Demand"
+    ],
+    [
+      "Friday",
+      "11:00 - 12:00",
+      "0 group(s) (0 students in class, Estimate)",
+      "~15 diners (Estimate)",
+      "Pre-Lunch Prep Rush"
+    ],
+    [
+      "Friday",
+      "12:00 - 14:00 (LUNCH BREAK)",
+      "0 (Protected Lunch Window)",
+      "~40 diners (Estimate)",
+      "PEAK RUSH WINDOW \u2014 All Counters Open"
+    ],
+    [
+      "Friday",
+      "14:00 - 15:00",
+      "0 group(s) (0 students in class, Estimate)",
+      "~15 diners (Estimate)",
+      "Low / Quiet Window"
+    ],
+    [
+      "Friday",
+      "15:00 - 16:00",
+      "0 group(s) (0 students in class, Estimate)",
+      "~15 diners (Estimate)",
+      "Low / Quiet Window"
+    ],
+    [
+      "Friday",
+      "16:00 - 17:00",
+      "0 group(s) (0 students in class, Estimate)",
+      "~15 diners (Estimate)",
+      "Low / Quiet Window"
+    ]
+  ],
+  "sheet": {
+    "section_title": "AI 2024 - Section A",
+    "slot_headers": [
+      "",
+      "Slot 1",
+      "Slot 2",
+      "Slot 3",
+      "Slot 4",
+      "Slot 5",
+      "Slot 6",
+      "Slot 7",
+      "Slot 8",
+      "Slot 9"
+    ],
+    "time_headers": [
+      "Day/Time",
+      "0830-9020",
+      "0920-1010",
+      "1010-1100",
+      "1100-1150",
+      "1150-1240",
+      "1240-1330",
+      "1330-1420",
+      "1420-1510",
+      "1510-1600"
+    ],
+    "days": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday"
+    ],
+    "day_cells": {
+      "Monday": [
+        "Est. 200 Students in Class\n(5 Groups Active - Estimate)",
+        "Est. 160 Students in Class\n(4 Groups Active - Estimate)",
+        "",
+        "",
+        "PEAK LUNCH RUSH\n(Est. 240+ Diners)",
+        "PEAK LUNCH RUSH\n(Est. 240+ Diners)",
+        "",
+        "",
+        ""
+      ],
+      "Tuesday": [
+        "Est. 200 Students in Class\n(5 Groups Active - Estimate)",
+        "Est. 200 Students in Class\n(5 Groups Active - Estimate)",
+        "",
+        "",
+        "PEAK LUNCH RUSH\n(Est. 240+ Diners)",
+        "PEAK LUNCH RUSH\n(Est. 240+ Diners)",
+        "",
+        "",
+        ""
+      ],
+      "Wednesday": [
+        "Est. 200 Students in Class\n(5 Groups Active - Estimate)",
+        "Est. 160 Students in Class\n(4 Groups Active - Estimate)",
+        "",
+        "Est. 40 Students in Class\n(1 Groups Active - Estimate)",
+        "PEAK LUNCH RUSH\n(Est. 240+ Diners)",
+        "PEAK LUNCH RUSH\n(Est. 240+ Diners)",
+        "",
+        "",
+        ""
+      ],
+      "Thursday": [
+        "Est. 80 Students in Class\n(2 Groups Active - Estimate)",
+        "Est. 80 Students in Class\n(2 Groups Active - Estimate)",
+        "",
+        "",
+        "PEAK LUNCH RUSH\n(Est. 240+ Diners)",
+        "PEAK LUNCH RUSH\n(Est. 240+ Diners)",
+        "",
+        "",
+        ""
+      ],
+      "Friday": [
+        "Est. 40 Students in Class\n(1 Groups Active - Estimate)",
+        "Est. 40 Students in Class\n(1 Groups Active - Estimate)",
+        "",
+        "",
+        "PEAK LUNCH RUSH\n(Est. 240+ Diners)",
+        "PEAK LUNCH RUSH\n(Est. 240+ Diners)",
+        "",
+        "",
+        ""
+      ]
+    },
+    "merged_day_cells": {
+      "Monday": [
+        {
+          "text": "Est. 200 Students in Class\n(5 Groups Active - Estimate)",
+          "colSpan": 1,
+          "startSlot": 1
+        },
+        {
+          "text": "Est. 160 Students in Class\n(4 Groups Active - Estimate)",
+          "colSpan": 1,
+          "startSlot": 2
+        },
+        {
+          "text": "",
+          "colSpan": 1,
+          "startSlot": 3
+        },
+        {
+          "text": "",
+          "colSpan": 1,
+          "startSlot": 4
+        },
+        {
+          "text": "PEAK LUNCH RUSH\n(Est. 240+ Diners)",
+          "colSpan": 2,
+          "startSlot": 5
+        },
+        {
+          "text": "",
+          "colSpan": 1,
+          "startSlot": 7
+        },
+        {
+          "text": "",
+          "colSpan": 1,
+          "startSlot": 8
+        },
+        {
+          "text": "",
+          "colSpan": 1,
+          "startSlot": 9
+        }
+      ],
+      "Tuesday": [
+        {
+          "text": "Est. 200 Students in Class\n(5 Groups Active - Estimate)",
+          "colSpan": 2,
+          "startSlot": 1
+        },
+        {
+          "text": "",
+          "colSpan": 1,
+          "startSlot": 3
+        },
+        {
+          "text": "",
+          "colSpan": 1,
+          "startSlot": 4
+        },
+        {
+          "text": "PEAK LUNCH RUSH\n(Est. 240+ Diners)",
+          "colSpan": 2,
+          "startSlot": 5
+        },
+        {
+          "text": "",
+          "colSpan": 1,
+          "startSlot": 7
+        },
+        {
+          "text": "",
+          "colSpan": 1,
+          "startSlot": 8
+        },
+        {
+          "text": "",
+          "colSpan": 1,
+          "startSlot": 9
+        }
+      ],
+      "Wednesday": [
+        {
+          "text": "Est. 200 Students in Class\n(5 Groups Active - Estimate)",
+          "colSpan": 1,
+          "startSlot": 1
+        },
+        {
+          "text": "Est. 160 Students in Class\n(4 Groups Active - Estimate)",
+          "colSpan": 1,
+          "startSlot": 2
+        },
+        {
+          "text": "",
+          "colSpan": 1,
+          "startSlot": 3
+        },
+        {
+          "text": "Est. 40 Students in Class\n(1 Groups Active - Estimate)",
+          "colSpan": 1,
+          "startSlot": 4
+        },
+        {
+          "text": "PEAK LUNCH RUSH\n(Est. 240+ Diners)",
+          "colSpan": 2,
+          "startSlot": 5
+        },
+        {
+          "text": "",
+          "colSpan": 1,
+          "startSlot": 7
+        },
+        {
+          "text": "",
+          "colSpan": 1,
+          "startSlot": 8
+        },
+        {
+          "text": "",
+          "colSpan": 1,
+          "startSlot": 9
+        }
+      ],
+      "Thursday": [
+        {
+          "text": "Est. 80 Students in Class\n(2 Groups Active - Estimate)",
+          "colSpan": 2,
+          "startSlot": 1
+        },
+        {
+          "text": "",
+          "colSpan": 1,
+          "startSlot": 3
+        },
+        {
+          "text": "",
+          "colSpan": 1,
+          "startSlot": 4
+        },
+        {
+          "text": "PEAK LUNCH RUSH\n(Est. 240+ Diners)",
+          "colSpan": 2,
+          "startSlot": 5
+        },
+        {
+          "text": "",
+          "colSpan": 1,
+          "startSlot": 7
+        },
+        {
+          "text": "",
+          "colSpan": 1,
+          "startSlot": 8
+        },
+        {
+          "text": "",
+          "colSpan": 1,
+          "startSlot": 9
+        }
+      ],
+      "Friday": [
+        {
+          "text": "Est. 40 Students in Class\n(1 Groups Active - Estimate)",
+          "colSpan": 2,
+          "startSlot": 1
+        },
+        {
+          "text": "",
+          "colSpan": 1,
+          "startSlot": 3
+        },
+        {
+          "text": "",
+          "colSpan": 1,
+          "startSlot": 4
+        },
+        {
+          "text": "PEAK LUNCH RUSH\n(Est. 240+ Diners)",
+          "colSpan": 2,
+          "startSlot": 5
+        },
+        {
+          "text": "",
+          "colSpan": 1,
+          "startSlot": 7
+        },
+        {
+          "text": "",
+          "colSpan": 1,
+          "startSlot": 8
+        },
+        {
+          "text": "",
+          "colSpan": 1,
+          "startSlot": 9
+        }
+      ]
+    },
+    "course_legend": [
+      {
+        "serial": 1,
+        "course_code": "CS101",
+        "course_title": "Artificial Intelligence",
+        "credit_hours": 3,
+        "faculty_name": "Dr. Tariq Mehmood",
+        "elective_compulsory": "Compulsory",
+        "venues": "Room 5, Room 2",
+        "remarks": ""
+      },
+      {
+        "serial": 2,
+        "course_code": "CS102",
+        "course_title": "Machine Learning Fundamentals",
+        "credit_hours": 4,
+        "faculty_name": "Dr. Tariq Mehmood",
+        "elective_compulsory": "Compulsory",
+        "venues": "Room 2, Room 1",
+        "remarks": ""
+      },
+      {
+        "serial": 3,
+        "course_code": "CS103",
+        "course_title": "Computer Vision",
+        "credit_hours": 3,
+        "faculty_name": "Lec. Faria Sajjad",
+        "elective_compulsory": "Compulsory",
+        "venues": "Room 5",
+        "remarks": ""
+      },
+      {
+        "serial": 4,
+        "course_code": "CS104",
+        "course_title": "Digital Image Processing",
+        "credit_hours": 2,
+        "faculty_name": "Lec. Faria Sajjad",
+        "elective_compulsory": "Compulsory",
+        "venues": "Room 4",
+        "remarks": ""
+      },
+      {
+        "serial": 5,
+        "course_code": "CS105",
+        "course_title": "Operating Systems",
+        "credit_hours": 4,
+        "faculty_name": "Dr. Ayesha Siddiqui",
+        "elective_compulsory": "Compulsory",
+        "venues": "Room 3, Room 1",
+        "remarks": ""
+      },
+      {
+        "serial": 6,
+        "course_code": "CS106",
+        "course_title": "System Programming",
+        "credit_hours": 2,
+        "faculty_name": "Dr. Ayesha Siddiqui",
+        "elective_compulsory": "Compulsory",
+        "venues": "Room 2",
+        "remarks": ""
+      },
+      {
+        "serial": 7,
+        "course_code": "CS107",
+        "course_title": "Natural Language Processing",
+        "credit_hours": 3,
+        "faculty_name": "Lec. Hassan Raza",
+        "elective_compulsory": "Compulsory",
+        "venues": "Room 2",
+        "remarks": ""
+      },
+      {
+        "serial": 8,
+        "course_code": "CS108",
+        "course_title": "Information Retrieval",
+        "credit_hours": 2,
+        "faculty_name": "Lec. Hassan Raza",
+        "elective_compulsory": "Compulsory",
+        "venues": "Room 3",
+        "remarks": ""
+      },
+      {
+        "serial": 9,
+        "course_code": "CS109",
+        "course_title": "Database Systems",
+        "credit_hours": 4,
+        "faculty_name": "Dr. Salman Ahmed",
+        "elective_compulsory": "Compulsory",
+        "venues": "Room 4, Room 5",
+        "remarks": ""
+      },
+      {
+        "serial": 10,
+        "course_code": "CS110",
+        "course_title": "Data Warehousing",
+        "credit_hours": 3,
+        "faculty_name": "Dr. Salman Ahmed",
+        "elective_compulsory": "Compulsory",
+        "venues": "Room 1, Room 4",
+        "remarks": ""
+      },
+      {
+        "serial": 11,
+        "course_code": "CS111",
+        "course_title": "Software Engineering",
+        "credit_hours": 3,
+        "faculty_name": "Lec. Zainab Tariq",
+        "elective_compulsory": "Compulsory",
+        "venues": "Room 3, Room 1",
+        "remarks": ""
+      },
+      {
+        "serial": 12,
+        "course_code": "CS112",
+        "course_title": "Technical & Business Writing",
+        "credit_hours": 2,
+        "faculty_name": "Lec. Zainab Tariq",
+        "elective_compulsory": "Compulsory",
+        "venues": "Room 5",
+        "remarks": ""
+      }
+    ]
+  },
+  "entries": [
+    {
+      "course_id": 1,
+      "course_name": "Artificial Intelligence",
+      "course_code": "CS101",
+      "faculty_id": 1,
+      "faculty_name": "Dr. Tariq Mehmood",
+      "venue_id": 5,
+      "venue_name": "Room 5",
+      "slot_id": 25,
+      "day_of_week": "Friday",
+      "start_time": "09:00",
+      "end_time": "10:00",
+      "student_group": "Group-CS101",
+      "credit_hours": 3
+    },
+    {
+      "course_id": 1,
+      "course_name": "Artificial Intelligence",
+      "course_code": "CS101",
+      "faculty_id": 1,
+      "faculty_name": "Dr. Tariq Mehmood",
+      "venue_id": 5,
+      "venue_name": "Room 5",
+      "slot_id": 26,
+      "day_of_week": "Friday",
+      "start_time": "10:00",
+      "end_time": "11:00",
+      "student_group": "Group-CS101",
+      "credit_hours": 3
+    },
+    {
+      "course_id": 1,
+      "course_name": "Artificial Intelligence",
+      "course_code": "CS101",
+      "faculty_id": 1,
+      "faculty_name": "Dr. Tariq Mehmood",
+      "venue_id": 2,
+      "venue_name": "Room 2",
+      "slot_id": 2,
+      "day_of_week": "Monday",
+      "start_time": "10:00",
+      "end_time": "11:00",
+      "student_group": "Group-CS101",
+      "credit_hours": 3
+    },
+    {
+      "course_id": 2,
+      "course_name": "Machine Learning Fundamentals",
+      "course_code": "CS102",
+      "faculty_id": 1,
+      "faculty_name": "Dr. Tariq Mehmood",
+      "venue_id": 2,
+      "venue_name": "Room 2",
+      "slot_id": 19,
+      "day_of_week": "Thursday",
+      "start_time": "09:00",
+      "end_time": "10:00",
+      "student_group": "Group-CS102",
+      "credit_hours": 4
+    },
+    {
+      "course_id": 2,
+      "course_name": "Machine Learning Fundamentals",
+      "course_code": "CS102",
+      "faculty_id": 1,
+      "faculty_name": "Dr. Tariq Mehmood",
+      "venue_id": 2,
+      "venue_name": "Room 2",
+      "slot_id": 20,
+      "day_of_week": "Thursday",
+      "start_time": "10:00",
+      "end_time": "11:00",
+      "student_group": "Group-CS102",
+      "credit_hours": 4
+    },
+    {
+      "course_id": 2,
+      "course_name": "Machine Learning Fundamentals",
+      "course_code": "CS102",
+      "faculty_id": 1,
+      "faculty_name": "Dr. Tariq Mehmood",
+      "venue_id": 1,
+      "venue_name": "Room 1",
+      "slot_id": 13,
+      "day_of_week": "Wednesday",
+      "start_time": "09:00",
+      "end_time": "10:00",
+      "student_group": "Group-CS102",
+      "credit_hours": 4
+    },
+    {
+      "course_id": 2,
+      "course_name": "Machine Learning Fundamentals",
+      "course_code": "CS102",
+      "faculty_id": 1,
+      "faculty_name": "Dr. Tariq Mehmood",
+      "venue_id": 1,
+      "venue_name": "Room 1",
+      "slot_id": 14,
+      "day_of_week": "Wednesday",
+      "start_time": "10:00",
+      "end_time": "11:00",
+      "student_group": "Group-CS102",
+      "credit_hours": 4
+    },
+    {
+      "course_id": 3,
+      "course_name": "Computer Vision",
+      "course_code": "CS103",
+      "faculty_id": 2,
+      "faculty_name": "Lec. Faria Sajjad",
+      "venue_id": 5,
+      "venue_name": "Room 5",
+      "slot_id": 1,
+      "day_of_week": "Monday",
+      "start_time": "09:00",
+      "end_time": "10:00",
+      "student_group": "Group-CS103",
+      "credit_hours": 3
+    },
+    {
+      "course_id": 3,
+      "course_name": "Computer Vision",
+      "course_code": "CS103",
+      "faculty_id": 2,
+      "faculty_name": "Lec. Faria Sajjad",
+      "venue_id": 5,
+      "venue_name": "Room 5",
+      "slot_id": 2,
+      "day_of_week": "Monday",
+      "start_time": "10:00",
+      "end_time": "11:00",
+      "student_group": "Group-CS103",
+      "credit_hours": 3
+    },
+    {
+      "course_id": 3,
+      "course_name": "Computer Vision",
+      "course_code": "CS103",
+      "faculty_id": 2,
+      "faculty_name": "Lec. Faria Sajjad",
+      "venue_id": 5,
+      "venue_name": "Room 5",
+      "slot_id": 15,
+      "day_of_week": "Wednesday",
+      "start_time": "11:00",
+      "end_time": "12:00",
+      "student_group": "Group-CS103",
+      "credit_hours": 3
+    },
+    {
+      "course_id": 4,
+      "course_name": "Digital Image Processing",
+      "course_code": "CS104",
+      "faculty_id": 2,
+      "faculty_name": "Lec. Faria Sajjad",
+      "venue_id": 4,
+      "venue_name": "Room 4",
+      "slot_id": 7,
+      "day_of_week": "Tuesday",
+      "start_time": "09:00",
+      "end_time": "10:00",
+      "student_group": "Group-CS104",
+      "credit_hours": 2
+    },
+    {
+      "course_id": 4,
+      "course_name": "Digital Image Processing",
+      "course_code": "CS104",
+      "faculty_id": 2,
+      "faculty_name": "Lec. Faria Sajjad",
+      "venue_id": 4,
+      "venue_name": "Room 4",
+      "slot_id": 8,
+      "day_of_week": "Tuesday",
+      "start_time": "10:00",
+      "end_time": "11:00",
+      "student_group": "Group-CS104",
+      "credit_hours": 2
+    },
+    {
+      "course_id": 5,
+      "course_name": "Operating Systems",
+      "course_code": "CS105",
+      "faculty_id": 3,
+      "faculty_name": "Dr. Ayesha Siddiqui",
+      "venue_id": 3,
+      "venue_name": "Room 3",
+      "slot_id": 1,
+      "day_of_week": "Monday",
+      "start_time": "09:00",
+      "end_time": "10:00",
+      "student_group": "Group-CS105",
+      "credit_hours": 4
+    },
+    {
+      "course_id": 5,
+      "course_name": "Operating Systems",
+      "course_code": "CS105",
+      "faculty_id": 3,
+      "faculty_name": "Dr. Ayesha Siddiqui",
+      "venue_id": 3,
+      "venue_name": "Room 3",
+      "slot_id": 2,
+      "day_of_week": "Monday",
+      "start_time": "10:00",
+      "end_time": "11:00",
+      "student_group": "Group-CS105",
+      "credit_hours": 4
+    },
+    {
+      "course_id": 5,
+      "course_name": "Operating Systems",
+      "course_code": "CS105",
+      "faculty_id": 3,
+      "faculty_name": "Dr. Ayesha Siddiqui",
+      "venue_id": 1,
+      "venue_name": "Room 1",
+      "slot_id": 7,
+      "day_of_week": "Tuesday",
+      "start_time": "09:00",
+      "end_time": "10:00",
+      "student_group": "Group-CS105",
+      "credit_hours": 4
+    },
+    {
+      "course_id": 5,
+      "course_name": "Operating Systems",
+      "course_code": "CS105",
+      "faculty_id": 3,
+      "faculty_name": "Dr. Ayesha Siddiqui",
+      "venue_id": 1,
+      "venue_name": "Room 1",
+      "slot_id": 8,
+      "day_of_week": "Tuesday",
+      "start_time": "10:00",
+      "end_time": "11:00",
+      "student_group": "Group-CS105",
+      "credit_hours": 4
+    },
+    {
+      "course_id": 6,
+      "course_name": "System Programming",
+      "course_code": "CS106",
+      "faculty_id": 3,
+      "faculty_name": "Dr. Ayesha Siddiqui",
+      "venue_id": 2,
+      "venue_name": "Room 2",
+      "slot_id": 13,
+      "day_of_week": "Wednesday",
+      "start_time": "09:00",
+      "end_time": "10:00",
+      "student_group": "Group-CS106",
+      "credit_hours": 2
+    },
+    {
+      "course_id": 6,
+      "course_name": "System Programming",
+      "course_code": "CS106",
+      "faculty_id": 3,
+      "faculty_name": "Dr. Ayesha Siddiqui",
+      "venue_id": 2,
+      "venue_name": "Room 2",
+      "slot_id": 14,
+      "day_of_week": "Wednesday",
+      "start_time": "10:00",
+      "end_time": "11:00",
+      "student_group": "Group-CS106",
+      "credit_hours": 2
+    },
+    {
+      "course_id": 7,
+      "course_name": "Natural Language Processing",
+      "course_code": "CS107",
+      "faculty_id": 4,
+      "faculty_name": "Lec. Hassan Raza",
+      "venue_id": 2,
+      "venue_name": "Room 2",
+      "slot_id": 7,
+      "day_of_week": "Tuesday",
+      "start_time": "09:00",
+      "end_time": "10:00",
+      "student_group": "Group-CS107",
+      "credit_hours": 3
+    },
+    {
+      "course_id": 7,
+      "course_name": "Natural Language Processing",
+      "course_code": "CS107",
+      "faculty_id": 4,
+      "faculty_name": "Lec. Hassan Raza",
+      "venue_id": 2,
+      "venue_name": "Room 2",
+      "slot_id": 8,
+      "day_of_week": "Tuesday",
+      "start_time": "10:00",
+      "end_time": "11:00",
+      "student_group": "Group-CS107",
+      "credit_hours": 3
+    },
+    {
+      "course_id": 7,
+      "course_name": "Natural Language Processing",
+      "course_code": "CS107",
+      "faculty_id": 4,
+      "faculty_name": "Lec. Hassan Raza",
+      "venue_id": 2,
+      "venue_name": "Room 2",
+      "slot_id": 1,
+      "day_of_week": "Monday",
+      "start_time": "09:00",
+      "end_time": "10:00",
+      "student_group": "Group-CS107",
+      "credit_hours": 3
+    },
+    {
+      "course_id": 8,
+      "course_name": "Information Retrieval",
+      "course_code": "CS108",
+      "faculty_id": 4,
+      "faculty_name": "Lec. Hassan Raza",
+      "venue_id": 3,
+      "venue_name": "Room 3",
+      "slot_id": 13,
+      "day_of_week": "Wednesday",
+      "start_time": "09:00",
+      "end_time": "10:00",
+      "student_group": "Group-CS108",
+      "credit_hours": 2
+    },
+    {
+      "course_id": 8,
+      "course_name": "Information Retrieval",
+      "course_code": "CS108",
+      "faculty_id": 4,
+      "faculty_name": "Lec. Hassan Raza",
+      "venue_id": 3,
+      "venue_name": "Room 3",
+      "slot_id": 14,
+      "day_of_week": "Wednesday",
+      "start_time": "10:00",
+      "end_time": "11:00",
+      "student_group": "Group-CS108",
+      "credit_hours": 2
+    },
+    {
+      "course_id": 9,
+      "course_name": "Database Systems",
+      "course_code": "CS109",
+      "faculty_id": 5,
+      "faculty_name": "Dr. Salman Ahmed",
+      "venue_id": 4,
+      "venue_name": "Room 4",
+      "slot_id": 1,
+      "day_of_week": "Monday",
+      "start_time": "09:00",
+      "end_time": "10:00",
+      "student_group": "Group-CS109",
+      "credit_hours": 4
+    },
+    {
+      "course_id": 9,
+      "course_name": "Database Systems",
+      "course_code": "CS109",
+      "faculty_id": 5,
+      "faculty_name": "Dr. Salman Ahmed",
+      "venue_id": 4,
+      "venue_name": "Room 4",
+      "slot_id": 2,
+      "day_of_week": "Monday",
+      "start_time": "10:00",
+      "end_time": "11:00",
+      "student_group": "Group-CS109",
+      "credit_hours": 4
+    },
+    {
+      "course_id": 9,
+      "course_name": "Database Systems",
+      "course_code": "CS109",
+      "faculty_id": 5,
+      "faculty_name": "Dr. Salman Ahmed",
+      "venue_id": 5,
+      "venue_name": "Room 5",
+      "slot_id": 7,
+      "day_of_week": "Tuesday",
+      "start_time": "09:00",
+      "end_time": "10:00",
+      "student_group": "Group-CS109",
+      "credit_hours": 4
+    },
+    {
+      "course_id": 9,
+      "course_name": "Database Systems",
+      "course_code": "CS109",
+      "faculty_id": 5,
+      "faculty_name": "Dr. Salman Ahmed",
+      "venue_id": 5,
+      "venue_name": "Room 5",
+      "slot_id": 8,
+      "day_of_week": "Tuesday",
+      "start_time": "10:00",
+      "end_time": "11:00",
+      "student_group": "Group-CS109",
+      "credit_hours": 4
+    },
+    {
+      "course_id": 10,
+      "course_name": "Data Warehousing",
+      "course_code": "CS110",
+      "faculty_id": 5,
+      "faculty_name": "Dr. Salman Ahmed",
+      "venue_id": 1,
+      "venue_name": "Room 1",
+      "slot_id": 19,
+      "day_of_week": "Thursday",
+      "start_time": "09:00",
+      "end_time": "10:00",
+      "student_group": "Group-CS110",
+      "credit_hours": 3
+    },
+    {
+      "course_id": 10,
+      "course_name": "Data Warehousing",
+      "course_code": "CS110",
+      "faculty_id": 5,
+      "faculty_name": "Dr. Salman Ahmed",
+      "venue_id": 1,
+      "venue_name": "Room 1",
+      "slot_id": 20,
+      "day_of_week": "Thursday",
+      "start_time": "10:00",
+      "end_time": "11:00",
+      "student_group": "Group-CS110",
+      "credit_hours": 3
+    },
+    {
+      "course_id": 10,
+      "course_name": "Data Warehousing",
+      "course_code": "CS110",
+      "faculty_id": 5,
+      "faculty_name": "Dr. Salman Ahmed",
+      "venue_id": 4,
+      "venue_name": "Room 4",
+      "slot_id": 13,
+      "day_of_week": "Wednesday",
+      "start_time": "09:00",
+      "end_time": "10:00",
+      "student_group": "Group-CS110",
+      "credit_hours": 3
+    },
+    {
+      "course_id": 11,
+      "course_name": "Software Engineering",
+      "course_code": "CS111",
+      "faculty_id": 6,
+      "faculty_name": "Lec. Zainab Tariq",
+      "venue_id": 3,
+      "venue_name": "Room 3",
+      "slot_id": 7,
+      "day_of_week": "Tuesday",
+      "start_time": "09:00",
+      "end_time": "10:00",
+      "student_group": "Group-CS111",
+      "credit_hours": 3
+    },
+    {
+      "course_id": 11,
+      "course_name": "Software Engineering",
+      "course_code": "CS111",
+      "faculty_id": 6,
+      "faculty_name": "Lec. Zainab Tariq",
+      "venue_id": 3,
+      "venue_name": "Room 3",
+      "slot_id": 8,
+      "day_of_week": "Tuesday",
+      "start_time": "10:00",
+      "end_time": "11:00",
+      "student_group": "Group-CS111",
+      "credit_hours": 3
+    },
+    {
+      "course_id": 11,
+      "course_name": "Software Engineering",
+      "course_code": "CS111",
+      "faculty_id": 6,
+      "faculty_name": "Lec. Zainab Tariq",
+      "venue_id": 1,
+      "venue_name": "Room 1",
+      "slot_id": 1,
+      "day_of_week": "Monday",
+      "start_time": "09:00",
+      "end_time": "10:00",
+      "student_group": "Group-CS111",
+      "credit_hours": 3
+    },
+    {
+      "course_id": 12,
+      "course_name": "Technical & Business Writing",
+      "course_code": "CS112",
+      "faculty_id": 6,
+      "faculty_name": "Lec. Zainab Tariq",
+      "venue_id": 5,
+      "venue_name": "Room 5",
+      "slot_id": 13,
+      "day_of_week": "Wednesday",
+      "start_time": "09:00",
+      "end_time": "10:00",
+      "student_group": "Group-CS112",
+      "credit_hours": 2
+    },
+    {
+      "course_id": 12,
+      "course_name": "Technical & Business Writing",
+      "course_code": "CS112",
+      "faculty_id": 6,
+      "faculty_name": "Lec. Zainab Tariq",
+      "venue_id": 5,
+      "venue_name": "Room 5",
+      "slot_id": 14,
+      "day_of_week": "Wednesday",
+      "start_time": "10:00",
+      "end_time": "11:00",
+      "student_group": "Group-CS112",
+      "credit_hours": 2
+    }
+  ]
+}

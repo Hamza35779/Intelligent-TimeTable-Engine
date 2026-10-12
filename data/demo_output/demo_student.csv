@@ -1,0 +1,78 @@
+Student Group Schedule View (With Explicit Break Rows),Schedule ID: 1,Generated At: 2026-10-12T09:00:00+00:00
+Student Group,Day,Time,Course / Break,Room,Teacher
+Group-CS101,Monday,10:00 - 11:00,Artificial Intelligence (CS101),Room 2,Dr. Tariq Mehmood
+Group-CS101,Friday,09:00 - 10:00,Artificial Intelligence (CS101),Room 5,Dr. Tariq Mehmood
+Group-CS101,Friday,10:00 - 11:00,Artificial Intelligence (CS101),Room 5,Dr. Tariq Mehmood
+Group-CS101,Friday,After 11:00 (15 min),MANDATORY 15-MIN BREAK (After 2 Consecutive Hours),—,—
+Group-CS101,Monday–Friday,12:00 - 14:00,LUNCH BREAK (Explicit Break Row),—,—
+Group-CS102,Wednesday,09:00 - 10:00,Machine Learning Fundamentals (CS102),Room 1,Dr. Tariq Mehmood
+Group-CS102,Wednesday,10:00 - 11:00,Machine Learning Fundamentals (CS102),Room 1,Dr. Tariq Mehmood
+Group-CS102,Wednesday,After 11:00 (15 min),MANDATORY 15-MIN BREAK (After 2 Consecutive Hours),—,—
+Group-CS102,Thursday,09:00 - 10:00,Machine Learning Fundamentals (CS102),Room 2,Dr. Tariq Mehmood
+Group-CS102,Thursday,10:00 - 11:00,Machine Learning Fundamentals (CS102),Room 2,Dr. Tariq Mehmood
+Group-CS102,Thursday,After 11:00 (15 min),MANDATORY 15-MIN BREAK (After 2 Consecutive Hours),—,—
+Group-CS102,Monday–Friday,12:00 - 14:00,LUNCH BREAK (Explicit Break Row),—,—
+Group-CS103,Monday,09:00 - 10:00,Computer Vision (CS103),Room 5,Lec. Faria Sajjad
+Group-CS103,Monday,10:00 - 11:00,Computer Vision (CS103),Room 5,Lec. Faria Sajjad
+Group-CS103,Monday,After 11:00 (15 min),MANDATORY 15-MIN BREAK (After 2 Consecutive Hours),—,—
+Group-CS103,Wednesday,11:00 - 12:00,Computer Vision (CS103),Room 5,Lec. Faria Sajjad
+Group-CS103,Monday–Friday,12:00 - 14:00,LUNCH BREAK (Explicit Break Row),—,—
+Group-CS104,Tuesday,09:00 - 10:00,Digital Image Processing (CS104),Room 4,Lec. Faria Sajjad
+Group-CS104,Tuesday,10:00 - 11:00,Digital Image Processing (CS104),Room 4,Lec. Faria Sajjad
+Group-CS104,Tuesday,After 11:00 (15 min),MANDATORY 15-MIN BREAK (After 2 Consecutive Hours),—,—
+Group-CS104,Monday–Friday,12:00 - 14:00,LUNCH BREAK (Explicit Break Row),—,—
+Group-CS105,Monday,09:00 - 10:00,Operating Systems (CS105),Room 3,Dr. Ayesha Siddiqui
+Group-CS105,Monday,10:00 - 11:00,Operating Systems (CS105),Room 3,Dr. Ayesha Siddiqui
+Group-CS105,Monday,After 11:00 (15 min),MANDATORY 15-MIN BREAK (After 2 Consecutive Hours),—,—
+Group-CS105,Tuesday,09:00 - 10:00,Operating Systems (CS105),Room 1,Dr. Ayesha Siddiqui
+Group-CS105,Tuesday,10:00 - 11:00,Operating Systems (CS105),Room 1,Dr. Ayesha Siddiqui
+Group-CS105,Tuesday,After 11:00 (15 min),MANDATORY 15-MIN BREAK (After 2 Consecutive Hours),—,—
+Group-CS105,Monday–Friday,12:00 - 14:00,LUNCH BREAK (Explicit Break Row),—,—
+Group-CS106,Wednesday,09:00 - 10:00,System Programming (CS106),Room 2,Dr. Ayesha Siddiqui
+Group-CS106,Wednesday,10:00 - 11:00,System Programming (CS106),Room 2,Dr. Ayesha Siddiqui
+Group-CS106,Wednesday,After 11:00 (15 min),MANDATORY 15-MIN BREAK (After 2 Consecutive Hours),—,—
+Group-CS106,Monday–Friday,12:00 - 14:00,LUNCH BREAK (Explicit Break Row),—,—
+Group-CS107,Monday,09:00 - 10:00,Natural Language Processing (CS107),Room 2,Lec. Hassan Raza
+Group-CS107,Tuesday,09:00 - 10:00,Natural Language Processing (CS107),Room 2,Lec. Hassan Raza
+Group-CS107,Tuesday,10:00 - 11:00,Natural Language Processing (CS107),Room 2,Lec. Hassan Raza
+Group-CS107,Tuesday,After 11:00 (15 min),MANDATORY 15-MIN BREAK (After 2 Consecutive Hours),—,—
+Group-CS107,Monday–Friday,12:00 - 14:00,LUNCH BREAK (Explicit Break Row),—,—
+Group-CS108,Wednesday,09:00 - 10:00,Information Retrieval (CS108),Room 3,Lec. Hassan Raza
+Group-CS108,Wednesday,10:00 - 11:00,Information Retrieval (CS108),Room 3,Lec. Hassan Raza
+Group-CS108,Wednesday,After 11:00 (15 min),MANDATORY 15-MIN BREAK (After 2 Consecutive Hours),—,—
+Group-CS108,Monday–Friday,12:00 - 14:00,LUNCH BREAK (Explicit Break Row),—,—
+Group-CS109,Monday,09:00 - 10:00,Database Systems (CS109),Room 4,Dr. Salman Ahmed
+Group-CS109,Monday,10:00 - 11:00,Database Systems (CS109),Room 4,Dr. Salman Ahmed
+Group-CS109,Monday,After 11:00 (15 min),MANDATORY 15-MIN BREAK (After 2 Consecutive Hours),—,—
+Group-CS109,Tuesday,09:00 - 10:00,Database Systems (CS109),Room 5,Dr. Salman Ahmed
+Group-CS109,Tuesday,10:00 - 11:00,Database Systems (CS109),Room 5,Dr. Salman Ahmed
+Group-CS109,Tuesday,After 11:00 (15 min),MANDATORY 15-MIN BREAK (After 2 Consecutive Hours),—,—
+Group-CS109,Monday–Friday,12:00 - 14:00,LUNCH BREAK (Explicit Break Row),—,—
+Group-CS110,Wednesday,09:00 - 10:00,Data Warehousing (CS110),Room 4,Dr. Salman Ahmed
+Group-CS110,Thursday,09:00 - 10:00,Data Warehousing (CS110),Room 1,Dr. Salman Ahmed
+Group-CS110,Thursday,10:00 - 11:00,Data Warehousing (CS110),Room 1,Dr. Salman Ahmed
+Group-CS110,Thursday,After 11:00 (15 min),MANDATORY 15-MIN BREAK (After 2 Consecutive Hours),—,—
+Group-CS110,Monday–Friday,12:00 - 14:00,LUNCH BREAK (Explicit Break Row),—,—
+Group-CS111,Monday,09:00 - 10:00,Software Engineering (CS111),Room 1,Lec. Zainab Tariq
+Group-CS111,Tuesday,09:00 - 10:00,Software Engineering (CS111),Room 3,Lec. Zainab Tariq
+Group-CS111,Tuesday,10:00 - 11:00,Software Engineering (CS111),Room 3,Lec. Zainab Tariq
+Group-CS111,Tuesday,After 11:00 (15 min),MANDATORY 15-MIN BREAK (After 2 Consecutive Hours),—,—
+Group-CS111,Monday–Friday,12:00 - 14:00,LUNCH BREAK (Explicit Break Row),—,—
+Group-CS112,Wednesday,09:00 - 10:00,Technical & Business Writing (CS112),Room 5,Lec. Zainab Tariq
+Group-CS112,Wednesday,10:00 - 11:00,Technical & Business Writing (CS112),Room 5,Lec. Zainab Tariq
+Group-CS112,Wednesday,After 11:00 (15 min),MANDATORY 15-MIN BREAK (After 2 Consecutive Hours),—,—
+Group-CS112,Monday–Friday,12:00 - 14:00,LUNCH BREAK (Explicit Break Row),—,—
+
+Serial,Course Code,Course Titles,CHs,Name of Faculty,Elective / Compulsory,Venues,Remarks
+1,CS101,Artificial Intelligence,3,Dr. Tariq Mehmood,Compulsory,"Room 5, Room 2",
+2,CS102,Machine Learning Fundamentals,4,Dr. Tariq Mehmood,Compulsory,"Room 2, Room 1",
+3,CS103,Computer Vision,3,Lec. Faria Sajjad,Compulsory,Room 5,
+4,CS104,Digital Image Processing,2,Lec. Faria Sajjad,Compulsory,Room 4,
+5,CS105,Operating Systems,4,Dr. Ayesha Siddiqui,Compulsory,"Room 3, Room 1",
+6,CS106,System Programming,2,Dr. Ayesha Siddiqui,Compulsory,Room 2,
+7,CS107,Natural Language Processing,3,Lec. Hassan Raza,Compulsory,Room 2,
+8,CS108,Information Retrieval,2,Lec. Hassan Raza,Compulsory,Room 3,
+9,CS109,Database Systems,4,Dr. Salman Ahmed,Compulsory,"Room 4, Room 5",
+10,CS110,Data Warehousing,3,Dr. Salman Ahmed,Compulsory,"Room 1, Room 4",
+11,CS111,Software Engineering,3,Lec. Zainab Tariq,Compulsory,"Room 3, Room 1",
+12,CS112,Technical & Business Writing,2,Lec. Zainab Tariq,Compulsory,Room 5,

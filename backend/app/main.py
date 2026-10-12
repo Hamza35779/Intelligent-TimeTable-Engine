@@ -2,13 +2,15 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
-from app.database import engine, Base
+from app.database import engine, Base, SessionLocal
+from app.fixtures import seed_demo_fixtures
 import app.models  # Ensure all models are registered with Base
 from app.routers import (
     health_router,
     constraints_router,
     timetable_router,
     schedule_router,
+    demo_router,
     feedback_router,
     ml_router,
     export_router,
@@ -19,6 +21,11 @@ from app.routers import (
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     Base.metadata.create_all(bind=engine)
+    db = SessionLocal()
+    try:
+        seed_demo_fixtures(db, force=False)
+    finally:
+        db.close()
     yield
 
 
@@ -48,6 +55,7 @@ app.include_router(health_router)
 app.include_router(constraints_router)
 app.include_router(timetable_router)
 app.include_router(schedule_router)
+app.include_router(demo_router)
 app.include_router(feedback_router)
 app.include_router(ml_router)
 app.include_router(export_router)

@@ -8,19 +8,42 @@ from app.schemas.course import CourseCreate, CourseResponse
 from app.schemas.constraint import ConstraintCreate, ConstraintResponse
 
 
+class GlobalScheduleConfig(BaseModel):
+    days: List[str] = Field(
+        default_factory=lambda: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+    )
+    day_start: str = "09:00"
+    day_end: str = "17:00"
+    slot_minutes: int = 60
+    lunch_start: str = "12:00"
+    lunch_end: str = "14:00"
+    break_minutes: int = 15
+    min_gap_minutes: int = 30
+    max_teaching_hours_per_day: int = 6
+    rooms: List[str] = Field(
+        default_factory=lambda: ["Room 1", "Room 2", "Room 3", "Room 4", "Room 5"]
+    )
+
+
 class GenerateScheduleRequest(BaseModel):
     faculty: List[FacultyCreate]
     venues: List[VenueCreate]
     slots: List[TimeSlotCreate]
     courses: List[CourseCreate]
     constraints: Optional[List[ConstraintCreate]] = Field(default_factory=list)
+    config: Optional[GlobalScheduleConfig] = None
     timeout_seconds: Optional[int] = Field(default=5, ge=1, le=30)
+    random_seed: Optional[int] = None
 
 
 class RescheduleRequest(BaseModel):
     timetable_id: int
-    unseated_slot_ids: Optional[List[int]] = Field(default_factory=list, description="Slots that became invalid")
-    unavailable_venue_ids: Optional[List[int]] = Field(default_factory=list, description="Venues temporarily offline")
+    unseated_slot_ids: Optional[List[int]] = Field(
+        default_factory=list, description="Slots that became invalid"
+    )
+    unavailable_venue_ids: Optional[List[int]] = Field(
+        default_factory=list, description="Venues temporarily offline"
+    )
     unavailable_faculty_slots: Optional[Dict[int, List[int]]] = Field(
         default_factory=dict,
         description="Faculty ID mapped to slot IDs they can no longer attend",
@@ -41,6 +64,8 @@ class TimetableEntryResponse(BaseModel):
     day_of_week: str
     start_time: str
     end_time: str
+    student_group: Optional[str] = None
+    credit_hours: Optional[int] = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -48,7 +73,9 @@ class TimetableEntryResponse(BaseModel):
 class SolverStats(BaseModel):
     status: str
     solver_time_ms: float
+    solve_time_ms: Optional[float] = 0.0
     total_time_ms: float
+    objective_value: Optional[float] = 0.0
     total_courses_scheduled: int
     total_courses_requested: int
     conflict_count: int

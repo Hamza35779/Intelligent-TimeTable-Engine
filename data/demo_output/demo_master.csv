@@ -1,0 +1,141 @@
+Master University Timetable,Schedule ID: 1,Generated At: 2026-10-12T09:00:00+00:00
+Time Slot,Monday,Tuesday,Wednesday,Thursday,Friday
+09:00 - 10:00,"Computer Vision (CS103)
+Teacher: Lec. Faria Sajjad
+Room: Room 5
+---
+Operating Systems (CS105)
+Teacher: Dr. Ayesha Siddiqui
+Room: Room 3
+---
+Natural Language Processing (CS107)
+Teacher: Lec. Hassan Raza
+Room: Room 2
+---
+Database Systems (CS109)
+Teacher: Dr. Salman Ahmed
+Room: Room 4
+---
+Software Engineering (CS111)
+Teacher: Lec. Zainab Tariq
+Room: Room 1","Digital Image Processing (CS104)
+Teacher: Lec. Faria Sajjad
+Room: Room 4
+---
+Operating Systems (CS105)
+Teacher: Dr. Ayesha Siddiqui
+Room: Room 1
+---
+Natural Language Processing (CS107)
+Teacher: Lec. Hassan Raza
+Room: Room 2
+---
+Database Systems (CS109)
+Teacher: Dr. Salman Ahmed
+Room: Room 5
+---
+Software Engineering (CS111)
+Teacher: Lec. Zainab Tariq
+Room: Room 3","Machine Learning Fundamentals (CS102)
+Teacher: Dr. Tariq Mehmood
+Room: Room 1
+---
+System Programming (CS106)
+Teacher: Dr. Ayesha Siddiqui
+Room: Room 2
+---
+Information Retrieval (CS108)
+Teacher: Lec. Hassan Raza
+Room: Room 3
+---
+Data Warehousing (CS110)
+Teacher: Dr. Salman Ahmed
+Room: Room 4
+---
+Technical & Business Writing (CS112)
+Teacher: Lec. Zainab Tariq
+Room: Room 5","Machine Learning Fundamentals (CS102)
+Teacher: Dr. Tariq Mehmood
+Room: Room 2
+---
+Data Warehousing (CS110)
+Teacher: Dr. Salman Ahmed
+Room: Room 1","Artificial Intelligence (CS101)
+Teacher: Dr. Tariq Mehmood
+Room: Room 5"
+10:00 - 11:00,"Artificial Intelligence (CS101)
+Teacher: Dr. Tariq Mehmood
+Room: Room 2
+---
+Computer Vision (CS103)
+Teacher: Lec. Faria Sajjad
+Room: Room 5
+---
+Operating Systems (CS105)
+Teacher: Dr. Ayesha Siddiqui
+Room: Room 3
+---
+Database Systems (CS109)
+Teacher: Dr. Salman Ahmed
+Room: Room 4","Digital Image Processing (CS104)
+Teacher: Lec. Faria Sajjad
+Room: Room 4
+---
+Operating Systems (CS105)
+Teacher: Dr. Ayesha Siddiqui
+Room: Room 1
+---
+Natural Language Processing (CS107)
+Teacher: Lec. Hassan Raza
+Room: Room 2
+---
+Database Systems (CS109)
+Teacher: Dr. Salman Ahmed
+Room: Room 5
+---
+Software Engineering (CS111)
+Teacher: Lec. Zainab Tariq
+Room: Room 3","Machine Learning Fundamentals (CS102)
+Teacher: Dr. Tariq Mehmood
+Room: Room 1
+---
+System Programming (CS106)
+Teacher: Dr. Ayesha Siddiqui
+Room: Room 2
+---
+Information Retrieval (CS108)
+Teacher: Lec. Hassan Raza
+Room: Room 3
+---
+Technical & Business Writing (CS112)
+Teacher: Lec. Zainab Tariq
+Room: Room 5","Machine Learning Fundamentals (CS102)
+Teacher: Dr. Tariq Mehmood
+Room: Room 2
+---
+Data Warehousing (CS110)
+Teacher: Dr. Salman Ahmed
+Room: Room 1","Artificial Intelligence (CS101)
+Teacher: Dr. Tariq Mehmood
+Room: Room 5"
+11:00 - 12:00,,,"Computer Vision (CS103)
+Teacher: Lec. Faria Sajjad
+Room: Room 5",,
+12:00 - 14:00 (LUNCH BREAK),LUNCH BREAK (No Classes),LUNCH BREAK (No Classes),LUNCH BREAK (No Classes),LUNCH BREAK (No Classes),LUNCH BREAK (No Classes)
+14:00 - 15:00,,,,,
+15:00 - 16:00,,,,,
+16:00 - 17:00,,,,,
+
+Serial,Course Code,Course Titles,CHs,Name of Faculty,Elective / Compulsory,Venues,Remarks
+1,CS101,Artificial Intelligence,3,Dr. Tariq Mehmood,Compulsory,"Room 5, Room 2",
+2,CS102,Machine Learning Fundamentals,4,Dr. Tariq Mehmood,Compulsory,"Room 2, Room 1",
+3,CS103,Computer Vision,3,Lec. Faria Sajjad,Compulsory,Room 5,
+4,CS104,Digital Image Processing,2,Lec. Faria Sajjad,Compulsory,Room 4,
+5,CS105,Operating Systems,4,Dr. Ayesha Siddiqui,Compulsory,"Room 3, Room 1",
+6,CS106,System Programming,2,Dr. Ayesha Siddiqui,Compulsory,Room 2,
+7,CS107,Natural Language Processing,3,Lec. Hassan Raza,Compulsory,Room 2,
+8,CS108,Information Retrieval,2,Lec. Hassan Raza,Compulsory,Room 3,
+9,CS109,Database Systems,4,Dr. Salman Ahmed,Compulsory,"Room 4, Room 5",
+10,CS110,Data Warehousing,3,Dr. Salman Ahmed,Compulsory,"Room 1, Room 4",
+11,CS111,Software Engineering,3,Lec. Zainab Tariq,Compulsory,"Room 3, Room 1",
+12,CS112,Technical & Business Writing,2,Lec. Zainab Tariq,Compulsory,Room 5,

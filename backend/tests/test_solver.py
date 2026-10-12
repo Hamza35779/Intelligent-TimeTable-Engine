@@ -203,3 +203,83 @@ def test_formatter_preserves_non_standard_slots():
     flat_text = "\n".join("\t".join(r) for r in rows)
     assert "Saturday" in flat_text
     assert "Early Bird Algorithms" in flat_text
+
+
+def test_demo_dataset_solves_under_5s_and_passes_independent_checker():
+    """
+    Step 9 Solver Test 1 & 2:
+    - Solvable demo dataset (data/demo_courses.csv) finishes in < 5 seconds and returns OPTIMAL or FEASIBLE.
+    - Independent plain-Python checker verifies:
+      * zero teacher overlaps
+      * zero room overlaps
+      * zero student group overlaps
+      * zero sessions in lunch (12:00-14:00)
+      * every course has its exact credit hours.
+    """
+    import os
+    from utils.csv_parser import parse_schedule_csv
+    from solver.validator import verify_solved_timetable
+
+    repo_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    demo_csv_path = os.path.join(repo_root, "data", "demo_courses.csv")
+    with open(demo_csv_path, "r", encoding="utf-8") as f:
+        csv_text = f.read()
+
+    parsed = parse_schedule_csv(csv_text)
+    solver = TimetableSolver(time_limit_seconds=5, random_seed=42, config=parsed["config"])
+    solver.add_variables(
+        courses=parsed["courses"],
+        faculty=parsed["faculty"],
+        venues=parsed["venues"],
+        slots=parsed["slots"],
+    )
+    solver.add_constraints([])
+
+    start_t = time.perf_counter()
+    is_solved, status, stats = solver.solve(timeout_seconds=5)
+    elapsed_s = time.perf_counter() - start_t
+
+    assert is_solved is True
+    assert status in ("OPTIMAL", "FEASIBLE")
+    assert elapsed_s < 5.0
+    assert stats["solve_time_ms"] < 5000.0
+
+    entries = solver.get_solution()
+    is_valid, violations = verify_solved_timetable(
+        entries=entries,
+        courses=parsed["courses"],
+        config=parsed["config"],
+    )
+    assert is_valid is True, f"Independent checker found violations: {violations}"
+    assert violations == []
+
+
+def test_impossible_50h_teacher_returns_infeasible_with_reason():
+    """
+    Step 9 Solver Test 3:
+    Impossible dataset (1 teacher assigned 50 credit hours in a 40-hour week)
+    returns INFEASIBLE with a human-readable reason string.
+    """
+    from utils.csv_parser import parse_schedule_csv
+
+    csv_text = (
+        "teacher_name,course_name,credit_hours\n"
+        + "\n".join(f"Dr. Overloaded,Course {i},5" for i in range(1, 11))
+    )
+    parsed = parse_schedule_csv(csv_text)
+    solver = TimetableSolver(time_limit_seconds=3, config=parsed["config"])
+    solver.add_variables(
+        courses=parsed["courses"],
+        faculty=parsed["faculty"],
+        venues=parsed["venues"],
+        slots=parsed["slots"],
+    )
+    solver.add_constraints([])
+    is_solved, status, stats = solver.solve(timeout_seconds=3)
+
+    assert is_solved is False
+    assert status == "INFEASIBLE"
+    assert solver.infeasibility_explanation is not None
+    assert "Dr. Overloaded" in solver.infeasibility_explanation
+    assert "50" in solver.infeasibility_explanation
+

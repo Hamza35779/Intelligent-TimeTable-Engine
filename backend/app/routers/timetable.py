@@ -10,6 +10,7 @@ from app.schemas.timetable import (
 )
 from solver.fairness import calculate_fairness_score, calculate_preference_satisfaction
 from utils.timetable_formatter import (
+    VALID_VIEWS,
     build_table_rows,
     build_university_sheet_data,
     generate_multi_views,
@@ -40,8 +41,12 @@ def _load_run_entries(schedule_id: int, db: Session):
     formatted_entries = []
     entry_dicts = []
     teachers = set()
+    stored_metrics = run.metrics or {}
     prefs_map: Dict[str, Dict[str, Any]] = dict(
-        (run.metrics or {}).get("ml_predicted_preferences") or {}
+        stored_metrics.get("ml_predicted_preferences") or {}
+    )
+    course_meta_map: Dict[str, Dict[str, Any]] = dict(
+        stored_metrics.get("course_metadata") or {}
     )
 
     for e in run.entries:
@@ -50,11 +55,18 @@ def _load_run_entries(schedule_id: int, db: Session):
         if e.faculty and e.faculty.preferences and f_name not in prefs_map:
             prefs_map[f_name] = e.faculty.preferences
 
+        c_code = e.course.code if e.course else f"C{e.course_id}"
+        c_meta = course_meta_map.get(str(e.course_id)) or course_meta_map.get(c_code) or {}
+        dur_mins = e.slot.duration_minutes if (e.slot and e.slot.duration_minutes) else 60
+        student_grp = c_meta.get("student_group") or c_code
+        credit_hrs = c_meta.get("credit_hours") or max(1, round((e.course.duration_minutes if e.course else 60) / 60))
+        cap_req = e.course.capacity_required if (e.course and e.course.capacity_required) else 30
+
         item = {
             "id": e.id,
             "course_id": e.course_id,
             "course_name": e.course.name if e.course else f"Course {e.course_id}",
-            "course_code": e.course.code if e.course else f"C{e.course_id}",
+            "course_code": c_code,
             "faculty_id": e.faculty_id,
             "faculty_name": f_name,
             "venue_id": e.venue_id,
@@ -63,6 +75,10 @@ def _load_run_entries(schedule_id: int, db: Session):
             "day_of_week": e.slot.day_of_week if e.slot else "Monday",
             "start_time": e.slot.start_time if e.slot else "09:00",
             "end_time": e.slot.end_time if e.slot else "10:00",
+            "duration_minutes": dur_mins,
+            "credit_hours": credit_hrs,
+            "student_group": student_grp,
+            "capacity_required": cap_req,
         }
         entry_dicts.append(item)
         formatted_entries.append(TimetableEntryResponse(**item))
@@ -121,12 +137,18 @@ def get_schedule_table(
     ),
     db: Session = Depends(get_db),
 ):
+    v = (view or "master").strip().lower()
+    if v not in VALID_VIEWS:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid view '{view}'. Allowed views: {sorted(VALID_VIEWS)}",
+        )
     run, _, entry_dicts, teacher_count, prefs_map = _load_run_entries(schedule_id, db)
-    rows = build_table_rows(entry_dicts, view_type=view.lower())
+    rows = build_table_rows(entry_dicts, view_type=v)
     stored_metrics = run.metrics or {}
     section_title = stored_metrics.get("section_title") or "AI 2024 - Section A"
     sheet = build_university_sheet_data(
-        entry_dicts, section_title=section_title, view_type=view.lower()
+        entry_dicts, section_title=section_title, view_type=v
     )
     fairness = stored_metrics.get("fairness_score") or calculate_fairness_score(entry_dicts)
     pref_sat = stored_metrics.get("preference_satisfaction") or calculate_preference_satisfaction(
@@ -135,12 +157,13 @@ def get_schedule_table(
 
     return {
         "format": "tabular",
-        "view": view.lower(),
+        "view": v,
         "headers": rows[0] if rows else [],
         "rows": rows[1:] if len(rows) > 1 else [],
         "sheet": sheet,
         "metadata": {
             "schedule_id": run.id,
+            "generated_at": run.generated_at.isoformat() if run.generated_at else None,
             "section_title": section_title,
             "total_courses": len(entry_dicts),
             "total_teachers": teacher_count,
@@ -156,15 +179,18 @@ def get_schedule_multi_views(schedule_id: int, db: Session = Depends(get_db)):
     stored_metrics = run.metrics or {}
     metadata = {
         "schedule_id": run.id,
+        "generated_at": run.generated_at.isoformat() if run.generated_at else None,
         "total_courses": len(entry_dicts),
         "total_teachers": teacher_count,
         "fairness_score": stored_metrics.get("fairness_score")
         or calculate_fairness_score(entry_dicts),
         "preference_satisfaction": stored_metrics.get("preference_satisfaction")
         or calculate_preference_satisfaction(entry_dicts, prefs_map),
+        "config": stored_metrics.get("config") or {},
     }
     return {
         "schedule_id": run.id,
+        "generated_at": metadata["generated_at"],
         "views": generate_multi_views(entry_dicts, metadata),
     }
 

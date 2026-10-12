@@ -4,11 +4,9 @@ import { useState, useRef, useEffect } from 'react';
 import { Bot, Send, Sparkles, Download, CheckCircle2, Layers } from 'lucide-react';
 import { TimetableResponse } from '../types';
 import {
-  parseCsvLocally,
   solveLocally,
   triggerLocalDownload,
 } from '../utils/localFallbackSolver';
-import { SAMPLE_CSV } from './CsvUploader';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
@@ -16,6 +14,7 @@ interface ChatMessage {
   id: number;
   sender: 'bot' | 'user';
   text: string;
+  mode?: string;
   detected_views?: string[];
   detected_formats?: string[];
   status?: string;
@@ -26,60 +25,21 @@ interface ChatBotProps {
   onScheduleGenerated?: (data: TimetableResponse) => void;
 }
 
-function detectIntentLocally(text: string) {
-  const lower = text.toLowerCase();
-  const views: string[] = [];
-  const formats: string[] = [];
-
-  if (lower.includes('master') || lower.includes('university') || lower.includes('all'))
-    views.push('master');
-  if (lower.includes('teacher') || lower.includes('faculty') || lower.includes('all'))
-    views.push('teacher');
-  if (lower.includes('student') || lower.includes('class') || lower.includes('all'))
-    views.push('student');
-  if (lower.includes('staff') || lower.includes('support') || lower.includes('all'))
-    views.push('staff');
-  if (lower.includes('canteen') || lower.includes('lunch') || lower.includes('all'))
-    views.push('canteen');
-
-  if (views.length === 0) {
-    views.push('master', 'teacher', 'student', 'staff', 'canteen');
-  }
-
-  if (lower.includes('pdf')) formats.push('pdf');
-  if (lower.includes('excel') || lower.includes('xlsx')) formats.push('xlsx');
-  if (lower.includes('png') || lower.includes('image')) formats.push('png');
-  if (lower.includes('csv')) formats.push('csv');
-  if (lower.includes('json')) formats.push('json');
-  if (lower.includes('html')) formats.push('html');
-
-  if (formats.length === 0) {
-    formats.push('pdf', 'xlsx', 'png', 'csv');
-  }
-
-  let section = 'AI 2023';
-  if (lower.includes('2024') && lower.includes('b')) section = 'AI 2024 - Section B';
-  else if (lower.includes('2024')) section = 'AI 2024 - Section A';
-  else if (lower.includes('2025') && lower.includes('b')) section = 'AI 2025 - Section B';
-  else if (lower.includes('2025')) section = 'AI 2025 - Section A';
-
-  return { views, formats, section };
-}
-
 export default function ChatBot({ scheduleId, onScheduleGenerated }: ChatBotProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: 1,
       sender: 'bot',
-      text: "Hi! I'm your AI Scheduling Assistant. Tell me which section or audience schedules you need (e.g., AI 2023, AI 2024 Section A/B, AI 2025 Section A/B, Teacher, Student, Support Staff, or Canteen) and I'll generate them instantly.",
+      text: "Hi! I'm your AI Scheduling Assistant. Tell me which views (master, teacher, student, staff, canteen) and export formats (csv, xlsx, pdf, png, jpg, json, html) you need.",
     },
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [activeMode, setActiveMode] = useState<string>('keyword_fallback');
   const [generatedSchedules, setGeneratedSchedules] = useState<any>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const sendText = (messageText: string) => {
+  const sendText = async (messageText: string) => {
     const trimmed = messageText.trim();
     if (!trimmed) return;
 
@@ -88,26 +48,66 @@ export default function ChatBot({ scheduleId, onScheduleGenerated }: ChatBotProp
       sender: 'user',
       text: trimmed,
     };
-    const { views, formats, section } = detectIntentLocally(trimmed);
-    const viewBullets = views.map((v) => `• ${v.toUpperCase()} Schedule`).join('\n');
-    const reply = `Ready to generate ${section} (${views.length} views) in ${formats
-      .map((f) => f.toUpperCase())
-      .join(', ')}:\n${viewBullets}\n\nClick "Generate All Schedules Simultaneously" below to build and view immediately.`;
-
-    const botMsg: ChatMessage = {
-      id: Date.now() + 1,
-      sender: 'bot',
-      text: reply,
-      detected_views: views,
-      detected_formats: formats,
-      status: 'ready_to_generate',
-    };
-
-    setMessages((prev) => [...prev, userMsg, botMsg]);
+    setMessages((prev) => [...prev, userMsg]);
     setInput('');
+    setLoading(true);
+
+    try {
+      const res = await fetch(`${API_BASE}/chat/message`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: trimmed,
+          schedule_id: scheduleId ?? undefined,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        const errMsg =
+          data?.detail?.message ||
+          (typeof data?.detail === 'string' ? data.detail : 'Invalid request');
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: Date.now() + 1,
+            sender: 'bot',
+            text: `Rejected (400): ${errMsg}`,
+            mode: data?.detail?.mode || activeMode,
+            status: 'error',
+          },
+        ]);
+        return;
+      }
+
+      if (data.mode) setActiveMode(data.mode);
+      const botMsg: ChatMessage = {
+        id: Date.now() + 1,
+        sender: 'bot',
+        text: data.bot_response,
+        mode: data.mode,
+        detected_views: data.detected_views || [],
+        detected_formats: data.detected_formats || [],
+        status: data.status,
+      };
+      setMessages((prev) => [...prev, botMsg]);
+    } catch {
+      const botMsg: ChatMessage = {
+        id: Date.now() + 1,
+        sender: 'bot',
+        text: 'Ready to generate views in PDF, XLSX, PNG, and CSV.',
+        mode: 'keyword_fallback',
+        detected_views: ['master', 'teacher', 'student', 'staff', 'canteen'],
+        detected_formats: ['pdf', 'xlsx', 'png', 'csv'],
+        status: 'ready_to_generate',
+      };
+      setMessages((prev) => [...prev, botMsg]);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleGenerateSchedules = (views?: string[], formats?: string[]) => {
+  const handleGenerateSchedules = async (views?: string[], formats?: string[]) => {
     setLoading(true);
     const targetViews =
       views && views.length > 0
@@ -116,11 +116,53 @@ export default function ChatBot({ scheduleId, onScheduleGenerated }: ChatBotProp
     const targetFormats =
       formats && formats.length > 0 ? formats : ['pdf', 'xlsx', 'png', 'csv'];
 
-    const localSched = solveLocally({ section_title: 'AI 2023' });
+    try {
+      let targetSchedId = scheduleId;
+      if (!targetSchedId) {
+        const demoRes = await fetch(`${API_BASE}/demo/run`, { method: 'POST' });
+        if (demoRes.ok) {
+          const demoData: TimetableResponse = await demoRes.json();
+          targetSchedId = demoData.schedule_id;
+          if (onScheduleGenerated) onScheduleGenerated(demoData);
+        }
+      }
+
+      if (targetSchedId) {
+        const res = await fetch(`${API_BASE}/chat/generate-schedules`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            schedule_id: targetSchedId,
+            views: targetViews,
+            formats: targetFormats,
+          }),
+        });
+        if (res.ok) {
+          const genData = await res.json();
+          if (genData.mode) setActiveMode(genData.mode);
+          setGeneratedSchedules(genData);
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: Date.now(),
+              sender: 'bot',
+              mode: genData.mode,
+              text: `Generated ${genData.schedules_generated} customized audience schedules (${targetViews.join(', ')}) for Schedule #${targetSchedId}. Click any format below to download.`,
+            },
+          ]);
+          return;
+        }
+      }
+    } catch {
+      // Fallback
+    } finally {
+      setLoading(false);
+    }
+
+    const localSched = solveLocally({ section_title: 'AI 2024 - Section A' });
     if (onScheduleGenerated) {
       onScheduleGenerated(localSched);
     }
-
     const viewMap: Record<string, Record<string, string>> = {};
     targetViews.forEach((v) => {
       viewMap[v] = {};
@@ -128,23 +170,12 @@ export default function ChatBot({ scheduleId, onScheduleGenerated }: ChatBotProp
         viewMap[v][fmt] = `/export/${localSched.schedule_id}?format=${fmt}&view=${v}`;
       });
     });
-
     setGeneratedSchedules({
       schedule_id: localSched.schedule_id,
       schedules_generated: targetViews.length,
       formats_generated: targetFormats,
       views: viewMap,
     });
-
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: Date.now(),
-        sender: 'bot',
-        text: `Generated ${targetViews.length} customized audience schedules in <5ms! Click any format below to download.`,
-      },
-    ]);
-    setLoading(false);
   };
 
   const handleDownloadLink = async (
@@ -155,11 +186,8 @@ export default function ChatBot({ scheduleId, onScheduleGenerated }: ChatBotProp
     url: string
   ) => {
     e.preventDefault();
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 600);
     try {
-      const res = await fetch(`${API_BASE}${url}`, { signal: controller.signal });
-      clearTimeout(timer);
+      const res = await fetch(`${API_BASE}${url}`);
       if (!res.ok) throw new Error('Backend export unreachable');
       const blob = await res.blob();
       const objUrl = window.URL.createObjectURL(blob);
@@ -171,7 +199,6 @@ export default function ChatBot({ scheduleId, onScheduleGenerated }: ChatBotProp
       a.remove();
       window.URL.revokeObjectURL(objUrl);
     } catch {
-      clearTimeout(timer);
       triggerLocalDownload(schedId, fmt, viewName);
     }
   };
@@ -181,9 +208,9 @@ export default function ChatBot({ scheduleId, onScheduleGenerated }: ChatBotProp
   }, [messages, generatedSchedules]);
 
   const quickPrompts = [
-    'I need schedules for teachers, students, and canteen staff in PDF and Excel',
+    'Generate teacher and student schedules in PDF and Excel',
     'Generate all 5 views (Master, Teacher, Student, Staff, Canteen) in PDF, XLSX, and PNG',
-    'Include support staff and canteen lunch rush schedule',
+    'Show canteen lunch rush and support staff views in HTML and CSV',
   ];
 
   return (
@@ -198,11 +225,11 @@ export default function ChatBot({ scheduleId, onScheduleGenerated }: ChatBotProp
             <h3 className="text-white font-bold text-sm flex items-center gap-2">
               <span>AI Schedule Assistant</span>
               <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                Multi-View NLU
+                mode: {activeMode}
               </span>
             </h3>
             <p className="text-xs text-slate-400">
-              Conversational generator for Master, Teacher, Student, Staff & Canteen views
+              Extracts structured views &amp; export formats via Gemini or deterministic keyword parser
             </p>
           </div>
         </div>
@@ -234,10 +261,18 @@ export default function ChatBot({ scheduleId, onScheduleGenerated }: ChatBotProp
               className={`max-w-[82%] px-4 py-3 rounded-2xl text-xs leading-relaxed ${
                 msg.sender === 'user'
                   ? 'bg-emerald-500 text-slate-950 font-medium rounded-br-xs'
+                  : msg.status === 'error'
+                  ? 'bg-rose-950/50 border border-rose-500/40 text-rose-200 rounded-bl-xs'
                   : 'bg-slate-950 border border-slate-800 text-slate-200 rounded-bl-xs'
               }`}
             >
               <p className="whitespace-pre-line">{msg.text}</p>
+
+              {msg.mode && msg.sender === 'bot' && (
+                <div className="mt-1.5 text-[10px] font-mono text-slate-400">
+                  Parser mode: <span className="text-emerald-400">{msg.mode}</span>
+                </div>
+              )}
 
               {msg.detected_views && msg.detected_views.length > 0 && (
                 <div className="mt-2 pt-2 border-t border-slate-800 flex flex-wrap gap-1.5">
@@ -263,7 +298,7 @@ export default function ChatBot({ scheduleId, onScheduleGenerated }: ChatBotProp
                   className="mt-3 w-full py-2 px-3 bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-xl text-xs font-bold flex items-center justify-center space-x-1.5 shadow-lg shadow-emerald-500/20 transition"
                 >
                   <Sparkles className="w-3.5 h-3.5" />
-                  <span>Generate All Schedules Simultaneously</span>
+                  <span>Generate Requested Views &amp; Formats</span>
                 </button>
               )}
             </div>
@@ -309,7 +344,7 @@ export default function ChatBot({ scheduleId, onScheduleGenerated }: ChatBotProp
                         }
                         className="px-2 py-1 bg-slate-800 hover:bg-emerald-500 hover:text-slate-950 text-emerald-300 rounded text-[10px] font-mono font-semibold transition"
                       >
-                        ↓ {fmt.toUpperCase()}
+                        &darr; {fmt.toUpperCase()}
                       </button>
                     ))}
                   </div>

@@ -1,0 +1,83 @@
+{
+  "faculty": [
+    {
+      "name": "Ahmad Ali",
+      "department": "Computer Science",
+      "max_hours_per_day": 4,
+      "max_days_per_week": 5,
+      "email": "ahmad@univ.edu",
+      "preferences": {
+        "prefer_morning": true
+      },
+      "unavailable_slots": []
+    },
+    {
+      "name": "Fatima Khan",
+      "department": "Information Theory",
+      "max_hours_per_day": 4,
+      "max_days_per_week": 5,
+      "email": "fatima@univ.edu",
+      "preferences": {
+        "prefer_morning": false
+      },
+      "unavailable_slots": []
+    }
+  ],
+  "venues": [
+    {
+      "name": "Room 101",
+      "capacity": 100,
+      "equipment": ["projector"],
+      "available_slots": [0, 1, 2, 3]
+    },
+    {
+      "name": "Room 102",
+      "capacity": 60,
+      "equipment": ["computers"],
+      "available_slots": [0, 1, 2, 3]
+    }
+  ],
+  "slots": [
+    {
+      "day_of_week": "Monday",
+      "start_time": "09:00",
+      "end_time": "10:00",
+      "duration_minutes": 60
+    },
+    {
+      "day_of_week": "Monday",
+      "start_time": "10:00",
+      "end_time": "11:00",
+      "duration_minutes": 60
+    },
+    {
+      "day_of_week": "Tuesday",
+      "start_time": "09:00",
+      "end_time": "10:00",
+      "duration_minutes": 60
+    },
+    {
+      "day_of_week": "Tuesday",
+      "start_time": "10:00",
+      "end_time": "11:00",
+      "duration_minutes": 60
+    }
+  ],
+  "courses": [
+    {
+      "name": "Data Structures",
+      "code": "CS201",
+      "faculty_id": 0,
+      "capacity_required": 50,
+      "duration_minutes": 60
+    },
+    {
+      "name": "Database Systems",
+      "code": "CS202",
+      "faculty_id": 1,
+      "capacity_required": 40,
+      "duration_minutes": 60
+    }
+  ],
+  "timeout_seconds": 5
+}

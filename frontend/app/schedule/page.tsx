@@ -60,6 +60,21 @@ export default function SchedulePage() {
     }
   };
 
+  const handleRunDemoPipeline = async () => {
+    try {
+      const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const res = await fetch(`${apiBase}/demo/run`, { method: 'POST' });
+      if (res.ok) {
+        const data = await res.json();
+        setCurrentSchedule(data);
+        setActiveScheduleId(data.schedule_id);
+        setActiveTab('views');
+      }
+    } catch (err: any) {
+      alert('Demo run failed: ' + err.message);
+    }
+  };
+
   const handleSelectSectionPreset = (sectionName: string) => {
     setSelectedPresetName(sectionName);
     const preset = UNIVERSITY_SECTION_PRESETS[sectionName] || SAMPLE_BENCHMARK_DATA;
@@ -93,14 +108,24 @@ export default function SchedulePage() {
         <div>
           <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight flex items-center gap-2">
             <Sparkles className="w-6 h-6 text-emerald-400" />
-            <span>Autonomous Schedule & University Sheet Studio</span>
+            <span>Autonomous Schedule &amp; University Sheet Studio</span>
           </h2>
           <p className="text-slate-400 text-xs sm:text-sm mt-1">
-            Official 9-Slot Horizontal University Timetable Sheets with Merged Lab/Lecture Spans & Course Legend.
+            Official 9-Slot Horizontal University Timetable Sheets with Merged Lab/Lecture Spans &amp; Course Legend.
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={handleRunDemoPipeline}
+            disabled={loading}
+            className="flex items-center space-x-2 px-4 py-2 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white font-bold text-xs rounded-xl shadow-lg transition"
+          >
+            <Play className="w-3.5 h-3.5 fill-current" />
+            <span>Run Demo (Seed 42)</span>
+          </button>
+
           <div className="flex items-center gap-2 bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5">
             <Layers className="w-4 h-4 text-blue-400" />
             <select
@@ -129,7 +154,7 @@ export default function SchedulePage() {
             ) : (
               <>
                 <Play className="w-4 h-4 fill-current" />
-                <span>Solve & Generate</span>
+                <span>Solve &amp; Generate</span>
               </>
             )}
           </button>

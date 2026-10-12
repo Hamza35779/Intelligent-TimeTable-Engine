@@ -1,4 +1,5 @@
 from collections import defaultdict
+from datetime import datetime, timezone
 from typing import List, Dict, Any, Tuple
 
 
@@ -17,7 +18,26 @@ UNIVERSITY_9_SLOTS: List[Tuple[str, str, str]] = [
     ("15:10", "Slot 9", "1510-1600"),
 ]
 
-# Map legacy hourly start_time values (08:00..16:00) into the 9 university slots
+STANDARD_HOURLY_SLOTS: List[Tuple[str, str]] = [
+    ("09:00", "09:00 - 10:00"),
+    ("10:00", "10:00 - 11:00"),
+    ("11:00", "11:00 - 12:00"),
+    ("LUNCH", "12:00 - 14:00 (LUNCH BREAK)"),
+    ("14:00", "14:00 - 15:00"),
+    ("15:00", "15:00 - 16:00"),
+    ("16:00", "16:00 - 17:00"),
+]
+
+VIEW_TITLES = {
+    "master": "Master University Timetable",
+    "teacher": "Teacher Schedule View (Per-Teacher Sessions, Total Hours & Days Taught)",
+    "student": "Student Group Schedule View (With Explicit Break Rows)",
+    "staff": "Support, Maintenance & Security Staff View (Hourly Active Rooms & Load)",
+    "canteen": "Canteen & Dining Demand View (Hourly Estimated Diners & Rush Windows)",
+}
+
+VALID_VIEWS = set(VIEW_TITLES.keys())
+
 HOUR_TO_SLOT_INDEX = {
     "08:00": 0,
     "08:30": 0,
@@ -67,16 +87,12 @@ def map_time_to_slot_index(start_time: str, slot_id: int = 0) -> int:
 
 
 def build_course_legend_rows(entries: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """
-    Build the lower 8-column Course & Faculty Legend table:
-      Serial | Course Code | Course Titles | CHs | Name of Faculty | Elective / Compulsory | Venues | Remarks
-    """
     grouped: Dict[str, Dict[str, Any]] = {}
     for e in entries:
         code = str(e.get("course_code") or "CS100").strip()
         title = str(e.get("course_name") or "Course").strip()
         key = f"{code}::{title}"
-        venue = str(e.get("venue_name") or "AC-702 (A)").strip()
+        venue = str(e.get("venue_name") or "Room 1").strip()
         faculty = str(e.get("faculty_name") or "Faculty").strip()
         is_lab = "lab" in title.lower() or "cl-" in venue.lower() or "nlsp" in venue.lower()
 
@@ -89,11 +105,13 @@ def build_course_legend_rows(entries: List[Dict[str, Any]]) -> List[Dict[str, An
                 "course_title": title,
                 "credit_hours": e.get("credit_hours") or (1 if is_lab else 3),
                 "faculty_name": faculty,
-                "elective_compulsory": e.get("elective_compulsory", ""),
+                "elective_compulsory": e.get("elective_compulsory", "Compulsory"),
                 "venues": [venue] if venue else [],
                 "remarks": remarks,
+                "count": 1,
             }
         else:
+            grouped[key]["count"] += 1
             if venue and venue not in grouped[key]["venues"]:
                 grouped[key]["venues"].append(venue)
 
@@ -119,22 +137,12 @@ def build_university_sheet_data(
     view_type: str = "master",
     section_title: str = "AI 2024 - Section A",
 ) -> Dict[str, Any]:
-    """
-    Build the complete university schedule structure matching the reference images:
-      - section_title (e.g. "AI 2023", "AI 2024 - Section A")
-      - slot_headers: ["Slot 1", ..., "Slot 9"]
-      - time_headers: ["0830-9020", ..., "1510-1600"]
-      - day_rows: dict mapping day -> list of 9 slot strings
-      - merged_day_rows: dict mapping day -> list of { text, colSpan, startSlot }
-      - course_legend: list of 8-column course legend dictionaries
-    """
     days = list(BASE_DAYS)
     for e in entries:
         d = e.get("day_of_week")
         if d and d not in days and str(d).upper() != "BREAK":
             days.append(d)
 
-    # day -> slot_idx (0..8) -> list of entries
     grid: Dict[str, Dict[int, List[Dict[str, Any]]]] = {
         d: defaultdict(list) for d in days
     }
@@ -145,18 +153,11 @@ def build_university_sheet_data(
             continue
         s_idx = e.get("slot_index")
         if s_idx is None:
-            s_idx = map_time_to_slot_index(e.get("start_time", "08:30"), int(e.get("slot_id", 0) or 0))
+            s_idx = map_time_to_slot_index(
+                e.get("start_time", "08:30"), int(e.get("slot_id", 0) or 0)
+            )
         s_idx = max(0, min(8, int(s_idx)))
-
-        span = int(e.get("span_slots", 0) or 0)
-        if span <= 0:
-            is_lab = "lab" in str(e.get("course_name", "")).lower()
-            span = 3 if is_lab else 1
-
-        for offset in range(span):
-            target_slot = s_idx + offset
-            if target_slot < 9:
-                grid[day][target_slot].append(e)
+        grid[day][s_idx].append(e)
 
     day_cells: Dict[str, List[str]] = {}
     merged_day_cells: Dict[str, List[Dict[str, Any]]] = {}
@@ -167,39 +168,43 @@ def build_university_sheet_data(
             slot_entries = grid[day].get(s_idx, [])
             if not slot_entries:
                 if view_type == "canteen" and s_idx in (4, 5):
-                    raw_row.append("PEAK LUNCH RUSH\n(350+ Diners)")
+                    raw_row.append("PEAK LUNCH RUSH\n(Est. 240+ Diners)")
                 elif view_type == "staff" and s_idx in (4, 5):
-                    raw_row.append("Room Sanitization &\nAV Check")
+                    raw_row.append("0 Active Rooms\n[Quiet - Lunch Window]")
                 else:
                     raw_row.append("")
                 continue
 
             if view_type == "teacher":
                 cell_txt = "\n".join(
-                    f"{i.get('course_name', '')}\n({i.get('faculty_name', '')} - {i.get('venue_name', '')})"
+                    f"{i.get('faculty_name', '')}\n{i.get('course_name', '')} ({i.get('venue_name', '')})"
+                    for i in slot_entries
+                )
+            elif view_type == "student":
+                cell_txt = "\n".join(
+                    f"{i.get('course_code', '')}: {i.get('course_name', '')}\n{i.get('venue_name', '')} ({i.get('faculty_name', '')})"
                     for i in slot_entries
                 )
             elif view_type == "staff":
-                rooms = ", ".join(dict.fromkeys(i.get("venue_name", "") for i in slot_entries))
-                cell_txt = f"Active: {rooms}\n({len(slot_entries)} Classes)"
+                rooms = list(dict.fromkeys(i.get("venue_name", "") for i in slot_entries))
+                n_r = len(rooms)
+                label = "Busy" if n_r >= 3 else ("Moderate" if n_r >= 1 else "Quiet")
+                cell_txt = f"{n_r} Active Room(s) [{label}]\n" + ", ".join(rooms)
             elif view_type == "canteen":
-                cell_txt = f"{len(slot_entries)} Classes Active\n(~{len(slot_entries) * 45} Students)"
+                est_students = len(slot_entries) * 40
+                cell_txt = f"Est. {est_students} Students in Class\n({len(slot_entries)} Groups Active - Estimate)"
             else:
-                # Standard University Sheet cell format (Course Title + optional Venue)
                 parts = []
                 for i in slot_entries:
                     c_name = i.get("course_name", "")
+                    t_name = i.get("faculty_name", "")
                     v_name = i.get("venue_name", "")
-                    if v_name and v_name not in c_name and view_type == "master":
-                        parts.append(f"{c_name}")
-                    else:
-                        parts.append(c_name)
-                cell_txt = "\n".join(dict.fromkeys(parts))
+                    parts.append(f"{c_name}\n{t_name} | {v_name}")
+                cell_txt = "\n---\n".join(dict.fromkeys(parts))
             raw_row.append(cell_txt)
 
         day_cells[day] = raw_row
 
-        # Build merged consecutive spans (e.g., 3-slot Labs or 2-slot lectures)
         spans: List[Dict[str, Any]] = []
         idx = 0
         while idx < 9:
@@ -212,7 +217,7 @@ def build_university_sheet_data(
                 {
                     "text": val,
                     "colSpan": span_len,
-                    "startSlot": idx,
+                    "startSlot": idx + 1,
                 }
             )
             idx += span_len
@@ -220,13 +225,305 @@ def build_university_sheet_data(
 
     return {
         "section_title": section_title,
-        "slot_headers": [s[1] for s in UNIVERSITY_9_SLOTS],
-        "time_headers": [s[2] for s in UNIVERSITY_9_SLOTS],
+        "slot_headers": [""] + [s[1] for s in UNIVERSITY_9_SLOTS],
+        "time_headers": ["Day/Time"] + [s[2] for s in UNIVERSITY_9_SLOTS],
         "days": days,
         "day_cells": day_cells,
         "merged_day_cells": merged_day_cells,
         "course_legend": build_course_legend_rows(entries),
     }
+
+
+def _build_master_grid_rows(entries: List[Dict[str, Any]], days: List[str]) -> List[List[str]]:
+    """
+    Step 3 Master view:
+    Full grid, rows = time slots, columns = days, cells = course, teacher, room.
+    """
+    headers = ["Time Slot"] + days
+    rows: List[List[str]] = [headers]
+
+    # Collect all distinct start times and merge with standard hourly slots
+    slot_map: Dict[Tuple[str, str], List[Dict[str, Any]]] = defaultdict(list)
+    extra_hours = set()
+    std_keys = {k for k, _ in STANDARD_HOURLY_SLOTS if k != "LUNCH"}
+
+    for e in entries:
+        d = str(e.get("day_of_week", "Monday"))
+        st = str(e.get("start_time", "09:00"))
+        hour_key = f"{st.split(':')[0].zfill(2)}:00" if ":" in st else "09:00"
+        if hour_key not in std_keys:
+            extra_hours.add(hour_key)
+        slot_map[(d, hour_key)].append(e)
+
+    ordered_slots = (
+        [(h, f"{h} - {int(h[:2])+1:02d}:00") for h in sorted(extra_hours) if h < "09:00"]
+        + STANDARD_HOURLY_SLOTS
+        + [(h, f"{h} - {int(h[:2])+1:02d}:00") for h in sorted(extra_hours) if h > "16:00"]
+    )
+
+    for slot_key, slot_label in ordered_slots:
+        if slot_key == "LUNCH":
+            rows.append([slot_label] + ["LUNCH BREAK (No Classes)"] * len(days))
+            continue
+        row = [slot_label]
+        for d in days:
+            cell_items = slot_map.get((d, slot_key), [])
+            if not cell_items:
+                row.append("")
+            else:
+                cell_str = "\n---\n".join(
+                    f"{i.get('course_name', '')} ({i.get('course_code', '')})\n"
+                    f"Teacher: {i.get('faculty_name', '')}\n"
+                    f"Room: {i.get('venue_name', '')}"
+                    for i in cell_items
+                )
+                row.append(cell_str)
+        rows.append(row)
+    return rows
+
+
+def build_teacher_tables(entries: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """
+    Step 3 Teacher view:
+    One table per teacher showing their own sessions, total hours, and days taught.
+    """
+    by_teacher: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
+    for e in entries:
+        t_name = str(e.get("faculty_name") or f"Teacher {e.get('faculty_id', 1)}")
+        by_teacher[t_name].append(e)
+
+    teacher_tables: List[Dict[str, Any]] = []
+    for t_name in sorted(by_teacher.keys()):
+        t_entries = sorted(
+            by_teacher[t_name],
+            key=lambda x: (
+                BASE_DAYS.index(x.get("day_of_week", "Monday"))
+                if x.get("day_of_week") in BASE_DAYS
+                else 99,
+                str(x.get("start_time", "09:00")),
+            ),
+        )
+        days_taught = sorted(
+            {str(x.get("day_of_week", "Monday")) for x in t_entries},
+            key=lambda d: BASE_DAYS.index(d) if d in BASE_DAYS else 99,
+        )
+        total_hours = len(t_entries)
+        session_rows = [
+            [
+                str(x.get("day_of_week", "")),
+                f"{x.get('start_time', '')} - {x.get('end_time', '')}",
+                f"{x.get('course_name', '')} ({x.get('course_code', '')})",
+                str(x.get("venue_name", "")),
+                str(x.get("student_group") or f"Group-{x.get('course_code', '')}"),
+            ]
+            for x in t_entries
+        ]
+        teacher_tables.append(
+            {
+                "teacher_name": t_name,
+                "total_hours": total_hours,
+                "days_taught": days_taught,
+                "days_taught_count": len(days_taught),
+                "headers": ["Day", "Time", "Course", "Room", "Student Group"],
+                "rows": session_rows,
+            }
+        )
+    return teacher_tables
+
+
+def build_student_group_tables(entries: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """
+    Step 3 Student view:
+    One table per student group showing their classes, times, rooms, and teachers,
+    plus breaks shown as explicit rows.
+    """
+    by_group: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
+    for e in entries:
+        grp = str(e.get("student_group") or f"Group-{e.get('course_code', e.get('course_name', '1'))}")
+        by_group[grp].append(e)
+
+    group_tables: List[Dict[str, Any]] = []
+    for grp in sorted(by_group.keys()):
+        g_entries = sorted(
+            by_group[grp],
+            key=lambda x: (
+                BASE_DAYS.index(x.get("day_of_week", "Monday"))
+                if x.get("day_of_week") in BASE_DAYS
+                else 99,
+                str(x.get("start_time", "09:00")),
+            ),
+        )
+        rows = []
+        consecutive_count = 0
+        last_day = None
+        lunch_inserted_for_day = set()
+
+        for x in g_entries:
+            day = str(x.get("day_of_week", "Monday"))
+            st = str(x.get("start_time", "09:00"))
+            if day != last_day:
+                consecutive_count = 0
+                last_day = day
+
+            if st >= "14:00" and day not in lunch_inserted_for_day:
+                rows.append([day, "12:00 - 14:00", "LUNCH BREAK (Explicit Break Row)", "—", "—"])
+                lunch_inserted_for_day.add(day)
+                consecutive_count = 0
+
+            rows.append(
+                [
+                    day,
+                    f"{st} - {x.get('end_time', '')}",
+                    f"{x.get('course_name', '')} ({x.get('course_code', '')})",
+                    str(x.get("venue_name", "")),
+                    str(x.get("faculty_name", "")),
+                ]
+            )
+            consecutive_count += 1
+            if consecutive_count == 2:
+                rows.append(
+                    [
+                        day,
+                        f"After {x.get('end_time', '11:00')} (15 min)",
+                        "MANDATORY 15-MIN BREAK (After 2 Consecutive Hours)",
+                        "—",
+                        "—",
+                    ]
+                )
+                consecutive_count = 0
+
+        if not lunch_inserted_for_day:
+            rows.append(["Monday–Friday", "12:00 - 14:00", "LUNCH BREAK (Explicit Break Row)", "—", "—"])
+
+        group_tables.append(
+            {
+                "student_group": grp,
+                "total_weekly_hours": len(g_entries),
+                "headers": ["Day", "Time", "Course / Break", "Room", "Teacher"],
+                "rows": rows,
+            }
+        )
+    return group_tables
+
+
+def build_staff_hourly_rows(entries: List[Dict[str, Any]]) -> List[List[str]]:
+    """
+    Step 3 Staff view (support/maintenance/security):
+    Per hour, number of rooms active and a busy / moderate / quiet label.
+    """
+    headers = ["Day", "Hour Window", "Active Rooms Count", "Activity Level", "Rooms Active"]
+    rows: List[List[str]] = [headers]
+
+    by_day_hour: Dict[Tuple[str, str], List[Dict[str, Any]]] = defaultdict(list)
+    days = list(BASE_DAYS)
+    for e in entries:
+        d = str(e.get("day_of_week", "Monday"))
+        if d not in days:
+            days.append(d)
+        st = str(e.get("start_time", "09:00"))
+        h_key = f"{st.split(':')[0].zfill(2)}:00" if ":" in st else "09:00"
+        by_day_hour[(d, h_key)].append(e)
+
+    for d in days:
+        for slot_key, slot_label in STANDARD_HOURLY_SLOTS:
+            if slot_key == "LUNCH":
+                rows.append(
+                    [
+                        d,
+                        "12:00 - 14:00",
+                        "0",
+                        "Quiet (Lunch / Room Maintenance Window)",
+                        "None (All rooms open for cleaning/AV check)",
+                    ]
+                )
+                continue
+            active = by_day_hour.get((d, slot_key), [])
+            rooms = sorted({str(x.get("venue_name", "")) for x in active if x.get("venue_name")})
+            n_rooms = len(rooms)
+            if n_rooms >= 3:
+                level = "Busy"
+            elif n_rooms >= 1:
+                level = "Moderate"
+            else:
+                level = "Quiet"
+            rows.append(
+                [
+                    d,
+                    slot_label,
+                    str(n_rooms),
+                    level,
+                    ", ".join(rooms) if rooms else "None",
+                ]
+            )
+    return rows
+
+
+def build_canteen_hourly_rows(entries: List[Dict[str, Any]]) -> List[List[str]]:
+    """
+    Step 3 Canteen view:
+    Per hour, expected diners = sum of students in groups with a class in that hour
+    (estimated, labeled as an estimate), plus the rush windows.
+    """
+    headers = [
+        "Day",
+        "Hour Window",
+        "Classes in Session",
+        "Expected Diners (Estimate)",
+        "Demand Window Status",
+    ]
+    rows: List[List[str]] = [headers]
+
+    by_day_hour: Dict[Tuple[str, str], List[Dict[str, Any]]] = defaultdict(list)
+    days = list(BASE_DAYS)
+    for e in entries:
+        d = str(e.get("day_of_week", "Monday"))
+        if d not in days:
+            days.append(d)
+        st = str(e.get("start_time", "09:00"))
+        h_key = f"{st.split(':')[0].zfill(2)}:00" if ":" in st else "09:00"
+        by_day_hour[(d, h_key)].append(e)
+
+    for d in days:
+        # Count total students active on this day to estimate lunch rush
+        day_groups = {
+            str(e.get("student_group") or e.get("course_code"))
+            for (ed, _), elist in by_day_hour.items()
+            if ed == d
+            for e in elist
+        }
+        est_day_students = max(40, len(day_groups) * 35)
+
+        for slot_key, slot_label in STANDARD_HOURLY_SLOTS:
+            if slot_key == "LUNCH":
+                rows.append(
+                    [
+                        d,
+                        "12:00 - 14:00 (LUNCH BREAK)",
+                        "0 (Protected Lunch Window)",
+                        f"~{est_day_students} diners (Estimate)",
+                        "PEAK RUSH WINDOW — All Counters Open",
+                    ]
+                )
+                continue
+            active = by_day_hour.get((d, slot_key), [])
+            # Estimate students in class (35 students per group) and ~30% pre/post class canteen visitors
+            in_class_students = len(active) * 35
+            est_diners = int(round(in_class_students * 0.35)) if in_class_students > 0 else 15
+            rush_status = (
+                "Pre-Lunch Prep Rush"
+                if slot_key == "11:00"
+                else ("Moderate Beverage/Snack Demand" if active else "Low / Quiet Window")
+            )
+            rows.append(
+                [
+                    d,
+                    slot_label,
+                    f"{len(active)} group(s) ({in_class_students} students in class, Estimate)",
+                    f"~{est_diners} diners (Estimate)",
+                    rush_status,
+                ]
+            )
+    return rows
 
 
 def build_table_rows(
@@ -235,30 +532,49 @@ def build_table_rows(
     section_title: str = "AI 2024 - Section A",
 ) -> List[List[str]]:
     """
-    Build tabular rows matching the University 9-Slot horizontal sheet layout:
-      Row 0 (Header): ["Day/Time", "Slot 1 (0830-9020)", ..., "Slot 9 (1510-1600)"]
-      Rows 1..5: ["Monday", cell1..cell9] ... ["Friday", cell1..cell9]
+    Pure function of the solved timetable producing tabular rows for the requested view:
+      - master: rows = time slots, columns = days, cells = course, teacher, room
+      - teacher: per-teacher sessions, total hours, and days taught
+      - student: per-student-group classes, times, rooms, teachers, and explicit break rows
+      - staff: per-hour active room count and Busy / Moderate / Quiet label
+      - canteen: per-hour expected diners (labeled as Estimate) and rush windows
     """
-    sheet = build_university_sheet_data(entries, view_type=view_type, section_title=section_title)
-    headers = ["Day/Time"] + [
-        f"{slot_lbl}\n{time_lbl}"
-        for slot_lbl, time_lbl in zip(sheet["slot_headers"], sheet["time_headers"])
-    ]
-    rows: List[List[str]] = [headers]
+    v = (view_type or "master").strip().lower()
+    days = list(BASE_DAYS)
+    for e in entries:
+        d = e.get("day_of_week")
+        if d and d not in days and str(d).upper() != "BREAK":
+            days.append(d)
 
-    for day in sheet["days"]:
-        rows.append([day] + sheet["day_cells"][day])
+    if v == "teacher":
+        t_tables = build_teacher_tables(entries)
+        rows: List[List[str]] = [
+            ["Teacher", "Total Weekly Hours", "Days Taught", "Day", "Time", "Course", "Room"]
+        ]
+        for tbl in t_tables:
+            t_name = tbl["teacher_name"]
+            tot_h = f"{tbl['total_hours']}h"
+            days_str = ", ".join(tbl["days_taught"])
+            for r in tbl["rows"]:
+                rows.append([t_name, tot_h, days_str, r[0], r[1], r[2], r[3]])
+        return rows
 
-    # Also include BREAK indicator row for backward compatibility with tabular checks
-    if view_type in ("canteen", "staff"):
-        break_msg = (
-            "PEAK LUNCH RUSH (350+ Diners)"
-            if view_type == "canteen"
-            else "Midday Maintenance & AV Check Window"
-        )
-        rows.append(["BREAK (1240-1330)"] + [break_msg] * 9)
+    if v == "student":
+        g_tables = build_student_group_tables(entries)
+        rows = [["Student Group", "Day", "Time", "Course / Break", "Room", "Teacher"]]
+        for tbl in g_tables:
+            grp = tbl["student_group"]
+            for r in tbl["rows"]:
+                rows.append([grp, r[0], r[1], r[2], r[3], r[4]])
+        return rows
 
-    return rows
+    if v == "staff":
+        return build_staff_hourly_rows(entries)
+
+    if v == "canteen":
+        return build_canteen_hourly_rows(entries)
+
+    return _build_master_grid_rows(entries, days)
 
 
 def generate_multi_views(
@@ -266,24 +582,36 @@ def generate_multi_views(
     metadata: Dict[str, Any],
 ) -> Dict[str, Any]:
     """
-    Generate structured multi-view perspectives from the same schedule:
-      - master
-      - teacher
-      - student
-      - staff
-      - canteen
+    Step 3: All 5 views driven from ONE solved timetable as pure functions.
+    Each view includes title, generated_at timestamp, and schedule_id.
     """
-    section_title = metadata.get("section_title", "AI 2024 - Section A")
+    meta = dict(metadata or {})
+    schedule_id = meta.get("schedule_id", 1)
+    generated_at = meta.get("generated_at") or datetime.now(timezone.utc).isoformat()
+    section_title = meta.get("section_title", "AI 2024 - Section A")
+
+    teacher_tables = build_teacher_tables(entries)
+    student_tables = build_student_group_tables(entries)
+
     views = {}
     for v_type in ("master", "teacher", "student", "staff", "canteen"):
         sheet = build_university_sheet_data(entries, view_type=v_type, section_title=section_title)
         table_rows = build_table_rows(entries, view_type=v_type, section_title=section_title)
-        views[v_type] = {
+        view_obj: Dict[str, Any] = {
             "view_type": v_type,
+            "title": VIEW_TITLES.get(v_type, "Timetable View"),
+            "schedule_id": schedule_id,
+            "generated_at": generated_at,
             "section_title": section_title,
-            "headers": table_rows[0],
-            "rows": table_rows[1:],
+            "headers": table_rows[0] if table_rows else [],
+            "rows": table_rows[1:] if len(table_rows) > 1 else [],
             "sheet": sheet,
-            "metadata": metadata,
+            "metadata": meta,
         }
+        if v_type == "teacher":
+            view_obj["teacher_tables"] = teacher_tables
+        elif v_type == "student":
+            view_obj["student_group_tables"] = student_tables
+        views[v_type] = view_obj
+
     return views

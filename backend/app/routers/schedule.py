@@ -161,6 +161,7 @@ def generate_schedule(payload: GenerateScheduleRequest, db: Session = Depends(ge
     faculty_payload = [f.model_dump() for f in payload.faculty]
     venues_payload = [v.model_dump() for v in payload.venues]
     slots_payload = [s.model_dump() for s in payload.slots]
+    config_dict = payload.config.model_dump() if getattr(payload, "config", None) else {}
 
     ml_preferences_map: Dict[str, Dict[str, float]] = {}
     for idx, f in enumerate(faculty_payload):
@@ -172,14 +173,24 @@ def generate_schedule(payload: GenerateScheduleRequest, db: Session = Depends(ge
         f["preferences"] = f_prefs
         ml_preferences_map[f["name"]] = f_prefs
 
+    course_metadata: Dict[str, Dict[str, Any]] = {}
     for idx, c in enumerate(courses_payload):
         c["id"] = db_courses_map[idx].id
+        course_metadata[str(c["id"])] = {
+            "credit_hours": c.get("credit_hours") or max(1, round((c.get("duration_minutes") or 60) / 60)),
+            "student_group": c.get("student_group") or c.get("code") or c.get("name"),
+            "room_type": c.get("room_type"),
+        }
     for idx, v in enumerate(venues_payload):
         v["id"] = db_venues_map[idx].id
     for idx, s in enumerate(slots_payload):
         s["id"] = db_slots_map[idx].id
 
-    solver = TimetableSolver(time_limit_seconds=payload.timeout_seconds or 5)
+    solver = TimetableSolver(
+        time_limit_seconds=payload.timeout_seconds or 5,
+        random_seed=getattr(payload, "random_seed", None),
+        config=config_dict,
+    )
     solver.add_variables(
         courses=courses_payload,
         faculty=faculty_payload,
@@ -193,6 +204,10 @@ def generate_schedule(payload: GenerateScheduleRequest, db: Session = Depends(ge
     total_time_ms = round((time.perf_counter() - wall_start_time) * 1000.0, 2)
 
     if not is_solved:
+        explanation = (
+            solver.infeasibility_explanation
+            or f"Solver could not find a feasible conflict-free timetable ({solver_status})."
+        )
         now_utc = datetime.now(timezone.utc)
         failed_run = ScheduleRun(
             generated_at=now_utc,
@@ -205,7 +220,10 @@ def generate_schedule(payload: GenerateScheduleRequest, db: Session = Depends(ge
             total_courses_scheduled=0,
             conflict_count=len(payload.courses),
             conflicts_resolved=0,
-            metrics={"error": "Constraint solver could not find a feasible schedule."},
+            metrics={
+                "error": explanation,
+                "explanation": explanation,
+            },
         )
         db.add(failed_run)
         db.commit()
@@ -213,9 +231,12 @@ def generate_schedule(payload: GenerateScheduleRequest, db: Session = Depends(ge
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail={
-                "message": f"Solver could not find a feasible conflict-free timetable: {solver_status}",
+                "message": explanation,
+                "explanation": explanation,
                 "status": solver_status,
                 "solver_time_ms": solver.solver_time_ms,
+                "solve_time_ms": solver.solver_time_ms,
+                "objective_value": solver.objective_value,
             },
         )
 
@@ -234,6 +255,10 @@ def generate_schedule(payload: GenerateScheduleRequest, db: Session = Depends(ge
         solution_entries, ml_preferences_map
     )
     analytics["ml_predicted_preferences"] = ml_preferences_map
+    analytics["preference_source"] = predictor.model_source
+    analytics["course_metadata"] = course_metadata
+    analytics["config"] = config_dict
+    analytics["objective_value"] = solver.objective_value
     analytics["run_scope"] = {
         "faculty_ids": [f["id"] for f in faculty_payload],
         "venue_ids": [v["id"] for v in venues_payload],
@@ -280,7 +305,9 @@ def generate_schedule(payload: GenerateScheduleRequest, db: Session = Depends(ge
         stats=SolverStats(
             status=solver_status,
             solver_time_ms=solver.solver_time_ms,
+            solve_time_ms=solver.solver_time_ms,
             total_time_ms=total_time_ms,
+            objective_value=solver.objective_value,
             total_courses_scheduled=len(solution_entries),
             total_courses_requested=len(payload.courses),
             conflict_count=0,
@@ -295,6 +322,14 @@ def generate_schedule(payload: GenerateScheduleRequest, db: Session = Depends(ge
 @router.post("/upload-csv", response_model=TimetableResponse, status_code=status.HTTP_201_CREATED)
 async def upload_csv_and_generate(
     file: UploadFile = File(...),
+    day_start: str = "09:00",
+    day_end: str = "17:00",
+    lunch_start: str = "12:00",
+    lunch_end: str = "14:00",
+    slot_minutes: int = 60,
+    break_minutes: int = 15,
+    min_gap_minutes: int = 30,
+    max_teaching_hours_per_day: int = 6,
     db: Session = Depends(get_db),
 ):
     raw_bytes = await file.read(MAX_CSV_UPLOAD_BYTES + 1)
@@ -310,7 +345,17 @@ async def upload_csv_and_generate(
         )
     try:
         csv_text = raw_bytes.decode("utf-8-sig")
-        parsed_dict = parse_schedule_csv(csv_text)
+        cfg = {
+            "day_start": day_start,
+            "day_end": day_end,
+            "lunch_start": lunch_start,
+            "lunch_end": lunch_end,
+            "slot_minutes": slot_minutes,
+            "break_minutes": break_minutes,
+            "min_gap_minutes": min_gap_minutes,
+            "max_teaching_hours_per_day": max_teaching_hours_per_day,
+        }
+        parsed_dict = parse_schedule_csv(csv_text, config=cfg)
         req = GenerateScheduleRequest(**parsed_dict)
     except Exception as exc:
         raise HTTPException(
@@ -399,17 +444,24 @@ def reschedule_conflicts(payload: RescheduleRequest, db: Session = Depends(get_d
         elif 0 <= raw_vid < len(all_venues):
             unavail_venue_indices.add(raw_vid)
 
-    courses_payload = [
-        {
-            "id": c.id,
-            "name": c.name,
-            "code": c.code,
-            "faculty_id": faculty_to_idx.get(c.faculty_id, 0),
-            "capacity_required": c.capacity_required,
-            "duration_minutes": c.duration_minutes,
-        }
-        for c in all_courses
-    ]
+    prior_course_meta = dict((prior_run.metrics or {}).get("course_metadata") or {})
+    courses_payload = []
+    for c in all_courses:
+        c_meta = prior_course_meta.get(str(c.id)) or {}
+        credit_hrs = c_meta.get("credit_hours") or max(1, round((c.duration_minutes or 60) / 60))
+        courses_payload.append(
+            {
+                "id": c.id,
+                "name": c.name,
+                "code": c.code,
+                "faculty_id": faculty_to_idx.get(c.faculty_id, 0),
+                "capacity_required": c.capacity_required,
+                "duration_minutes": c.duration_minutes,
+                "credit_hours": credit_hrs,
+                "student_group": c_meta.get("student_group") or c.code,
+                "room_type": c_meta.get("room_type"),
+            }
+        )
 
     ml_preferences_map = dict((prior_run.metrics or {}).get("ml_predicted_preferences") or {})
     faculty_payload = []
@@ -486,7 +538,11 @@ def reschedule_conflicts(payload: RescheduleRequest, db: Session = Depends(get_d
                 )
             )
 
-    solver = TimetableSolver(time_limit_seconds=payload.timeout_seconds or 5)
+    prior_config = dict((prior_run.metrics or {}).get("config") or {})
+    solver = TimetableSolver(
+        time_limit_seconds=payload.timeout_seconds or 5,
+        config=prior_config,
+    )
     solver.add_variables(
         courses=courses_payload,
         faculty=faculty_payload,
@@ -500,9 +556,19 @@ def reschedule_conflicts(payload: RescheduleRequest, db: Session = Depends(get_d
     total_time_ms = round((time.perf_counter() - wall_start_time) * 1000.0, 2)
 
     if not is_solved:
+        explanation = (
+            solver.infeasibility_explanation
+            or f"Unable to reschedule given new conflict constraints ({solver_status})."
+        )
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=f"Unable to reschedule given new conflict constraints: {solver_status}",
+            detail={
+                "message": explanation,
+                "explanation": explanation,
+                "status": solver_status,
+                "solver_time_ms": solver.solver_time_ms,
+                "solve_time_ms": solver.solver_time_ms,
+            },
         )
 
     solution_entries = solver.get_solution()
@@ -520,6 +586,9 @@ def reschedule_conflicts(payload: RescheduleRequest, db: Session = Depends(get_d
         solution_entries, ml_preferences_map
     )
     analytics["ml_predicted_preferences"] = ml_preferences_map
+    analytics["course_metadata"] = prior_course_meta
+    analytics["config"] = prior_config
+    analytics["objective_value"] = solver.objective_value
     analytics["run_scope"] = {
         "faculty_ids": [f["id"] for f in faculty_payload],
         "venue_ids": [v["id"] for v in venues_payload],
@@ -565,7 +634,9 @@ def reschedule_conflicts(payload: RescheduleRequest, db: Session = Depends(get_d
         stats=SolverStats(
             status=solver_status,
             solver_time_ms=solver.solver_time_ms,
+            solve_time_ms=solver.solver_time_ms,
             total_time_ms=total_time_ms,
+            objective_value=solver.objective_value,
             total_courses_scheduled=len(solution_entries),
             total_courses_requested=len(courses_payload),
             conflict_count=0,
@@ -575,3 +646,62 @@ def reschedule_conflicts(payload: RescheduleRequest, db: Session = Depends(get_d
         schedule=formatted_entries,
         analytics=analytics,
     )
+
+
+demo_router = APIRouter(prefix="/demo", tags=["Demo"])
+
+
+def _load_demo_csv_text() -> str:
+    import os
+    candidates = [
+        os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))), "data", "demo_courses.csv"),
+        os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "demo_courses.csv"),
+    ]
+    for path in candidates:
+        if os.path.exists(path):
+            with open(path, "r", encoding="utf-8") as f:
+                return f.read()
+    # Built-in fallback if file is moved
+    return (
+        "teacher_name,course_name,credit_hours,student_group,room_type\n"
+        "Dr. Sarah Ahmed,Artificial Intelligence,3,BS-AI-4A,Lecture\n"
+        "Dr. Sarah Ahmed,Deep Learning,3,BS-AI-6A,Lab\n"
+        "Prof. Kamran Siddiqui,Operating Systems,4,BS-CS-4A,Lecture\n"
+        "Prof. Kamran Siddiqui,Computer Networks,3,BS-CS-6A,Lecture\n"
+        "Dr. Ayesha Tariq,Database Systems,4,BS-SE-4A,Lecture\n"
+        "Dr. Ayesha Tariq,Data Mining,2,BS-AI-6A,Lecture\n"
+        "Mr. Bilal Raza,Software Engineering,3,BS-SE-4A,Lecture\n"
+        "Mr. Bilal Raza,Agile Development,2,BS-SE-6A,Lecture\n"
+        "Dr. Usman Farooq,Linear Algebra,3,BS-AI-4A,Lecture\n"
+        "Dr. Usman Farooq,Probability & Statistics,3,BS-CS-4A,Lecture\n"
+        "Ms. Hina Noor,Technical Writing,2,BS-CS-6A,Lecture\n"
+        "Ms. Hina Noor,Professional Ethics,2,BS-SE-6A,Lecture\n"
+    )
+
+
+@demo_router.post("/run", response_model=TimetableResponse, status_code=status.HTTP_201_CREATED)
+def run_demo_pipeline(db: Session = Depends(get_db)):
+    csv_text = _load_demo_csv_text()
+    parsed_dict = parse_schedule_csv(csv_text)
+    parsed_dict["random_seed"] = 42
+    parsed_dict["timeout_seconds"] = 5
+    req = GenerateScheduleRequest(**parsed_dict)
+    return generate_schedule(payload=req, db=db)
+
+
+@demo_router.get("/courses")
+def get_demo_courses():
+    csv_text = _load_demo_csv_text()
+    parsed_dict = parse_schedule_csv(csv_text)
+    return {
+        "csv_text": csv_text,
+        "parsed": parsed_dict,
+    }
+
+
+@demo_router.post("/seed", status_code=status.HTTP_200_OK)
+def seed_demo_database_fixtures(force: bool = False, db: Session = Depends(get_db)):
+    from app.fixtures import seed_demo_fixtures
+
+    return seed_demo_fixtures(db, force=force)
+
