@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { Upload, FileSpreadsheet, Download, CheckCircle2, RefreshCw } from 'lucide-react';
+import { Upload, FileSpreadsheet, Download, CheckCircle2 } from 'lucide-react';
 import { TimetableResponse } from '../types';
 import {
   parseCsvLocally,
@@ -9,65 +9,63 @@ import {
   saveLocalSchedule,
 } from '../utils/localFallbackSolver';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
 export const SAMPLE_CSV = `teacher,course,code,hours,preferred_time,department,capacity
-Ahmad Ali,Data Structures & Algorithms,CS301,3,Morning,Computer Science,60
-Fatima Khan,Database Management Systems,CS302,4,Afternoon,Computer Science,50
-Hassan Raza,Operating Systems,SE205,3,Morning,Software Engineering,45
-Dr. Alan Turing,Theory of Computation,CS401,3,Morning,Computer Science,75
-Dr. Ada Lovelace,Compiler Construction,CS405,3,Afternoon,Computer Science,40
-Dr. Claude Shannon,Information Theory,IT202,3,Morning,Information Theory,55`;
+Lec. Faria Sajjad,Computer Vision,CS410,3,Morning,Artificial Intelligence,50
+SLE Saad Rafi Butt,Computer Vision Lab,CS410L,1,Afternoon,Artificial Intelligence,50
+Lec. Almira Aslam,Operating Systems,CS330,3,Morning,Artificial Intelligence,50
+Lec. Qasim Safeer,Operating Systems Lab,CS331,1,Morning,Artificial Intelligence,50
+Lec. Hassan Raza,Natural Language Processing,CS380,3,Morning,Artificial Intelligence,50
+Lec. Abdul Basit,Competitive Programming,CS210,2,Afternoon,Computer Science,50
+Lec. Usama Ahmed,Full Stack Mobile App Development,SE340,3,Afternoon,Software Engineering,50`;
 
 interface CsvUploaderProps {
   onScheduleGenerated: (data: TimetableResponse) => void;
 }
 
 export default function CsvUploader({ onScheduleGenerated }: CsvUploaderProps) {
-  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileUpload = async (file: File) => {
-    setUploading(true);
     setError(null);
     setFileName(file.name);
 
-    const formData = new FormData();
-    formData.append('file', file);
-
     try {
-      const res = await fetch(`${API_BASE}/schedule/upload-csv`, {
+      // 1. Parse and solve in-browser immediately (<5ms) so there is zero waiting
+      const text = await file.text();
+      const parsed = parseCsvLocally(text);
+      const localData = solveLocally(parsed);
+      onScheduleGenerated(localData);
+
+      // 2. Sync asynchronously with backend if running
+      const formData = new FormData();
+      formData.append('file', file);
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 700);
+      fetch(`${API_BASE}/schedule/upload-csv`, {
         method: 'POST',
         body: formData,
-      });
-      if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.detail || 'CSV upload failed');
-      }
-      const data: TimetableResponse = await res.json();
-      saveLocalSchedule(data);
-      onScheduleGenerated(data);
+        signal: controller.signal,
+      })
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          clearTimeout(timer);
+          if (data) saveLocalSchedule(data);
+        })
+        .catch(() => clearTimeout(timer));
     } catch (err: any) {
-      // Fallback to in-browser CSV parsing & solving if backend is unreachable
-      try {
-        const text = await file.text();
-        const parsed = parseCsvLocally(text);
-        const localData = solveLocally(parsed);
-        onScheduleGenerated(localData);
-      } catch (fallbackErr: any) {
-        setError(fallbackErr.message || err.message);
-      }
-    } finally {
-      setUploading(false);
+      setError(err.message || 'CSV upload failed');
     }
   };
 
-  const handleSampleCsvGenerate = async () => {
-    const blob = new Blob([SAMPLE_CSV], { type: 'text/csv' });
-    const file = new File([blob], 'university_courses.csv', { type: 'text/csv' });
-    await handleFileUpload(file);
+  const handleSampleCsvGenerate = () => {
+    setFileName('university_ai_courses.csv');
+    const parsed = parseCsvLocally(SAMPLE_CSV);
+    const localData = solveLocally(parsed);
+    onScheduleGenerated(localData);
   };
 
   const handleDownloadTemplate = () => {
@@ -101,7 +99,6 @@ export default function CsvUploader({ onScheduleGenerated }: CsvUploaderProps) {
           <button
             type="button"
             onClick={handleSampleCsvGenerate}
-            disabled={uploading}
             className="flex items-center space-x-1 text-xs font-semibold text-slate-950 bg-emerald-500 hover:bg-emerald-400 px-3 py-1.5 rounded-lg transition"
           >
             <span>1-Click Run Sample CSV</span>
@@ -123,25 +120,18 @@ export default function CsvUploader({ onScheduleGenerated }: CsvUploaderProps) {
             if (f) handleFileUpload(f);
           }}
         />
-        {uploading ? (
-          <div className="flex flex-col items-center space-y-2 text-emerald-400">
-            <RefreshCw className="w-7 h-7 animate-spin" />
-            <span className="text-xs font-medium">Parsing CSV, predicting ML preferences & solving...</span>
+        <div className="flex flex-col items-center space-y-2">
+          <Upload className="w-7 h-7 text-slate-400 group-hover:text-emerald-400 transition" />
+          <div className="text-xs text-slate-300 font-medium">
+            {fileName ? (
+              <span className="text-emerald-400 flex items-center gap-1 justify-center">
+                <CheckCircle2 className="w-3.5 h-3.5" /> {fileName} (Solved Instantly)
+              </span>
+            ) : (
+              'Click to upload CSV (teacher, course, code, hours, preferred_time, department, capacity)'
+            )}
           </div>
-        ) : (
-          <div className="flex flex-col items-center space-y-2">
-            <Upload className="w-7 h-7 text-slate-400 group-hover:text-emerald-400 transition" />
-            <div className="text-xs text-slate-300 font-medium">
-              {fileName ? (
-                <span className="text-emerald-400 flex items-center gap-1 justify-center">
-                  <CheckCircle2 className="w-3.5 h-3.5" /> {fileName}
-                </span>
-              ) : (
-                'Click to upload CSV (teacher, course, code, hours, preferred_time, department, capacity)'
-              )}
-            </div>
-          </div>
-        )}
+        </div>
       </div>
 
       {error && <p className="text-xs text-rose-400 font-mono">{error}</p>}

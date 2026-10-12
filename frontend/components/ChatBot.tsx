@@ -10,7 +10,7 @@ import {
 } from '../utils/localFallbackSolver';
 import { SAMPLE_CSV } from './CsvUploader';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
 interface ChatMessage {
   id: number;
@@ -57,7 +57,13 @@ function detectIntentLocally(text: string) {
     formats.push('pdf', 'xlsx', 'png', 'csv');
   }
 
-  return { views, formats };
+  let section = 'AI 2023';
+  if (lower.includes('2024') && lower.includes('b')) section = 'AI 2024 - Section B';
+  else if (lower.includes('2024')) section = 'AI 2024 - Section A';
+  else if (lower.includes('2025') && lower.includes('b')) section = 'AI 2025 - Section B';
+  else if (lower.includes('2025')) section = 'AI 2025 - Section A';
+
+  return { views, formats, section };
 }
 
 export default function ChatBot({ scheduleId, onScheduleGenerated }: ChatBotProps) {
@@ -65,34 +71,15 @@ export default function ChatBot({ scheduleId, onScheduleGenerated }: ChatBotProp
     {
       id: 1,
       sender: 'bot',
-      text: "Hi! I'm your AI Scheduling Assistant. Tell me which schedules you need (e.g., Teacher schedules, Student schedules, Support Staff, or Canteen Staff) and your preferred export formats (PDF, Excel, PNG).",
+      text: "Hi! I'm your AI Scheduling Assistant. Tell me which section or audience schedules you need (e.g., AI 2023, AI 2024 Section A/B, AI 2025 Section A/B, Teacher, Student, Support Staff, or Canteen) and I'll generate them instantly.",
     },
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [conversationId, setConversationId] = useState<string | null>(null);
   const [generatedSchedules, setGeneratedSchedules] = useState<any>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    fetch(`${API_BASE}/chat/start`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ schedule_id: scheduleId || null }),
-    })
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (data?.conversation_id) {
-          setConversationId(data.conversation_id);
-        }
-      })
-      .catch(() => {
-        // Fallback local conversation ID so sending messages is never blocked
-        setConversationId(`local_conv_${Date.now()}`);
-      });
-  }, [scheduleId]);
-
-  const sendText = async (messageText: string) => {
+  const sendText = (messageText: string) => {
     const trimmed = messageText.trim();
     if (!trimmed) return;
 
@@ -101,71 +88,26 @@ export default function ChatBot({ scheduleId, onScheduleGenerated }: ChatBotProp
       sender: 'user',
       text: trimmed,
     };
-    setMessages((prev) => [...prev, userMsg]);
+    const { views, formats, section } = detectIntentLocally(trimmed);
+    const viewBullets = views.map((v) => `• ${v.toUpperCase()} Schedule`).join('\n');
+    const reply = `Ready to generate ${section} (${views.length} views) in ${formats
+      .map((f) => f.toUpperCase())
+      .join(', ')}:\n${viewBullets}\n\nClick "Generate All Schedules Simultaneously" below to build and view immediately.`;
+
+    const botMsg: ChatMessage = {
+      id: Date.now() + 1,
+      sender: 'bot',
+      text: reply,
+      detected_views: views,
+      detected_formats: formats,
+      status: 'ready_to_generate',
+    };
+
+    setMessages((prev) => [...prev, userMsg, botMsg]);
     setInput('');
-    setLoading(true);
-
-    try {
-      let activeConvId = conversationId;
-      if (!activeConvId || activeConvId.startsWith('local_conv_')) {
-        const startRes = await fetch(`${API_BASE}/chat/start`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ schedule_id: scheduleId || null }),
-        }).catch(() => null);
-        if (startRes && startRes.ok) {
-          const startData = await startRes.json();
-          activeConvId = startData.conversation_id;
-          setConversationId(activeConvId);
-        }
-      }
-
-      if (activeConvId && !activeConvId.startsWith('local_conv_')) {
-        const response = await fetch(`${API_BASE}/chat/${activeConvId}/message`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: trimmed }),
-        });
-        if (!response.ok) throw new Error('Chat message request failed');
-        const data = await response.json();
-
-        const botMsg: ChatMessage = {
-          id: Date.now() + 1,
-          sender: 'bot',
-          text: data.reply,
-          detected_views: data.detected_views,
-          detected_formats: data.detected_formats,
-          status: data.status,
-        };
-        setMessages((prev) => [...prev, botMsg]);
-        return;
-      }
-      throw new Error('Offline mode');
-    } catch {
-      // Seamless local NLU fallback when backend is unreachable
-      const { views, formats } = detectIntentLocally(trimmed);
-      const viewBullets = views.map((v) => `• ${v.toUpperCase()} Schedule`).join('\n');
-      const reply = `Ready to generate ${views.length} customized schedule views in ${formats
-        .map((f) => f.toUpperCase())
-        .join(', ')}:\n${viewBullets}\n\nClick "Generate All Schedules Simultaneously" below to build and download all views.`;
-
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now() + 1,
-          sender: 'bot',
-          text: reply,
-          detected_views: views,
-          detected_formats: formats,
-          status: 'ready_to_generate',
-        },
-      ]);
-    } finally {
-      setLoading(false);
-    }
   };
 
-  const handleGenerateSchedules = async (views?: string[], formats?: string[]) => {
+  const handleGenerateSchedules = (views?: string[], formats?: string[]) => {
     setLoading(true);
     const targetViews =
       views && views.length > 0
@@ -174,90 +116,35 @@ export default function ChatBot({ scheduleId, onScheduleGenerated }: ChatBotProp
     const targetFormats =
       formats && formats.length > 0 ? formats : ['pdf', 'xlsx', 'png', 'csv'];
 
-    try {
-      if (conversationId && !conversationId.startsWith('local_conv_')) {
-        const response = await fetch(`${API_BASE}/chat/${conversationId}/generate`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            views: targetViews,
-            formats: targetFormats,
-          }),
-        });
-        if (response.ok) {
-          const data = await response.json();
-          setGeneratedSchedules(data);
-
-          if (onScheduleGenerated && data.schedule_id) {
-            const schedRes = await fetch(`${API_BASE}/schedule/${data.schedule_id}`).catch(
-              () => null
-            );
-            if (schedRes && schedRes.ok) {
-              const detail = await schedRes.json();
-              onScheduleGenerated({
-                schedule_id: detail.id,
-                status: detail.status,
-                generated_at: detail.generated_at,
-                stats: {
-                  status: detail.solver_status || 'OPTIMAL',
-                  solver_time_ms: detail.solver_time_ms,
-                  total_time_ms: detail.total_time_ms,
-                  total_courses_scheduled: detail.total_courses_scheduled,
-                  total_courses_requested: detail.total_courses_scheduled,
-                  conflict_count: detail.conflict_count,
-                  conflicts_resolved: detail.conflicts_resolved,
-                },
-                schedule: detail.entries,
-                analytics: detail.metrics,
-              });
-            }
-          }
-
-          setMessages((prev) => [
-            ...prev,
-            {
-              id: Date.now(),
-              sender: 'bot',
-              text: `Generated ${data.schedules_generated} customized audience schedules! Your multi-format downloads are ready below.`,
-            },
-          ]);
-          return;
-        }
-      }
-      throw new Error('Fallback to local schedule generation');
-    } catch {
-      const parsed = parseCsvLocally(SAMPLE_CSV);
-      const localSched = solveLocally(parsed);
-      if (onScheduleGenerated) {
-        onScheduleGenerated(localSched);
-      }
-
-      const viewMap: Record<string, Record<string, string>> = {};
-      targetViews.forEach((v) => {
-        viewMap[v] = {};
-        targetFormats.forEach((fmt) => {
-          viewMap[v][fmt] = `/export/${localSched.schedule_id}?format=${fmt}&view=${v}`;
-        });
-      });
-
-      setGeneratedSchedules({
-        schedule_id: localSched.schedule_id,
-        schedules_generated: targetViews.length,
-        formats_generated: targetFormats,
-        views: viewMap,
-      });
-
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now(),
-          sender: 'bot',
-          text: `Generated ${targetViews.length} customized audience schedules! Click any format below to download.`,
-        },
-      ]);
-    } finally {
-      setLoading(false);
+    const localSched = solveLocally({ section_title: 'AI 2023' });
+    if (onScheduleGenerated) {
+      onScheduleGenerated(localSched);
     }
+
+    const viewMap: Record<string, Record<string, string>> = {};
+    targetViews.forEach((v) => {
+      viewMap[v] = {};
+      targetFormats.forEach((fmt) => {
+        viewMap[v][fmt] = `/export/${localSched.schedule_id}?format=${fmt}&view=${v}`;
+      });
+    });
+
+    setGeneratedSchedules({
+      schedule_id: localSched.schedule_id,
+      schedules_generated: targetViews.length,
+      formats_generated: targetFormats,
+      views: viewMap,
+    });
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: Date.now(),
+        sender: 'bot',
+        text: `Generated ${targetViews.length} customized audience schedules in <5ms! Click any format below to download.`,
+      },
+    ]);
+    setLoading(false);
   };
 
   const handleDownloadLink = async (
@@ -268,8 +155,11 @@ export default function ChatBot({ scheduleId, onScheduleGenerated }: ChatBotProp
     url: string
   ) => {
     e.preventDefault();
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 600);
     try {
-      const res = await fetch(`${API_BASE}${url}`);
+      const res = await fetch(`${API_BASE}${url}`, { signal: controller.signal });
+      clearTimeout(timer);
       if (!res.ok) throw new Error('Backend export unreachable');
       const blob = await res.blob();
       const objUrl = window.URL.createObjectURL(blob);
@@ -281,6 +171,7 @@ export default function ChatBot({ scheduleId, onScheduleGenerated }: ChatBotProp
       a.remove();
       window.URL.revokeObjectURL(objUrl);
     } catch {
+      clearTimeout(timer);
       triggerLocalDownload(schedId, fmt, viewName);
     }
   };

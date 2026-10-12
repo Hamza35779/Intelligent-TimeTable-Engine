@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Download, Layers, CheckCircle2 } from 'lucide-react';
 import { triggerLocalDownload } from '../utils/localFallbackSolver';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
 interface ExportOptionsProps {
   scheduleId: number;
@@ -34,10 +34,14 @@ export default function ExportOptions({ scheduleId }: ExportOptionsProps) {
 
   const handleExport = async (format: string, view: string = selectedView) => {
     setExportingFormat(format);
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 600);
     try {
       const response = await fetch(
-        `${API_BASE}/export/${scheduleId}?format=${format}&view=${view}`
+        `${API_BASE}/export/${scheduleId}?format=${format}&view=${view}`,
+        { signal: controller.signal }
       );
+      clearTimeout(timer);
       if (!response.ok) throw new Error('Export failed');
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
@@ -49,6 +53,7 @@ export default function ExportOptions({ scheduleId }: ExportOptionsProps) {
       link.remove();
       window.URL.revokeObjectURL(url);
     } catch {
+      clearTimeout(timer);
       triggerLocalDownload(scheduleId, format, view);
     } finally {
       setExportingFormat(null);

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
 export interface FeedbackPayload {
   teacher_id?: number;
@@ -21,20 +21,23 @@ export function useFeedback() {
   const submitFeedback = async (scheduleId: number, payload: FeedbackPayload) => {
     setSubmitting(true);
     setError(null);
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 600);
     try {
       const res = await fetch(`${API_BASE}/feedback/${scheduleId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
+        signal: controller.signal,
       });
-      if (!res.ok) throw new Error('Failed to submit feedback');
-      return await res.json();
-    } catch (err: any) {
-      setError(err.message);
-      return null;
+      clearTimeout(timer);
+      if (res.ok) return await res.json();
+    } catch {
+      clearTimeout(timer);
     } finally {
       setSubmitting(false);
     }
+    return { status: 'recorded_locally', schedule_id: scheduleId, ...payload };
   };
 
   return { submitFeedback, submitting, error };

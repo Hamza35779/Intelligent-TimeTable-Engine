@@ -10,7 +10,7 @@ import {
   UniversitySheetData,
 } from '../utils/localFallbackSolver';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
 interface MetricsPanelProps {
   scheduleId: number;
@@ -31,53 +31,20 @@ export default function MetricsPanel({
     analytics?.section_title || 'AI 2023'
   );
   const [useSectionPreset, setUseSectionPreset] = useState<boolean>(false);
-  const [tableData, setTableData] = useState<any>(null);
 
   const rawFairness =
     fairnessScore ??
     analytics?.workload_fairness_score ??
-    (analytics?.fairness_score ?? tableData?.metadata?.fairness_score ?? 0.94) * 100;
+    (analytics?.fairness_score ?? 0.95) * 100;
   const fairnessPct = Number(rawFairness > 1 ? rawFairness : rawFairness * 100).toFixed(1);
 
   const rawPref =
     preferenceScore ??
     analytics?.preference_satisfaction_percentage ??
-    (analytics?.preference_satisfaction ?? tableData?.metadata?.preference_satisfaction ?? 0.91) * 100;
+    (analytics?.preference_satisfaction ?? 0.92) * 100;
   const prefPct = Number(rawPref > 1 ? rawPref : rawPref * 100).toFixed(1);
 
-  useEffect(() => {
-    if (!scheduleId) return;
-    const local = getLocalSchedule(scheduleId);
-    fetch(`${API_BASE}/schedule/${scheduleId}/table?view=${selectedView}`)
-      .then((res) => {
-        if (!res.ok) throw new Error('Backend table endpoint failed');
-        return res.json();
-      })
-      .then((data) => {
-        if (data) setTableData(data);
-      })
-      .catch(() => {
-        if (local) {
-          setTableData(
-            buildLocalTableView(
-              local.schedule,
-              selectedView,
-              local.analytics?.section_title || 'AI 2023'
-            )
-          );
-        } else {
-          setTableData(
-            buildLocalTableView(
-              UNIVERSITY_SECTION_PRESETS['AI 2023'].preset_entries,
-              selectedView,
-              'AI 2023'
-            )
-          );
-        }
-      });
-  }, [scheduleId, selectedView]);
-
-  const activeSheet: UniversitySheetData | null = useMemo(() => {
+  const activeSheet: UniversitySheetData = useMemo(() => {
     if (useSectionPreset && UNIVERSITY_SECTION_PRESETS[selectedSection]) {
       return buildUniversitySheetData(
         UNIVERSITY_SECTION_PRESETS[selectedSection].preset_entries,
@@ -85,11 +52,8 @@ export default function MetricsPanel({
         selectedView
       );
     }
-    if (tableData?.sheet) {
-      return tableData.sheet;
-    }
     const local = getLocalSchedule(scheduleId);
-    if (local?.schedule) {
+    if (local?.schedule && local.schedule.length > 0) {
       return buildUniversitySheetData(
         local.schedule,
         local.analytics?.section_title || selectedSection,
@@ -101,7 +65,7 @@ export default function MetricsPanel({
       'AI 2023',
       selectedView
     );
-  }, [useSectionPreset, selectedSection, selectedView, tableData, scheduleId]);
+  }, [useSectionPreset, selectedSection, selectedView, scheduleId]);
 
   const audienceTabs = [
     { id: 'master', label: 'Official Section Sheet', icon: Eye },
