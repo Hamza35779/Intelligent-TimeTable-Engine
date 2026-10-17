@@ -60,6 +60,9 @@ export interface TimetableEntry {
   day_of_week: string;
   start_time: string;
   end_time: string;
+  credit_hours?: number;
+  elective_compulsory?: string;
+  remarks?: string;
 }
 
 export interface SolverStats {
@@ -80,6 +83,14 @@ export interface TimetableResponse {
   stats: SolverStats;
   schedule: TimetableEntry[];
   analytics?: Record<string, any>;
+}
+
+export interface ScheduleSummary {
+  id: number;
+  generated_at: string;
+  status: string;
+  total_courses_scheduled: number;
+  solver_time_ms: number;
 }
 
 export interface ScheduleRunDetail {

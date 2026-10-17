@@ -1,304 +1,308 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
   Sparkles,
   Calendar,
   Clock,
-  CheckCircle2,
-  ShieldCheck,
-  Zap,
-  ArrowRight,
-  Activity,
   Play,
+  ArrowRight,
+  Users,
+  Cpu,
+  CalendarCheck,
   RefreshCw,
+  AlertCircle,
 } from 'lucide-react';
-import CsvUploader from '../components/CsvUploader';
-import ChatBot from '../components/ChatBot';
-import MLStatus from '../components/MLStatus';
-import { TimetableResponse } from '../types';
+import { TimetableResponse, ScheduleSummary } from '../types';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 export default function HomePage() {
   const router = useRouter();
-  const [health, setHealth] = useState<any>(null);
-  const [healthLoading, setHealthLoading] = useState(true);
-  const [recentSchedules, setRecentSchedules] = useState<any[]>([]);
-  const [runningDemo, setRunningDemo] = useState(false);
+  const [schedules, setSchedules] = useState<ScheduleSummary[]>([]);
+  const [isLoadingSchedules, setIsLoadingSchedules] = useState(true);
+  const [isRunningDemo, setIsRunningDemo] = useState(false);
+  const [demoError, setDemoError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function fetchData() {
-      setHealthLoading(true);
-      try {
-        const [healthRes, schedulesRes] = await Promise.all([
-          fetch(`${API_BASE}/health`).catch(() => null),
-          fetch(`${API_BASE}/schedules`).catch(() => null),
-        ]);
-
-        if (healthRes && healthRes.ok) {
-          setHealth(await healthRes.json());
-        }
-        if (schedulesRes && schedulesRes.ok) {
-          setRecentSchedules(await schedulesRes.json());
-        }
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setHealthLoading(false);
+  const fetchSchedules = useCallback(async () => {
+    setIsLoadingSchedules(true);
+    try {
+      const res = await fetch(`${API_BASE}/schedules`);
+      if (res.ok) {
+        const data: ScheduleSummary[] = await res.json();
+        setSchedules(data);
+      } else {
+        setSchedules([]);
       }
+    } catch {
+      setSchedules([]);
+    } finally {
+      setIsLoadingSchedules(false);
     }
-    fetchData();
   }, []);
 
-  const handleCsvGenerated = (data: TimetableResponse) => {
-    router.push(`/schedule/${data.schedule_id}`);
-  };
+  useEffect(() => {
+    fetchSchedules();
+  }, [fetchSchedules]);
 
   const handleRunDemo = async () => {
-    setRunningDemo(true);
+    setIsRunningDemo(true);
+    setDemoError(null);
     try {
-      const res = await fetch(`${API_BASE}/demo/run`, { method: 'POST' });
-      if (res.ok) {
-        const data: TimetableResponse = await res.json();
-        router.push(`/schedule/${data.schedule_id}`);
-        return;
+      const res = await fetch(`${API_BASE}/demo/run`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!res.ok) {
+        throw new Error(`Demo failed with status: ${res.status}`);
       }
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setRunningDemo(false);
+
+      const data: TimetableResponse = await res.json();
+      router.push(`/schedule/${data.schedule_id}`);
+    } catch (err) {
+      console.error(err);
+      setDemoError('Failed to run demo schedule. Please ensure the backend server is running.');
+      setIsRunningDemo(false);
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    try {
+      const d = new Date(dateString);
+      return d.toLocaleDateString(undefined, {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } catch {
+      return dateString;
     }
   };
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-12 py-4">
       {/* Hero Section */}
-      <div className="relative rounded-3xl bg-gradient-to-b from-slate-900 to-slate-950 border border-slate-800 p-8 sm:p-12 overflow-hidden shadow-2xl">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl -z-10" />
-        <div className="max-w-3xl space-y-4">
-          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
-            <Zap className="w-3.5 h-3.5" />
-            <span>OR-Tools CP-SAT + Random Forest ML + Conversational AI</span>
+      <section className="relative rounded-3xl bg-gradient-to-b from-slate-900 via-slate-900/90 to-slate-950 border border-slate-800 p-8 sm:p-12 lg:p-16 overflow-hidden shadow-2xl">
+        <div className="absolute top-0 right-0 -mr-24 -mt-24 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 -ml-24 -mb-24 w-80 h-80 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="relative max-w-3xl space-y-6">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Automated University Timetabling</span>
           </div>
-          <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight">
-            Conversational, ML-driven university timetabling in{' '}
-            <span className="text-emerald-400">&lt;5 seconds</span>.
+
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-tight">
+            University Timetable <span className="text-emerald-400">Generator</span>
           </h1>
-          <p className="text-slate-400 text-sm sm:text-base leading-relaxed">
-            Upload your 3-column course CSV (<span className="font-mono text-slate-300">teacher_name, course_name, credit_hours</span>) or chat with the AI Assistant to generate conflict-free schedules with 5 tailored audience views (Master, Teacher, Student, Support Staff, Canteen Staff) and 7 simultaneous export formats.
+
+          <p className="text-slate-300 text-base sm:text-lg leading-relaxed max-w-2xl">
+            Generate conflict-free, optimal university schedules in seconds. Powered by Google
+            OR-Tools CP-SAT constraint programming to balance faculty availability, student
+            cohorts, and room capacities effortlessly.
           </p>
-          <div className="pt-2 flex flex-wrap gap-4">
+
+          <div className="pt-2 flex flex-wrap items-center gap-4">
+            <Link
+              href="/build"
+              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm sm:text-base shadow-lg shadow-emerald-500/20 transition-all duration-200 transform hover:-translate-y-0.5 active:translate-y-0"
+            >
+              <Sparkles className="w-4 h-4 text-slate-950" />
+              <span>Build Schedule</span>
+            </Link>
+
             <button
               type="button"
               onClick={handleRunDemo}
-              disabled={runningDemo}
-              className="inline-flex items-center space-x-2 px-6 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-slate-950 font-bold text-sm shadow-xl shadow-emerald-500/25 transition-all transform hover:-translate-y-0.5"
+              disabled={isRunningDemo}
+              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold text-sm sm:text-base border border-slate-700 transition-all duration-200 transform hover:-translate-y-0.5 active:translate-y-0"
             >
-              {runningDemo ? (
+              {isRunningDemo ? (
                 <>
-                  <RefreshCw className="w-4 h-4 animate-spin" />
-                  <span>Running Demo (Seed 42)...</span>
+                  <RefreshCw className="w-4 h-4 animate-spin text-emerald-400" />
+                  <span>Running Demo...</span>
                 </>
               ) : (
                 <>
-                  <Play className="w-4 h-4 fill-current" />
-                  <span>Run Demo (12 Courses, Seed 42)</span>
+                  <Play className="w-4 h-4 fill-current text-emerald-400" />
+                  <span>Run Demo</span>
                 </>
               )}
             </button>
-            <Link
-              href="/schedule"
-              className="inline-flex items-center space-x-2 px-6 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm border border-slate-700 transition"
-            >
-              <Sparkles className="w-4 h-4 text-emerald-400" />
-              <span>Launch Timetable Workspace</span>
-            </Link>
-            <Link
-              href="/constraints"
-              className="inline-flex items-center space-x-2 px-6 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 font-medium text-sm border border-slate-800 transition"
-            >
-              <span>Manage Constraints</span>
-            </Link>
           </div>
-        </div>
-      </div>
 
-      {/* Interactive CSV Uploader + Conversational AI Assistant */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        <div className="lg:col-span-5 space-y-6">
-          <CsvUploader onScheduleGenerated={handleCsvGenerated} />
-          <MLStatus />
+          {demoError && (
+            <div className="flex items-center gap-2 p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>{demoError}</span>
+            </div>
+          )}
         </div>
-        <div className="lg:col-span-7">
-          <ChatBot
-            scheduleId={recentSchedules[0]?.id}
-            onScheduleGenerated={(data) => {
-              setRecentSchedules((prev) => [
-                {
-                  id: data.schedule_id,
-                  generated_at: data.generated_at,
-                  status: data.status,
-                  total_courses_scheduled: data.stats.total_courses_scheduled,
-                  solver_time_ms: data.stats.solver_time_ms,
-                },
-                ...prev.filter((item) => item.id !== data.schedule_id),
-              ]);
-            }}
-          />
-        </div>
-      </div>
+      </section>
 
-      {/* Engine Status & Features Grid (Live from /health - No hardcoded strings) */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-lg">
-          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-4">
-            <Activity className="w-5 h-5" />
-          </div>
-          <h3 className="text-white font-bold text-base mb-1">Live System Health (/health)</h3>
-          <p className="text-slate-400 text-xs mb-3">
-            Status:{' '}
-            <span
-              className={`font-mono font-bold ${
-                health?.status === 'healthy' ? 'text-emerald-400' : 'text-amber-400'
-              }`}
-            >
-              {healthLoading ? 'checking...' : health?.status ?? 'unreachable'}
-            </span>
+      {/* How it Works */}
+      <section className="space-y-6">
+        <div className="text-center sm:text-left space-y-1">
+          <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">How It Works</h2>
+          <p className="text-slate-400 text-sm sm:text-base">
+            Three simple steps to generate a complete academic timetable with zero conflicts.
           </p>
-          <div className="text-xs text-slate-400 space-y-1 border-t border-slate-800 pt-3 font-mono">
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Step 1 */}
+          <div className="relative rounded-2xl bg-slate-900/60 border border-slate-800 p-6 flex flex-col justify-between hover:border-slate-700 transition duration-200 group">
             <div>
-              Database:{' '}
-              <span className="text-slate-200">
-                {healthLoading
-                  ? '...'
-                  : health?.database?.reachable
-                  ? 'reachable'
-                  : 'unreachable'}
-              </span>
+              <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-5 group-hover:bg-emerald-500/20 transition">
+                <Users className="w-6 h-6" />
+              </div>
+              <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">Step 1</span>
+              <h3 className="text-lg font-bold text-white mt-1 mb-2">Add Teachers &amp; Courses</h3>
+              <p className="text-slate-400 text-sm leading-relaxed">
+                Add your faculty members, departments, and course details manually or upload a
+                simple 3-column CSV spreadsheet in seconds.
+              </p>
             </div>
+          </div>
+
+          {/* Step 2 */}
+          <div className="relative rounded-2xl bg-slate-900/60 border border-slate-800 p-6 flex flex-col justify-between hover:border-slate-700 transition duration-200 group">
             <div>
-              OR-Tools:{' '}
-              <span className="text-slate-200">
-                {healthLoading
-                  ? '...'
-                  : health?.ortools?.importable
-                  ? `v${health.ortools.version}`
-                  : 'unavailable'}
-              </span>
+              <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-5 group-hover:bg-emerald-500/20 transition">
+                <Cpu className="w-6 h-6" />
+              </div>
+              <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">Step 2</span>
+              <h3 className="text-lg font-bold text-white mt-1 mb-2">Click Generate</h3>
+              <p className="text-slate-400 text-sm leading-relaxed">
+                The Google OR-Tools CP-SAT solver analyzes constraints, time slots, and room
+                capacities to compute the mathematically optimal schedule.
+              </p>
             </div>
+          </div>
+
+          {/* Step 3 */}
+          <div className="relative rounded-2xl bg-slate-900/60 border border-slate-800 p-6 flex flex-col justify-between hover:border-slate-700 transition duration-200 group">
             <div>
-              ML Model File:{' '}
-              <span className="text-slate-200">
-                {healthLoading ? '...' : String(Boolean(health?.ml_model_present))}
-              </span>
-            </div>
-            <div>
-              Gemini API Key:{' '}
-              <span className="text-slate-200">
-                {healthLoading
-                  ? '...'
-                  : health?.gemini_configured
-                  ? 'configured (gemini)'
-                  : 'not set (keyword_fallback)'}
-              </span>
-            </div>
-            <div>
-              Redis:{' '}
-              <span className="text-slate-200">
-                {healthLoading ? '...' : health?.redis ?? 'not_configured'}
-              </span>
+              <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-5 group-hover:bg-emerald-500/20 transition">
+                <CalendarCheck className="w-6 h-6" />
+              </div>
+              <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">Step 3</span>
+              <h3 className="text-lg font-bold text-white mt-1 mb-2">View &amp; Export</h3>
+              <p className="text-slate-400 text-sm leading-relaxed">
+                Explore tailored perspectives for teachers, students, and administration, and
+                export your finished schedule to PDF, Excel, or CSV.
+              </p>
             </div>
           </div>
         </div>
+      </section>
 
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-lg">
-          <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 mb-4">
-            <ShieldCheck className="w-5 h-5" />
-          </div>
-          <h3 className="text-white font-bold text-base mb-1">5-Audience Multi-View Output</h3>
-          <p className="text-slate-400 text-xs mb-3">
-            Pure-function projections from one solved CP-SAT schedule for Master, Teacher, Student (with explicit breaks), Support Staff, and Canteen (labeled Estimates).
-          </p>
-          <div className="text-xs text-slate-400 space-y-1 border-t border-slate-800 pt-3">
-            <div className="flex items-center gap-1 text-emerald-400">
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>CSV, XLSX, PDF, PNG, JPG, JSON, HTML</span>
+      {/* Recent Schedules */}
+      <section className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6 sm:p-8">
+        <div className="flex items-center justify-between pb-4 border-b border-slate-800 mb-6">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+              <Calendar className="w-5 h-5" />
             </div>
-          </div>
-        </div>
-
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-lg">
-          <div className="w-10 h-10 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-violet-400 mb-4">
-            <Clock className="w-5 h-5" />
-          </div>
-          <h3 className="text-white font-bold text-base mb-1">Credit-Hour Session Splitting</h3>
-          <p className="text-slate-400 text-xs mb-3">
-            Splits multi-credit courses into &le;2h weekly contact sessions across distinct days, protecting 12:00&ndash;14:00 lunch and enforcing teacher break gaps.
-          </p>
-          <div className="text-xs text-slate-400 space-y-1 border-t border-slate-800 pt-3">
             <div>
-              Solver Time Limit: <span className="text-slate-200 font-mono">5.0s default</span>
+              <h2 className="text-lg sm:text-xl font-bold text-white">Recent Schedules</h2>
+              <p className="text-xs text-slate-400">Previously generated timetable runs</p>
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* Recent Timetable Runs */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
-        <div className="flex items-center justify-between border-b border-slate-800 pb-4 mb-4">
-          <div className="flex items-center space-x-2">
-            <Calendar className="w-5 h-5 text-emerald-400" />
-            <h3 className="text-white font-bold text-base">Recent Schedules Generated</h3>
-          </div>
           <Link
             href="/schedule"
-            className="text-xs text-emerald-400 hover:text-emerald-300 flex items-center gap-1 font-semibold"
+            className="text-xs text-emerald-400 hover:text-emerald-300 flex items-center gap-1 font-semibold transition"
           >
-            <span>Generate New</span>
+            <span>All Schedules</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
 
-        {recentSchedules.length === 0 ? (
-          <div className="text-center py-8 text-slate-500 text-xs">
-            No timetables generated yet. Click &quot;Run Demo (12 Courses, Seed 42)&quot; or upload a CSV above.
+        {isLoadingSchedules ? (
+          <div className="py-12 flex flex-col items-center justify-center text-slate-400 text-sm space-y-2">
+            <RefreshCw className="w-6 h-6 animate-spin text-emerald-400" />
+            <span>Loading schedules...</span>
+          </div>
+        ) : schedules.length === 0 ? (
+          <div className="py-12 text-center space-y-3">
+            <div className="w-12 h-12 mx-auto rounded-full bg-slate-800/80 border border-slate-700/60 flex items-center justify-center text-slate-400">
+              <Clock className="w-6 h-6" />
+            </div>
+            <div className="text-slate-300 font-semibold text-base">No schedules yet</div>
+            <p className="text-slate-500 text-sm max-w-sm mx-auto">
+              Get started by creating your first timetable with the Easy Builder or click Run Demo.
+            </p>
+            <div className="pt-2 flex justify-center gap-3">
+              <Link
+                href="/build"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold text-xs shadow-md transition"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Build Schedule</span>
+              </Link>
+              <button
+                type="button"
+                onClick={handleRunDemo}
+                disabled={isRunningDemo}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium text-xs border border-slate-700 transition"
+              >
+                <Play className="w-3.5 h-3.5 fill-current text-emerald-400" />
+                <span>Run Demo</span>
+              </button>
+            </div>
           </div>
         ) : (
           <div className="divide-y divide-slate-800/80">
-            {recentSchedules.map((item) => (
+            {schedules.map((schedule) => (
               <div
-                key={item.id}
-                className="py-3 flex items-center justify-between hover:bg-slate-800/30 px-3 rounded-lg transition"
+                key={schedule.id}
+                className="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-850/50 px-3 rounded-xl transition"
               >
-                <div className="flex items-center space-x-3">
-                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                <div className="flex items-center gap-3">
+                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0" />
                   <div>
-                    <div className="text-sm font-semibold text-white">Timetable #{item.id}</div>
-                    <div className="text-[11px] text-slate-400 font-mono">
-                      {new Date(item.generated_at).toLocaleString()} &bull;{' '}
-                      {item.total_courses_scheduled} sessions
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-semibold text-white">
+                        Timetable #{schedule.id}
+                      </span>
+                      <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
+                        {schedule.status}
+                      </span>
+                    </div>
+                    <div className="text-xs text-slate-400 mt-0.5">
+                      {formatDate(schedule.generated_at)} &bull;{' '}
+                      <span className="text-slate-300 font-medium">
+                        {schedule.total_courses_scheduled} sessions
+                      </span>
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
+
+                <div className="flex items-center justify-between sm:justify-end gap-4 pl-5 sm:pl-0">
                   <span className="text-xs font-mono text-slate-400">
-                    {Number(item.solver_time_ms || 0).toFixed(1)} ms
+                    {Number(schedule.solver_time_ms || 0).toFixed(1)} ms
                   </span>
                   <Link
-                    href={`/schedule/${item.id}`}
-                    className="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-emerald-400 text-xs font-semibold rounded-lg border border-slate-700 transition"
+                    href={`/schedule/${schedule.id}`}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-emerald-400 hover:text-emerald-300 text-xs font-semibold rounded-lg border border-slate-700 transition"
                   >
-                    View Views &amp; Export
+                    <span>View Schedule</span>
+                    <ArrowRight className="w-3 h-3" />
                   </Link>
                 </div>
               </div>
             ))}
           </div>
         )}
-      </div>
+      </section>
     </div>
   );
 }

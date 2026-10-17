@@ -253,6 +253,11 @@ export function getLocalSchedule(scheduleId: number): TimetableResponse | null {
   return all.length > 0 ? all[all.length - 1] : null;
 }
 
+export function getAllLocalSchedules(): TimetableResponse[] {
+  const map = loadStoredSchedules();
+  return Object.values(map);
+}
+
 export function mapTimeToSlotIndex(startTime: string): number {
   const s = String(startTime || '08:30').trim();
   const exactMap: Record<string, number> = {

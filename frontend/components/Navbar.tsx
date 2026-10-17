@@ -2,17 +2,16 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Calendar, Sliders, BarChart3, Clock, Sparkles } from 'lucide-react';
+import { Calendar, Clock, Sparkles } from 'lucide-react';
+
+const navItems = [
+  { href: '/', label: 'Home', icon: Calendar },
+  { href: '/build', label: 'Easy Builder', icon: Sparkles },
+  { href: '/schedule', label: 'Schedules', icon: Clock },
+];
 
 export default function Navbar() {
   const pathname = usePathname();
-
-  const navItems = [
-    { href: '/', label: 'Overview', icon: Calendar },
-    { href: '/schedule', label: 'Generate Schedule', icon: Sparkles },
-    { href: '/constraints', label: 'Constraints', icon: Sliders },
-    { href: '/analytics', label: 'Analytics', icon: BarChart3 },
-  ];
 
   return (
     <nav className="bg-slate-900 border-b border-slate-800 sticky top-0 z-50">
@@ -23,7 +22,10 @@ export default function Navbar() {
               <Clock className="w-6 h-6 text-slate-950" />
             </div>
             <div>
-              <Link href="/" className="text-white font-bold text-lg tracking-tight hover:text-emerald-400 transition-colors">
+              <Link
+                href="/"
+                className="text-white font-bold text-lg tracking-tight hover:text-emerald-400 transition-colors"
+              >
                 Timetable Engine
               </Link>
               <span className="block text-[11px] text-emerald-400/80 font-mono">CP-SAT Optimized</span>
@@ -33,7 +35,8 @@ export default function Navbar() {
           <div className="flex items-center space-x-1 sm:space-x-4">
             {navItems.map((item) => {
               const Icon = item.icon;
-              const isActive = pathname === item.href;
+              const isActive =
+                item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
               return (
                 <Link
                   key={item.href}

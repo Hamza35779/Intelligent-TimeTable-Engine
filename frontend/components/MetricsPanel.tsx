@@ -10,10 +10,13 @@ import {
   UniversitySheetData,
 } from '../utils/localFallbackSolver';
 
+import { TimetableEntry } from '../types';
+
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
 interface MetricsPanelProps {
   scheduleId: number;
+  entries?: TimetableEntry[];
   analytics?: Record<string, any>;
   fairnessScore?: number;
   preferenceScore?: number;
@@ -22,6 +25,7 @@ interface MetricsPanelProps {
 
 export default function MetricsPanel({
   scheduleId,
+  entries,
   analytics,
   fairnessScore,
   preferenceScore,
@@ -52,6 +56,13 @@ export default function MetricsPanel({
         selectedView
       );
     }
+    if (entries && entries.length > 0) {
+      return buildUniversitySheetData(
+        entries,
+        analytics?.section_title || selectedSection,
+        selectedView
+      );
+    }
     const local = getLocalSchedule(scheduleId);
     if (local?.schedule && local.schedule.length > 0) {
       return buildUniversitySheetData(
@@ -65,7 +76,7 @@ export default function MetricsPanel({
       'AI 2023',
       selectedView
     );
-  }, [useSectionPreset, selectedSection, selectedView, scheduleId]);
+  }, [useSectionPreset, selectedSection, selectedView, scheduleId, entries, analytics?.section_title]);
 
   const audienceTabs = [
     { id: 'master', label: 'Official Section Sheet', icon: Eye },

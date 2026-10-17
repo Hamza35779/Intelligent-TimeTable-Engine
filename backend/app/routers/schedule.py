@@ -319,6 +319,11 @@ def generate_schedule(payload: GenerateScheduleRequest, db: Session = Depends(ge
     )
 
 
+@router.post("/generate-simple", response_model=TimetableResponse, status_code=status.HTTP_201_CREATED)
+def generate_schedule_simple(payload: GenerateScheduleRequest, db: Session = Depends(get_db)):
+    return generate_schedule(payload=payload, db=db)
+
+
 @router.post("/upload-csv", response_model=TimetableResponse, status_code=status.HTTP_201_CREATED)
 async def upload_csv_and_generate(
     file: UploadFile = File(...),
