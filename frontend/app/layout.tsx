@@ -3,8 +3,8 @@ import type { Metadata } from 'next';
 import Navbar from '../components/Navbar';
 
 export const metadata: Metadata = {
-  title: 'Autonomous Timetable Optimization Engine',
-  description: 'Production-ready constraint-based timetable optimization engine using Google OR-Tools CP-SAT',
+  title: 'TimetableMaster | AI-Powered Scheduling Platform for Universities & Colleges',
+  description: 'AI-powered timetable generator that builds conflict-free schedules in seconds using Google OR-Tools CP-SAT and machine learning.',
 };
 
 export default function RootLayout({
@@ -13,14 +13,27 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark">
-      <body className="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-emerald-500 selection:text-slate-950">
+    <html lang="en">
+      <body className="bg-[#F8FAFC] text-slate-800 min-h-screen flex flex-col antialiased selection:bg-indigo-600 selection:text-white">
         <Navbar />
         <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
           {children}
         </main>
-        <footer className="border-t border-slate-900 bg-slate-950/80 py-6 text-center text-xs text-slate-500">
-          Intelligent Autonomous Timetable Engine &bull; Powered by Google OR-Tools CP-SAT &bull; Real-time Optimization
+        <footer className="border-t border-slate-200 bg-white py-8 text-center text-xs text-slate-500">
+          <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <span className="font-semibold text-slate-700">TimetableMaster</span>
+              <span>&bull;</span>
+              <span>AI-Powered Autonomous Timetable Engine</span>
+            </div>
+            <div className="flex items-center gap-4 text-slate-400">
+              <span>Google OR-Tools CP-SAT</span>
+              <span>&bull;</span>
+              <span>Machine Learning Preferences</span>
+              <span>&bull;</span>
+              <span>Conflict-Free Guaranteed</span>
+            </div>
+          </div>
         </footer>
       </body>
     </html>

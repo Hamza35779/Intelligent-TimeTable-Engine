@@ -2,37 +2,51 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Calendar, Clock, Sparkles } from 'lucide-react';
+import { Sparkles, Calendar, Users, Bot, ArrowRight, Layers } from 'lucide-react';
 
 const navItems = [
-  { href: '/', label: 'Home', icon: Calendar },
-  { href: '/build', label: 'Easy Builder', icon: Sparkles },
-  { href: '/schedule', label: 'Schedules', icon: Clock },
+  { href: '/', label: 'Overview', icon: Calendar },
+  { href: '/build', label: 'Timetable Builder', icon: Sparkles },
+  { href: '/schedule', label: 'Schedules', icon: Layers },
+  { href: '/substitutes', label: 'Substitutes', icon: Users },
+  { href: '/assistant', label: 'AI Assistant', icon: Bot },
 ];
 
 export default function Navbar() {
   const pathname = usePathname();
 
   return (
-    <nav className="bg-slate-900 border-b border-slate-800 sticky top-0 z-50">
+    <header className="bg-white/95 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50 transition-all">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <div className="flex items-center space-x-3">
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-slate-950 font-bold shadow-lg shadow-emerald-500/20">
-              <Clock className="w-6 h-6 text-slate-950" />
+          {/* Logo brand */}
+          <Link href="/" className="flex items-center gap-2 group">
+            <div className="flex-shrink-0">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+                <defs>
+                  <linearGradient id="tmGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#4F46E5" />
+                    <stop offset="100%" stopColor="#818CF8" />
+                  </linearGradient>
+                </defs>
+                <rect x="4" y="4" width="24" height="24" rx="6" fill="url(#tmGrad)" />
+                <rect x="8" y="8" width="7" height="7" rx="2" fill="white" opacity="0.95" />
+                <rect x="17" y="8" width="7" height="7" rx="2" fill="white" opacity="0.65" />
+                <rect x="8" y="17" width="7" height="7" rx="2" fill="white" opacity="0.65" />
+                <rect x="17" y="17" width="7" height="7" rx="2" fill="white" opacity="0.95" />
+              </svg>
             </div>
-            <div>
-              <Link
-                href="/"
-                className="text-white font-bold text-lg tracking-tight hover:text-emerald-400 transition-colors"
-              >
-                Timetable Engine
-              </Link>
-              <span className="block text-[11px] text-emerald-400/80 font-mono">CP-SAT Optimized</span>
+            <div className="relative inline-flex items-baseline select-none">
+              <span className="text-indigo-600 font-light italic tracking-tight text-xl sm:text-2xl">timetable</span>
+              <span className="text-indigo-600 font-extrabold italic tracking-tight text-xl sm:text-2xl">master</span>
+              <span className="ml-1 inline-flex items-center justify-center rounded-full font-bold not-italic bg-indigo-600 text-white text-[9px] w-4 h-4 leading-none">
+                TM
+              </span>
             </div>
-          </div>
+          </Link>
 
-          <div className="flex items-center space-x-1 sm:space-x-4">
+          {/* Navigation Links */}
+          <nav className="hidden md:flex items-center gap-1 lg:gap-2">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive =
@@ -41,20 +55,31 @@ export default function Navbar() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                     isActive
-                      ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
-                      : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                      ? 'text-indigo-600 bg-indigo-50 font-semibold'
+                      : 'text-slate-600 hover:text-indigo-600 hover:bg-slate-50'
                   }`}
                 >
-                  <Icon className="w-4 h-4" />
+                  <Icon className={`w-4 h-4 ${isActive ? 'text-indigo-600' : 'text-slate-400'}`} />
                   <span>{item.label}</span>
                 </Link>
               );
             })}
+          </nav>
+
+          {/* CTA Action */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Link
+              href="/build"
+              className="inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-full shadow-sm hover:shadow transition-all"
+            >
+              <span>Build Schedule</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
           </div>
         </div>
       </div>
-    </nav>
+    </header>
   );
 }

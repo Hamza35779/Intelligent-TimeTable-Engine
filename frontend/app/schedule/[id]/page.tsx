@@ -203,30 +203,30 @@ export default function ScheduleDetailPage() {
       <div className="space-y-6 max-w-4xl mx-auto py-8">
         <Link
           href="/schedule"
-          className="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-white transition"
+          className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-indigo-600 transition"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back to schedules</span>
         </Link>
 
-        <div className="p-8 bg-slate-900 border border-slate-800 rounded-2xl text-center space-y-4 shadow-xl">
-          <AlertCircle className="w-10 h-10 text-rose-400 mx-auto" />
+        <div className="p-8 bg-white border border-slate-200 rounded-2xl text-center space-y-4 shadow-sm">
+          <AlertCircle className="w-10 h-10 text-rose-500 mx-auto" />
           <div className="space-y-1">
-            <h3 className="text-lg font-bold text-white">Schedule Not Found</h3>
-            <p className="text-xs text-slate-400 max-w-md mx-auto">
+            <h3 className="text-lg font-bold text-slate-900">Schedule Not Found</h3>
+            <p className="text-xs text-slate-500 max-w-md mx-auto">
               {error || `Unable to locate timetable schedule with ID #${scheduleId}.`}
             </p>
           </div>
           <div className="pt-2 flex justify-center gap-3">
             <button
               onClick={fetchSchedule}
-              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold rounded-xl border border-slate-700 transition"
+              className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold rounded-full transition"
             >
               Try Again
             </button>
             <Link
               href="/schedule"
-              className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-slate-950 text-xs font-semibold rounded-xl transition"
+              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-full transition shadow-sm"
             >
               Return to Schedules
             </Link>
@@ -241,12 +241,12 @@ export default function ScheduleDetailPage() {
   const isFeasible = solverStatusUpper.includes('FEASIBLE');
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
-      {/* Back Link & Navigation */}
+    <div className="space-y-6 max-w-7xl mx-auto pb-16">
+      {/* Back Link & View Tabs */}
       <div className="flex items-center justify-between">
         <Link
           href="/schedule"
-          className="inline-flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-emerald-400 transition"
+          className="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-indigo-600 transition"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back to schedules</span>
@@ -255,10 +255,10 @@ export default function ScheduleDetailPage() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setActiveTab('audience')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition ${
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition ${
               activeTab === 'audience'
-                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-indigo-600 text-white shadow-sm'
+                : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
             }`}
           >
             <Layers className="w-3.5 h-3.5" />
@@ -266,34 +266,34 @@ export default function ScheduleDetailPage() {
           </button>
           <button
             onClick={() => setActiveTab('grid')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition ${
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition ${
               activeTab === 'grid'
-                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-indigo-600 text-white shadow-sm'
+                : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
             }`}
           >
             <LayoutGrid className="w-3.5 h-3.5" />
-            <span>Printable Official Sheet</span>
+            <span>Official University Sheet</span>
           </button>
         </div>
       </div>
 
       {/* Schedule Header Card */}
-      <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl space-y-4">
+      <div className="bg-white border border-slate-200/80 p-6 rounded-2xl shadow-sm space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+              <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
                 <Calendar className="w-5 h-5" />
               </div>
               <div>
-                <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
-                  Schedule #{schedule.id}
+                <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+                  Timetable Run #{schedule.id}
                 </h1>
-                <div className="flex items-center gap-2 text-xs text-slate-400 font-mono">
+                <div className="flex items-center gap-2 text-xs text-slate-500">
                   <span>Generated {new Date(schedule.generated_at).toLocaleString()}</span>
                   {isFallback && (
-                    <span className="inline-flex items-center gap-1 text-[11px] text-amber-400">
+                    <span className="inline-flex items-center gap-1 text-[11px] text-amber-600 font-medium">
                       <Database className="w-3 h-3" />
                       (offline local cache)
                     </span>
@@ -309,30 +309,30 @@ export default function ScheduleDetailPage() {
             <div
               className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold border ${
                 isOptimal
-                  ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/40'
+                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                   : isFeasible
-                  ? 'bg-blue-500/15 text-blue-400 border-blue-500/40'
-                  : 'bg-slate-800 text-slate-300 border-slate-700'
+                  ? 'bg-indigo-50 text-indigo-700 border-indigo-200'
+                  : 'bg-slate-50 text-slate-700 border-slate-200'
               }`}
             >
-              <CheckCircle2 className="w-4 h-4" />
+              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
               <span>{solverStatusUpper}</span>
             </div>
 
             {/* Courses Scheduled Count */}
-            <div className="flex items-center gap-2 px-3.5 py-1.5 bg-slate-950 border border-slate-800 rounded-xl text-xs">
-              <BookOpen className="w-3.5 h-3.5 text-emerald-400" />
-              <span className="text-slate-400">Scheduled:</span>
-              <span className="font-mono font-bold text-white">
-                {schedule.total_courses_scheduled} courses
+            <div className="flex items-center gap-2 px-3.5 py-1.5 bg-slate-50 border border-slate-200 rounded-full text-xs">
+              <BookOpen className="w-3.5 h-3.5 text-indigo-600" />
+              <span className="text-slate-500">Contact Sessions:</span>
+              <span className="font-mono font-bold text-slate-900">
+                {schedule.total_courses_scheduled}
               </span>
             </div>
 
             {/* Solver Time */}
-            <div className="flex items-center gap-2 px-3.5 py-1.5 bg-slate-950 border border-slate-800 rounded-xl text-xs">
-              <Clock className="w-3.5 h-3.5 text-blue-400" />
-              <span className="text-slate-400">Solver Time:</span>
-              <span className="font-mono font-bold text-white">
+            <div className="flex items-center gap-2 px-3.5 py-1.5 bg-slate-50 border border-slate-200 rounded-full text-xs">
+              <Clock className="w-3.5 h-3.5 text-indigo-600" />
+              <span className="text-slate-500">CP-SAT Solve Time:</span>
+              <span className="font-mono font-bold text-slate-900">
                 {Number(schedule.solver_time_ms || 0).toFixed(1)} ms
               </span>
             </div>
@@ -359,8 +359,8 @@ export default function ScheduleDetailPage() {
       )}
 
       {/* Export Section: Buttons for CSV, XLSX, PDF, JSON, HTML */}
-      <div className="space-y-2">
-        <h2 className="text-sm font-bold text-slate-300 uppercase tracking-wider">
+      <div className="space-y-2 pt-4">
+        <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider">
           Download &amp; Export Formats
         </h2>
         <ExportOptions scheduleId={schedule.id} />

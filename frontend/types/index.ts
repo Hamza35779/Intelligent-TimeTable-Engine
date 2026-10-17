@@ -63,6 +63,7 @@ export interface TimetableEntry {
   credit_hours?: number;
   elective_compulsory?: string;
   remarks?: string;
+  time_slot?: string;
 }
 
 export interface SolverStats {
@@ -106,3 +107,5 @@ export interface ScheduleRunDetail {
   metrics: Record<string, any>;
   entries: TimetableEntry[];
 }
+
+export type ScheduleDetail = ScheduleRunDetail;
