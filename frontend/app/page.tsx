@@ -114,18 +114,18 @@ export default function HomePage() {
         <div className="relative max-w-3xl mx-auto space-y-6">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs font-semibold tracking-wide uppercase">
             <span className="w-2 h-2 rounded-full bg-indigo-600 animate-pulse" />
-            <span>AI-Powered Scheduling Platform for Universities &amp; Schools</span>
+            <span>Intelligent Timetable Engine &bull; University &amp; School Scheduling</span>
           </div>
 
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight leading-[1.08]">
             Timetables that hold up <br className="hidden sm:inline" />
-            <span className="text-indigo-600">for the whole semester.</span>
+            <span className="text-indigo-600">for the whole university.</span>
           </h1>
 
           <p className="text-slate-600 text-base sm:text-lg leading-relaxed max-w-2xl mx-auto">
-            An AI-powered timetable generator that builds a conflict-free schedule in seconds, then
-            runs the semester from the same place: faculty workload, room allocation, student
-            sections, cover substitutes, and one-click multi-format exports.
+            Give it teachers and courses via <strong>CSV/Excel upload</strong> or <strong>screen table entry</strong>.
+            CP-SAT generates one conflict-free timetable and produces separate schedules for Administration, Teachers,
+            Classes, Staff, and the Canteen.
           </p>
 
           <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
@@ -133,29 +133,44 @@ export default function HomePage() {
               href="/build"
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-base rounded-full shadow-sm hover:shadow transition-all"
             >
-              <span>Start Timetable Builder</span>
+              <span>Build Schedule</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
 
+            <Link
+              href="/enter-data"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold text-base rounded-full border border-indigo-200 transition-all shadow-sm"
+            >
+              <span>Data Entry Table</span>
+            </Link>
+
+            <Link
+              href="/guide"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-white hover:bg-slate-50 text-slate-800 font-semibold text-base rounded-full border border-slate-300 hover:border-slate-400 transition-all shadow-sm"
+            >
+              <span>User Guide</span>
+            </Link>
             <button
+
               type="button"
               onClick={handleRunDemo}
               disabled={isRunningDemo}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 bg-white hover:bg-slate-50 text-slate-800 font-semibold text-base rounded-full border border-slate-300 hover:border-slate-400 transition-all shadow-sm"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold text-base rounded-full border border-slate-900 transition-all shadow-sm"
             >
               {isRunningDemo ? (
                 <>
-                  <RefreshCw className="w-4 h-4 animate-spin text-indigo-600" />
+                  <RefreshCw className="w-4 h-4 animate-spin text-indigo-400" />
                   <span>Computing Timetable...</span>
                 </>
               ) : (
                 <>
-                  <Play className="w-4 h-4 fill-current text-indigo-600" />
+                  <Play className="w-4 h-4 fill-current text-indigo-400" />
                   <span>Run Instant Demo</span>
                 </>
               )}
             </button>
           </div>
+
 
           <p className="text-xs text-slate-400 pt-1">
             Zero installation required. Google OR-Tools CP-SAT + Scikit-Learn ML engine.

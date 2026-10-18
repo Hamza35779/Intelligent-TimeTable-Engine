@@ -417,3 +417,100 @@ def test_demo_seed_and_shared_fixtures(
     assert seed_data["schedule_id"] >= 1
 
 
+def test_table_and_csv_inputs_produce_identical_solver_output():
+    # 1. Option A: CSV text
+    csv_text = (
+        "teacher_name,course_name,credit_hours,student_group,preferred_time\n"
+        "Dr. Ahmad Ali,Data Structures,3,CS-2024-A,Morning\n"
+        "Ms. Fatima Khan,Database Systems,4,CS-2024-A,Afternoon\n"
+        "Mr. Hassan Khan,Web Development,3,CS-2024-B,Evening\n"
+    )
+
+    # 2. Option B: Table rows
+    table_rows = [
+        {
+            "teacher_name": "Dr. Ahmad Ali",
+            "course_name": "Data Structures",
+            "credit_hours": 3,
+            "student_group": "CS-2024-A",
+            "preferred_time": "Morning",
+        },
+        {
+            "teacher_name": "Ms. Fatima Khan",
+            "course_name": "Database Systems",
+            "credit_hours": 4,
+            "student_group": "CS-2024-A",
+            "preferred_time": "Afternoon",
+        },
+        {
+            "teacher_name": "Mr. Hassan Khan",
+            "course_name": "Web Development",
+            "credit_hours": 3,
+            "student_group": "CS-2024-B",
+            "preferred_time": "Evening",
+        },
+    ]
+
+    # Validate table first
+    val_resp = client.post("/schedule/validate-table", json={"rows": table_rows})
+    assert val_resp.status_code == 200
+    val_data = val_resp.json()
+    assert val_data["is_valid"] is True
+    assert val_data["total_rows"] == 3
+    assert val_data["valid_rows"] == 3
+    assert len(val_data["errors"]) == 0
+
+    # Parse comparison directly
+    from utils.csv_parser import parse_schedule_csv, parse_schedule_table
+    csv_parsed = parse_schedule_csv(csv_text)
+    table_parsed = parse_schedule_table(table_rows)
+
+    # Verify input dictionary equivalence
+    assert len(csv_parsed["faculty"]) == len(table_parsed["faculty"])
+    assert len(csv_parsed["courses"]) == len(table_parsed["courses"])
+    assert len(csv_parsed["slots"]) == len(table_parsed["slots"])
+    assert len(csv_parsed["venues"]) == len(table_parsed["venues"])
+    for i in range(len(csv_parsed["courses"])):
+        assert csv_parsed["courses"][i]["name"] == table_parsed["courses"][i]["name"]
+        assert csv_parsed["courses"][i]["credit_hours"] == table_parsed["courses"][i]["credit_hours"]
+        assert csv_parsed["courses"][i]["student_group"] == table_parsed["courses"][i]["student_group"]
+
+    # Run solver on table endpoint
+    table_resp = client.post("/schedule/generate-from-table", json={"rows": table_rows, "random_seed": 42})
+    assert table_resp.status_code == 201
+    table_json = table_resp.json()
+
+    # Upload CSV endpoint
+    csv_resp = client.post(
+        "/schedule/upload-csv",
+        files={"file": ("courses.csv", csv_text.encode("utf-8"), "text/csv")},
+    )
+    assert csv_resp.status_code == 201
+    csv_json = csv_resp.json()
+
+    # Both must schedule the exact same number of courses and contact hours (3+4+3 = 10)
+    assert len(table_json["schedule"]) == 10
+    assert len(csv_json["schedule"]) == 10
+    assert table_json["stats"]["total_courses_scheduled"] == csv_json["stats"]["total_courses_scheduled"]
+
+
+def test_table_validation_section_6_rules():
+    invalid_rows = [
+        {"teacher_name": "", "course_name": "Math", "credit_hours": 3},
+        {"teacher_name": "Prof Smith", "course_name": "", "credit_hours": 3},
+        {"teacher_name": "Prof Jones", "course_name": "Physics", "credit_hours": 5},
+        {"teacher_name": "Prof Smith", "course_name": "Algorithms", "credit_hours": 3},
+        {"teacher_name": "Prof Smith", "course_name": "Algorithms", "credit_hours": 3},
+    ]
+    resp = client.post("/schedule/validate-table", json={"rows": invalid_rows})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["is_valid"] is False
+    messages = [e["message"] for e in data["errors"]]
+    assert "Teacher name is missing" in messages
+    assert "Course name is missing" in messages
+    assert "Credit hours must be 1 to 4" in messages
+    assert "Duplicate: this teacher already teaches this course" in messages
+
+
+

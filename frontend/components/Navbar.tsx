@@ -2,13 +2,14 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Sparkles, Calendar, Users, Bot, ArrowRight, Layers } from 'lucide-react';
+import { Sparkles, Calendar, Users, Bot, ArrowRight, Layers, BookOpen } from 'lucide-react';
 
 const navItems = [
   { href: '/', label: 'Overview', icon: Calendar },
-  { href: '/build', label: 'Timetable Builder', icon: Sparkles },
+  { href: '/build', label: 'Data Entry', icon: Sparkles },
   { href: '/schedule', label: 'Schedules', icon: Layers },
   { href: '/substitutes', label: 'Substitutes', icon: Users },
+  { href: '/guide', label: 'User Guide', icon: BookOpen },
   { href: '/assistant', label: 'AI Assistant', icon: Bot },
 ];
 
@@ -37,13 +38,14 @@ export default function Navbar() {
               </svg>
             </div>
             <div className="relative inline-flex items-baseline select-none">
-              <span className="text-indigo-600 font-light italic tracking-tight text-xl sm:text-2xl">timetable</span>
-              <span className="text-indigo-600 font-extrabold italic tracking-tight text-xl sm:text-2xl">master</span>
-              <span className="ml-1 inline-flex items-center justify-center rounded-full font-bold not-italic bg-indigo-600 text-white text-[9px] w-4 h-4 leading-none">
-                TM
+              <span className="text-indigo-600 font-extrabold tracking-tight text-lg sm:text-xl">Intelligent</span>
+              <span className="text-slate-800 font-semibold tracking-tight text-lg sm:text-xl ml-1">Timetable Engine</span>
+              <span className="ml-2 inline-flex items-center justify-center rounded px-1.5 py-0.5 font-bold not-italic bg-indigo-50 text-indigo-700 text-[10px] border border-indigo-200">
+                PRO
               </span>
             </div>
           </Link>
+
 
           {/* Navigation Links */}
           <nav className="hidden md:flex items-center gap-1 lg:gap-2">

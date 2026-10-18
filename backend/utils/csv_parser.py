@@ -215,3 +215,117 @@ def parse_schedule_csv(
         },
         "timeout_seconds": int(cfg.get("timeout_seconds", 5)),
     }
+
+
+def table_rows_to_csv(rows: List[Dict[str, Any]]) -> str:
+    """Convert tabular input rows to standard CSV text."""
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["teacher_name", "course_name", "credit_hours", "student_group", "preferred_time"])
+    for r in rows:
+        t_name = str(r.get("teacher_name") or "").strip()
+        c_name = str(r.get("course_name") or "").strip()
+        ch = r.get("credit_hours", 3)
+        sg = str(r.get("student_group") or "").strip()
+        pref = str(r.get("preferred_time") or "").strip()
+        writer.writerow([t_name, c_name, ch, sg, pref])
+    return output.getvalue()
+
+
+def validate_table_rows(
+    rows: List[Dict[str, Any]],
+    config: Optional[Dict[str, Any]] = None,
+) -> List[Dict[str, Any]]:
+    """
+    Validate tabular input against Section 6 rules:
+      - 'Teacher name is missing'
+      - 'Course name is missing'
+      - 'Credit hours must be 1 to 4'
+      - 'Duplicate: this teacher already teaches this course'
+      - 'Teacher X needs N hours but only M are free'
+    """
+    errors: List[Dict[str, Any]] = []
+    seen_teacher_course: Dict[tuple, int] = {}
+    teacher_hours: Dict[str, int] = {}
+
+    cfg = config or {}
+    days = cfg.get("days") or ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+    slots = build_slots_from_config(cfg)
+    slots_per_day = len([s for s in slots if s.get("day_of_week") == (days[0] if days else "Monday")])
+    max_daily_hrs = int(cfg.get("max_teaching_hours_per_day", 6))
+    max_weekly_hours_per_teacher = len(days) * min(slots_per_day, max_daily_hrs) if days else 30
+
+    for idx, r in enumerate(rows):
+        t_name = str(r.get("teacher_name") or "").strip()
+        c_name = str(r.get("course_name") or "").strip()
+        raw_ch = r.get("credit_hours")
+
+        if not t_name:
+            errors.append({
+                "row_index": idx,
+                "field": "teacher_name",
+                "message": "Teacher name is missing",
+            })
+
+        if not c_name:
+            errors.append({
+                "row_index": idx,
+                "field": "course_name",
+                "message": "Course name is missing",
+            })
+
+        # Credit hours check
+        ch_int = None
+        try:
+            ch_int = int(raw_ch) if raw_ch is not None else 3
+            if ch_int < 1 or ch_int > 4:
+                errors.append({
+                    "row_index": idx,
+                    "field": "credit_hours",
+                    "message": "Credit hours must be 1 to 4",
+                })
+        except (ValueError, TypeError):
+            errors.append({
+                "row_index": idx,
+                "field": "credit_hours",
+                "message": "Credit hours must be 1 to 4",
+            })
+
+        # Duplicate check
+        if t_name and c_name:
+            pair = (t_name.lower(), c_name.lower())
+            if pair in seen_teacher_course:
+                errors.append({
+                    "row_index": idx,
+                    "field": "course_name",
+                    "message": "Duplicate: this teacher already teaches this course",
+                })
+            else:
+                seen_teacher_course[pair] = idx
+
+            # Accumulate teacher load
+            valid_ch = ch_int if (ch_int and 1 <= ch_int <= 4) else 3
+            teacher_hours[t_name] = teacher_hours.get(t_name, 0) + valid_ch
+
+    # Workload capacity check
+    for t_name, total_hrs in teacher_hours.items():
+        if total_hrs > max_weekly_hours_per_teacher:
+            # find first row with this teacher
+            first_idx = next((i for i, r in enumerate(rows) if str(r.get("teacher_name") or "").strip().lower() == t_name.lower()), 0)
+            errors.append({
+                "row_index": first_idx,
+                "field": "teacher_name",
+                "message": f"Teacher {t_name} needs {total_hrs} hours but only {max_weekly_hours_per_teacher} are free",
+            })
+
+    return errors
+
+
+def parse_schedule_table(
+    rows: List[Dict[str, Any]],
+    config: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
+    """Parse table rows into GenerateScheduleRequest dictionary via equivalent CSV conversion."""
+    csv_text = table_rows_to_csv(rows)
+    return parse_schedule_csv(csv_text, config=config)
+

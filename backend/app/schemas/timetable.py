@@ -116,3 +116,33 @@ class TimetableAnalyticsResponse(BaseModel):
     time_slot_fill_rate_percentage: float
     conflicts_resolved_count: int
     solver_efficiency: Dict[str, Any]
+
+
+class TableRowInput(BaseModel):
+    teacher_name: Optional[str] = ""
+    course_name: Optional[str] = ""
+    credit_hours: Optional[Any] = 3
+    student_group: Optional[str] = ""
+    preferred_time: Optional[str] = ""
+
+
+
+class TableRowValidationError(BaseModel):
+    row_index: int
+    field: Optional[str] = None
+    message: str
+
+
+class TableValidationResult(BaseModel):
+    is_valid: bool
+    errors: List[TableRowValidationError] = Field(default_factory=list)
+    total_rows: int
+    valid_rows: int
+
+
+class GenerateFromTableRequest(BaseModel):
+    rows: List[TableRowInput]
+    config: Optional[GlobalScheduleConfig] = None
+    timeout_seconds: Optional[int] = Field(default=5, ge=1, le=30)
+    random_seed: Optional[int] = None
+

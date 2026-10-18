@@ -109,3 +109,25 @@ export interface ScheduleRunDetail {
 }
 
 export type ScheduleDetail = ScheduleRunDetail;
+
+export interface TableRowData {
+  id: string;
+  teacher_name: string;
+  course_name: string;
+  credit_hours: number;
+  student_group?: string;
+  preferred_time?: '' | 'Morning' | 'Afternoon' | 'Evening';
+}
+
+export interface TableRowValidationError {
+  row_index: number;
+  field?: string;
+  message: string;
+}
+
+export interface TableValidationResponse {
+  is_valid: boolean;
+  errors: TableRowValidationError[];
+  total_rows: number;
+  valid_rows: number;
+}

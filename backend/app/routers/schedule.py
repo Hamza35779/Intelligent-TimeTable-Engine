@@ -16,13 +16,16 @@ from app.schemas.timetable import (
     TimetableResponse,
     TimetableEntryResponse,
     SolverStats,
+    GenerateFromTableRequest,
+    TableValidationResult,
+    TableRowValidationError,
 )
 from app.services.validator import ConstraintValidator
 from app.services.solver import TimetableSolver
 from app.services.analytics import TimetableAnalytics
 from ml.predictor import PreferencePredictor
 from solver.fairness import calculate_fairness_score, calculate_preference_satisfaction
-from utils.csv_parser import parse_schedule_csv
+from utils.csv_parser import parse_schedule_csv, parse_schedule_table, validate_table_rows
 
 router = APIRouter(prefix="/schedule", tags=["Schedule"])
 
@@ -367,6 +370,40 @@ async def upload_csv_and_generate(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Failed to parse uploaded CSV: {str(exc)}",
         )
+    return generate_schedule(payload=req, db=db)
+
+
+@router.post("/validate-table", response_model=TableValidationResult)
+def validate_table_endpoint(payload: GenerateFromTableRequest):
+    row_dicts = [r.model_dump() for r in payload.rows]
+    cfg_dict = payload.config.model_dump() if payload.config else None
+    errors = validate_table_rows(row_dicts, config=cfg_dict)
+    error_indices = {e["row_index"] for e in errors}
+    valid_count = len(row_dicts) - len(error_indices)
+    return TableValidationResult(
+        is_valid=len(errors) == 0,
+        errors=[TableRowValidationError(**e) for e in errors],
+        total_rows=len(row_dicts),
+        valid_rows=max(0, valid_count),
+    )
+
+
+@router.post("/generate-from-table", response_model=TimetableResponse, status_code=status.HTTP_201_CREATED)
+def generate_from_table(payload: GenerateFromTableRequest, db: Session = Depends(get_db)):
+    row_dicts = [r.model_dump() for r in payload.rows]
+    cfg_dict = payload.config.model_dump() if payload.config else None
+    errors = validate_table_rows(row_dicts, config=cfg_dict)
+    if errors:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"message": "Table validation failed", "errors": errors},
+        )
+    parsed_dict = parse_schedule_table(row_dicts, config=cfg_dict)
+    if payload.timeout_seconds:
+        parsed_dict["timeout_seconds"] = payload.timeout_seconds
+    if payload.random_seed is not None:
+        parsed_dict["random_seed"] = payload.random_seed
+    req = GenerateScheduleRequest(**parsed_dict)
     return generate_schedule(payload=req, db=db)
 
 
