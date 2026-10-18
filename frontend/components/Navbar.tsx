@@ -39,10 +39,11 @@ export default function Navbar() {
             </div>
             <div className="relative inline-flex items-baseline select-none">
               <span className="text-indigo-600 font-extrabold tracking-tight text-lg sm:text-xl">Intelligent</span>
-              <span className="text-slate-800 font-semibold tracking-tight text-lg sm:text-xl ml-1">Timetable Engine</span>
+              <span className="text-slate-800 font-semibold tracking-tight text-lg sm:text-xl ml-1">Time Table</span>
               <span className="ml-2 inline-flex items-center justify-center rounded px-1.5 py-0.5 font-bold not-italic bg-indigo-50 text-indigo-700 text-[10px] border border-indigo-200">
                 PRO
               </span>
+
             </div>
           </Link>
 

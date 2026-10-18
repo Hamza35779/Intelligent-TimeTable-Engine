@@ -34,8 +34,9 @@ export default function UserGuidePage() {
                 Official Documentation &amp; User Manual
               </div>
               <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
-                Intelligent Timetable Engine: User Guide
+                Intelligent Time Table: User Guide
               </h1>
+
               <p className="mt-2 text-slate-600 max-w-2xl text-sm leading-relaxed">
                 Complete operational reference manual for university administrators, registrars, and department heads.
                 Learn how to upload or enter datasets, configure timetable constraints, generate conflict-free schedules,

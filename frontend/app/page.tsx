@@ -114,7 +114,7 @@ export default function HomePage() {
         <div className="relative max-w-3xl mx-auto space-y-6">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs font-semibold tracking-wide uppercase">
             <span className="w-2 h-2 rounded-full bg-indigo-600 animate-pulse" />
-            <span>Intelligent Timetable Engine &bull; University &amp; School Scheduling</span>
+            <span>Intelligent Time Table &bull; University &amp; School Scheduling</span>
           </div>
 
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight leading-[1.08]">

@@ -4,8 +4,8 @@ import Navbar from '../components/Navbar';
 import MindmapChatDrawer from '../components/MindmapChatDrawer';
 
 export const metadata: Metadata = {
-  title: 'TimetableMaster | AI-Powered Scheduling Platform for Universities & Colleges',
-  description: 'AI-powered timetable generator that builds conflict-free schedules in seconds using Google OR-Tools CP-SAT and machine learning.',
+  title: 'Intelligent Time Table | AI-Powered Scheduling Platform for Universities & Schools',
+  description: 'Intelligent Time Table builds conflict-free schedules in seconds using Google OR-Tools CP-SAT and machine learning.',
 };
 
 export default function RootLayout({
@@ -24,10 +24,11 @@ export default function RootLayout({
         <footer className="border-t border-slate-200 bg-white py-8 text-center text-xs text-slate-500">
           <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
-              <span className="font-semibold text-slate-700">TimetableMaster</span>
+              <span className="font-semibold text-slate-700">Intelligent Time Table</span>
               <span>&bull;</span>
-              <span>AI-Powered Autonomous Timetable Engine</span>
+              <span>Autonomous Scheduling Platform</span>
             </div>
+
             <div className="flex items-center gap-4 text-slate-400">
               <span>Google OR-Tools CP-SAT</span>
               <span>&bull;</span>

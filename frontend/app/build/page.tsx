@@ -493,8 +493,9 @@ export default function EasyBuilderPage() {
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-semibold mb-2">
               <Sparkles className="w-3.5 h-3.5" />
-              Intelligent Timetable Engine v2.0
+              Intelligent Time Table v2.0
             </div>
+
             <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
               Create Conflict-Free University Timetable
             </h1>
