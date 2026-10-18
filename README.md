@@ -98,6 +98,47 @@ pytest -v
 
 31 tests covering solver correctness, API endpoints, ML pipeline, exports, and performance.
 
+## Academic Benchmark (ITC-2007 Track 3 CB-CTT)
+
+The solver is benchmarked against the standard academic **ITC-2007 Track 3 (Curriculum-Based Course Timetabling)** competition instances (`comp01` through `comp21`).
+
+### Independent Verification Architecture
+To ensure objective rigor, the system uses an **independent solution checker** (`benchmarks/itc2007/checker.py`) that strictly recounts every hard violation and soft cost directly from the generated schedule. **The solver's own internal status claims are never trusted; only the independent checker's metrics are reported.**
+
+- **Hard Constraints (Target: 0 violations)**:
+  - `Lectures`: All required lectures scheduled in valid periods and rooms.
+  - `Conflicts`: No teacher or curriculum cohort overlaps in any period.
+  - `Availability`: No lectures assigned to unavailable time slots.
+  - `RoomOccupation`: At most one lecture per room in any time slot.
+- **Soft Constraints (Official ITC-2007 Penalty Weights)**:
+  - `RoomCapacity` ($w = 1$): Penalty of 1 per student exceeding room capacity.
+  - `MinWorkingDays` ($w = 5$): Penalty of 5 for each day short of minimum teaching days.
+  - `CurriculumCompactness` ($w = 2$): Penalty of 2 for isolated lectures in a curriculum day.
+  - `RoomStability` ($w = 1$): Penalty of 1 for each distinct room used beyond the first.
+
+### Running the Benchmark
+
+```bash
+# 1. Fetch official competition instances and PDF documentation
+python scripts/fetch_itc2007.py
+
+# 2. Run benchmark on selected instances (e.g. comp01, comp05, comp10)
+python benchmarks/itc2007/run_benchmark.py --instances comp01,comp05,comp10 --time-limit 30 --seed 42 --out benchmarks/itc2007/results
+
+# 3. Run independent checker & parser unit tests
+pytest benchmarks/itc2007/tests/ -v
+```
+
+### Benchmark Results (Independent Checker Recount)
+
+| Instance | Status | Solve Time | Hard Violations (Lec/Conf/Avail/Room) | Total Hard | Cap ($w=1$) | MinDays ($w=5$) | Compact ($w=2$) | Stab ($w=1$) | Total Soft Cost |
+|---|---|---|---|---|---|---|---|---|---|
+| **comp01** | `FEASIBLE` | 2.53s | 0 / 0 / 0 / 0 | **0** | 4 | 0 | 122 | 48 | **174** |
+| **comp05** | `FEASIBLE` | 7.50s | 0 / 0 / 0 / 0 | **0** | 0 | 15 | 1548 | 48 | **1611** |
+| **comp10** | `FEASIBLE` | 31.60s | 0 / 0 / 0 / 0 | **0** | 0 | 0 | 590 | 197 | **787** |
+
+---
+
 ## Tech Stack
 
 | Layer | Technology |
@@ -106,5 +147,7 @@ pytest -v
 | Backend | Python 3.11+, FastAPI, SQLAlchemy |
 | Database | SQLite (default), PostgreSQL (via DATABASE_URL) |
 | ML | scikit-learn RandomForest |
+| Benchmark | ITC-2007 Track 3 (CB-CTT) Parser, Adapter & Independent Checker |
 | Frontend | Next.js 14, React 18, TypeScript, TailwindCSS |
 | Export | CSV, XLSX (openpyxl), PDF (reportlab), JSON, HTML |
+

@@ -1,0 +1,75 @@
+============================================================
+ITC-2007 Track 3 Benchmark Evaluation
+Timestamp: 2026-10-19T02:12:14.623795
+Instances: comp01, comp05, comp10
+Time limit per instance: 30s | Random Seed: 42
+Output directory: D:\My Softwares\Time Table Generator\benchmarks\itc2007\results
+Rule: Solver claims discarded. Only independent checker metrics reported.
+============================================================
+
+>> Loading and solving instance: comp01 (comp01.ctt)
+   Courses: 30, Rooms: 6, Curricula: 14, Periods: 30
+   Solver returned 160 lecture assignments in 2.528s
+============================================================
+ITC-2007 Benchmark Verification: Fis0506-1
+Status: FEASIBLE
+------------------------------------------------------------
+Hard Constraints (Target: 0):
+  Lectures Scheduled:        0
+  Teacher/Curriculum Clashes:0
+  Availability Violations:   0
+  Room Overbookings:         0
+  Total Hard Violations:     0
+------------------------------------------------------------
+Soft Constraint Costs (Official ITC-2007 Weights):
+  Room Capacity (w=1):       4
+  Min Working Days (w=5):    0
+  Curriculum Compactness(w=2):122
+  Room Stability (w=1):      48
+  Total Soft Cost:           174
+============================================================
+
+>> Loading and solving instance: comp05 (comp05.ctt)
+   Courses: 54, Rooms: 9, Curricula: 139, Periods: 36
+   Solver returned 152 lecture assignments in 7.5s
+============================================================
+ITC-2007 Benchmark Verification: Let0405-1
+Status: FEASIBLE
+------------------------------------------------------------
+Hard Constraints (Target: 0):
+  Lectures Scheduled:        0
+  Teacher/Curriculum Clashes:0
+  Availability Violations:   0
+  Room Overbookings:         0
+  Total Hard Violations:     0
+------------------------------------------------------------
+Soft Constraint Costs (Official ITC-2007 Weights):
+  Room Capacity (w=1):       0
+  Min Working Days (w=5):    15
+  Curriculum Compactness(w=2):1548
+  Room Stability (w=1):      48
+  Total Soft Cost:           1611
+============================================================
+
+>> Loading and solving instance: comp10 (comp10.ctt)
+   Courses: 115, Rooms: 18, Curricula: 67, Periods: 25
+   Solver returned 370 lecture assignments in 31.602s
+============================================================
+ITC-2007 Benchmark Verification: Ing0405-2
+Status: FEASIBLE
+------------------------------------------------------------
+Hard Constraints (Target: 0):
+  Lectures Scheduled:        0
+  Teacher/Curriculum Clashes:0
+  Availability Violations:   0
+  Room Overbookings:         0
+  Total Hard Violations:     0
+------------------------------------------------------------
+Soft Constraint Costs (Official ITC-2007 Weights):
+  Room Capacity (w=1):       0
+  Min Working Days (w=5):    0
+  Curriculum Compactness(w=2):590
+  Room Stability (w=1):      197
+  Total Soft Cost:           787
+============================================================
+

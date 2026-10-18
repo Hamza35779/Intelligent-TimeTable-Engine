@@ -1,6 +1,15 @@
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Tuple
 from app.services.solver import TimetableSolver
 from ml.predictor import PreferencePredictor
+
+try:
+    from benchmarks.itc2007.adapter import solve_itc_instance, convert_product_schedule_to_solution
+    from benchmarks.itc2007.parser import Instance, Solution
+except ImportError:
+    solve_itc_instance = None  # type: ignore
+    convert_product_schedule_to_solution = None  # type: ignore
+    Instance = None  # type: ignore
+    Solution = None  # type: ignore
 
 
 def solve_schedule(
