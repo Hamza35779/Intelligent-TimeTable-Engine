@@ -38,6 +38,8 @@ desktop.ini
 node_modules/
 .next/
 out/
+!frontend/out/
+!frontend/out/**
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

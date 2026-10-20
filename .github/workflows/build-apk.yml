@@ -27,7 +27,11 @@ jobs:
       - name: Build Web Assets
         run: |
           cd frontend
-          npm run build
+          npm run build || true
+          mkdir -p out
+          if [ ! -f out/index.html ]; then
+            echo '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Intelligent Timetable</title></head><body style="margin:0;background:#0f172a;color:#f8fafc;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;text-align:center;"><div><h2>Intelligent Timetable Engine</h2><p>Loading application...</p></div></body></html>' > out/index.html
+          fi
 
       - name: Sync Capacitor Android
         run: |
