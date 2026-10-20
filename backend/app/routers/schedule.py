@@ -1,7 +1,7 @@
 import time
 from datetime import datetime, timezone
-from typing import List, Dict, Any, Tuple
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status
+from typing import List, Dict, Any, Tuple, Optional
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, status
 from sqlalchemy.orm import Session
 from app.database import get_db, SessionLocal
 from app.models.faculty import Faculty
@@ -741,6 +741,33 @@ def submit_async_generation_job(payload: GenerateScheduleRequest):
     )
     job = job_queue.get_job(job_id)
     return JobStatusResponse(**job.to_dict())
+
+
+@router.post("/jobs/upload-csv", response_model=JobStatusResponse, status_code=status.HTTP_202_ACCEPTED)
+def submit_async_csv_generation_job(
+    file: UploadFile = File(...),
+    academic_term: Optional[str] = Form(default="General"),
+    department: Optional[str] = Form(default="All"),
+    created_by: Optional[str] = Form(default="System"),
+):
+    """
+    Submits an uploaded CSV dataset to the background solver queue.
+    Returns 202 Accepted immediately with a job_id for polling.
+    """
+    try:
+        content = file.file.read()
+        csv_text = content.decode("utf-8")
+        parsed = parse_schedule_csv(csv_text)
+        req = GenerateScheduleRequest(**parsed)
+        req.academic_term = academic_term or "General"
+        req.department = department or "All"
+        req.created_by = created_by or "System"
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Failed to parse uploaded CSV: {str(exc)}",
+        )
+    return submit_async_generation_job(req)
 
 
 @router.get("/jobs", response_model=List[JobStatusResponse])

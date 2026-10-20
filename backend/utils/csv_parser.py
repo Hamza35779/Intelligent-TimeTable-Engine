@@ -141,10 +141,18 @@ def parse_schedule_csv(
         except ValueError:
             capacity = 40
 
-        raw_ch = row.get("credit_hours") or row.get("hours") or "3"
-        try:
-            credit_hours = max(1, min(6, int(float(raw_ch))))
-        except ValueError:
+        raw_ch = row.get("credit_hours") or row.get("hours")
+        if raw_ch is not None and str(raw_ch).strip() != "":
+            try:
+                ch_val = int(float(raw_ch))
+                if ch_val < 1 or ch_val > 6:
+                    raise ValueError(f"Row {idx + 1}: Credit hours must be between 1 and 6, got '{raw_ch}'")
+                credit_hours = ch_val
+            except ValueError as e:
+                if "between 1 and 6" in str(e):
+                    raise
+                raise ValueError(f"Row {idx + 1}: Invalid credit hours '{raw_ch}'. Must be a number between 1 and 6.")
+        else:
             credit_hours = 3
 
         if teacher_name not in faculty_map:

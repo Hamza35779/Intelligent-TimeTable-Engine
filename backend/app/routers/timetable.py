@@ -114,6 +114,7 @@ def list_schedules(
 
 
 @router.get("/schedule/{schedule_id:int}", response_model=TimetableDetailResponse)
+@router.get("/schedules/{schedule_id:int}", response_model=TimetableDetailResponse)
 def get_schedule(schedule_id: int, db: Session = Depends(get_db)):
     run, formatted_entries, entry_dicts, _, prefs_map = _load_run_entries(schedule_id, db)
 
@@ -140,7 +141,8 @@ def get_schedule(schedule_id: int, db: Session = Depends(get_db)):
     )
 
 
-@router.get("/schedule/{schedule_id}/table")
+@router.get("/schedule/{schedule_id:int}/table")
+@router.get("/schedules/{schedule_id:int}/table")
 def get_schedule_table(
     schedule_id: int,
     view: str = Query(
@@ -185,8 +187,13 @@ def get_schedule_table(
     }
 
 
-@router.get("/schedule/{schedule_id}/views")
-def get_schedule_multi_views(schedule_id: int, db: Session = Depends(get_db)):
+@router.get("/schedule/{schedule_id:int}/views")
+@router.get("/schedules/{schedule_id:int}/views")
+def get_schedule_multi_views(
+    schedule_id: int,
+    view: Optional[str] = Query(default=None, description="Optional view filter"),
+    db: Session = Depends(get_db),
+):
     run, _, entry_dicts, teacher_count, prefs_map = _load_run_entries(schedule_id, db)
     stored_metrics = run.metrics or {}
     metadata = {
@@ -200,10 +207,20 @@ def get_schedule_multi_views(schedule_id: int, db: Session = Depends(get_db)):
         or calculate_preference_satisfaction(entry_dicts, prefs_map),
         "config": stored_metrics.get("config") or {},
     }
+    all_views = generate_multi_views(entry_dicts, metadata)
+    v_norm = (view or "").strip().lower()
+    if v_norm and v_norm in VALID_VIEWS:
+        return {
+            "schedule_id": run.id,
+            "view": v_norm,
+            "data": all_views.get(v_norm),
+            "views": all_views,
+            "metadata": metadata,
+        }
     return {
         "schedule_id": run.id,
         "generated_at": metadata["generated_at"],
-        "views": generate_multi_views(entry_dicts, metadata),
+        "views": all_views,
     }
 
 
