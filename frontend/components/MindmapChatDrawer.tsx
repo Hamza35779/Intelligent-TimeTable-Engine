@@ -20,6 +20,13 @@ import {
   Sliders,
   ShieldCheck,
   Check,
+  Mic,
+  MicOff,
+  Volume2,
+  VolumeX,
+  UserCheck,
+  GraduationCap,
+  ShieldAlert,
 } from 'lucide-react';
 import { TimetableResponse, TimetableEntry } from '../types';
 import {
@@ -44,7 +51,9 @@ interface ChatMessage {
   id: string;
   sender: 'user' | 'bot';
   text: string;
+  speechText?: string;
   ruleCreated?: MindmapRule;
+  intentStatus?: 'success' | 'clash' | 'free' | 'busy' | 'info' | 'error';
   actionTriggered?: 'reschedule' | 'clear' | 'view';
 }
 
@@ -78,6 +87,8 @@ const DEFAULT_RULES: MindmapRule[] = [
   },
 ];
 
+type PersonaMode = 'mindmap' | 'admin' | 'faculty' | 'student';
+
 export default function MindmapChatDrawer() {
   const router = useRouter();
   const pathname = usePathname();
@@ -90,8 +101,96 @@ export default function MindmapChatDrawer() {
   const [rulesExpanded, setRulesExpanded] = useState(false);
   const [rescheduleNotice, setRescheduleNotice] = useState<string | null>(null);
 
+  // Voice States
+  const [isListening, setIsListening] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const [activePersona, setActivePersona] = useState<PersonaMode>('mindmap');
+  const [speechSupported, setSpeechSupported] = useState(false);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const recognitionRef = useRef<any>(null);
+
+  // Check Web Speech API support
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const SpeechRecognitionClass =
+        (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (SpeechRecognitionClass) {
+        setSpeechSupported(true);
+        const recog = new SpeechRecognitionClass();
+        recog.continuous = false;
+        recog.interimResults = false;
+        recog.lang = 'en-US';
+
+        recog.onresult = (event: any) => {
+          const transcript = event.results?.[0]?.[0]?.transcript;
+          if (transcript) {
+            setInput(transcript);
+            handleSendMessage(transcript);
+          }
+          setIsListening(false);
+        };
+
+        recog.onerror = () => {
+          setIsListening(false);
+        };
+
+        recog.onend = () => {
+          setIsListening(false);
+        };
+
+        recognitionRef.current = recog;
+      }
+    }
+  }, []);
+
+  // Text-to-Speech function
+  const speakUtterance = (text: string) => {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window) || isMuted) return;
+    try {
+      window.speechSynthesis.cancel();
+      const cleanText = text.replace(/[*_#`•🚫✅]/g, '').trim();
+      if (!cleanText) return;
+      const utterance = new SpeechSynthesisUtterance(cleanText);
+      utterance.rate = 1.0;
+      utterance.pitch = 1.0;
+      utterance.onstart = () => setIsSpeaking(true);
+      utterance.onend = () => setIsSpeaking(false);
+      utterance.onerror = () => setIsSpeaking(false);
+      window.speechSynthesis.speak(utterance);
+    } catch {
+      setIsSpeaking(false);
+    }
+  };
+
+  const toggleListening = () => {
+    if (!speechSupported) return;
+    if (isListening) {
+      try {
+        recognitionRef.current?.stop();
+      } catch {
+        // ignore
+      }
+      setIsListening(false);
+    } else {
+      try {
+        recognitionRef.current?.start();
+        setIsListening(true);
+      } catch {
+        setIsListening(false);
+      }
+    }
+  };
+
+  const toggleMute = () => {
+    if (isSpeaking && !isMuted && typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+    }
+    setIsMuted(!isMuted);
+  };
 
   // Load saved rules from localStorage
   useEffect(() => {
@@ -112,7 +211,6 @@ export default function MindmapChatDrawer() {
   useEffect(() => {
     try {
       localStorage.setItem('timetable_mindmap_rules', JSON.stringify(rules));
-      // Broadcast update to any listening components
       window.dispatchEvent(
         new CustomEvent('mindmap-rules-changed', { detail: { rules } })
       );
@@ -129,7 +227,12 @@ export default function MindmapChatDrawer() {
           id: 'welcome-1',
           sender: 'bot',
           text:
-            "Hi! I am your AI Mindmap Copilot. Chat with me to define what to do and what NOT to do before generating or rescheduling your timetable.\n\nFor example:\n• \"Dr. Sarah should only teach on Mondays and Wednesdays in the morning\"\n• \"No classes for any professor on Friday after 1 PM\"\n• \"Add course: Cloud Computing (3 CH) assigned to Dr. Usman\"\n• \"Set slot duration to 60 minutes with 12:00 lunch break\"\n• \"Now reschedule the timetable\"",
+            "Hi! I am your AI Timetable Copilot with Voice Command Support.\n\n" +
+            "You can use Voice or Text to control your timetable across 4 modes:\n" +
+            "• Mindmap: Define what to do & not do before rescheduling\n" +
+            "• Admin: \"Move Artificial Intelligence to Room B-201\"\n" +
+            "• Faculty: \"Am I free on Monday at 10 AM?\"\n" +
+            "• Student: \"What is my next class?\"",
         },
       ]);
     }
@@ -155,7 +258,7 @@ export default function MindmapChatDrawer() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Natural Language Interpreter: parses instructions and extracts Do's and Don'ts
+  // Natural Language Interpreter for Mindmap Rules
   const interpretUserMindmap = async (userText: string) => {
     const lower = userText.toLowerCase();
 
@@ -178,23 +281,74 @@ export default function MindmapChatDrawer() {
       lower.includes('reset mindmap')
     ) {
       setRules(DEFAULT_RULES);
+      const text = 'Reset all custom mindmap directives back to default university standards.';
       setMessages((prev) => [
         ...prev,
         {
           id: `bot-${Date.now()}`,
           sender: 'bot',
-          text: 'Reset all custom mindmap directives back to default university standards.',
+          text,
           actionTriggered: 'clear',
         },
       ]);
+      speakUtterance(text);
       return;
     }
 
-    // 3. Parse specific instructions
+    // 3. Check for Slide 11 Voice Persona Queries: Admin, Faculty, Student via backend API
+    const isAdminQuery =
+      lower.includes('move ') ||
+      lower.includes('shift ') ||
+      lower.includes('assign ') ||
+      activePersona === 'admin';
+    const isFacultyQuery =
+      lower.includes('free') ||
+      lower.includes('my schedule') ||
+      activePersona === 'faculty';
+    const isStudentQuery =
+      lower.includes('next class') ||
+      lower.includes('upcoming class') ||
+      activePersona === 'student';
+
+    if (isAdminQuery || isFacultyQuery || isStudentQuery) {
+      try {
+        const res = await fetch(`${API_BASE}/chat/message`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: userText,
+            persona: activePersona !== 'mindmap' ? activePersona : undefined,
+          }),
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data.mode === 'voice_persona') {
+            const botReply = data.reply || data.speech_text;
+            const intentStatus = data.intent?.status;
+            setMessages((prev) => [
+              ...prev,
+              {
+                id: `bot-${Date.now()}`,
+                sender: 'bot',
+                text: botReply,
+                speechText: data.speech_text,
+                intentStatus,
+              },
+            ]);
+            speakUtterance(data.speech_text || botReply);
+            return;
+          }
+        }
+      } catch {
+        // Fall back to local mindmap rule parsing if backend is unreachable
+      }
+    }
+
+    // 4. Parse Mindmap Rules
     let createdRule: MindmapRule | null = null;
     let botReply = '';
 
-    // Day avoidance (e.g. "no classes on Friday", "avoid Friday")
     if (
       lower.includes('no classes on friday') ||
       lower.includes('avoid friday') ||
@@ -212,16 +366,15 @@ export default function MindmapChatDrawer() {
       };
       botReply =
         'Got it! Added directive: 🚫 No classes will be scheduled on Fridays. Operating days adjusted to Monday–Thursday.';
-    }
-    // Teacher specific day / time restriction
-    else if (lower.includes('dr. sarah') || lower.includes('sarah')) {
+    } else if (lower.includes('dr. sarah') || lower.includes('sarah')) {
       const isMorning = lower.includes('morning');
       const isMonWed = lower.includes('monday') || lower.includes('wednesday');
-      const detailStr = isMorning && isMonWed
-        ? 'Restricted to Monday & Wednesday morning slots (08:30 - 12:00)'
-        : isMorning
-        ? 'Restricted to morning slots only (08:30 - 12:00)'
-        : 'Restricted to specified preferred days';
+      const detailStr =
+        isMorning && isMonWed
+          ? 'Restricted to Monday & Wednesday morning slots (08:30 - 12:00)'
+          : isMorning
+          ? 'Restricted to morning slots only (08:30 - 12:00)'
+          : 'Restricted to specified preferred days';
 
       createdRule = {
         id: `rule-${Date.now()}`,
@@ -233,9 +386,7 @@ export default function MindmapChatDrawer() {
         timestamp: 'Just now',
       };
       botReply = `Understood! Added directive for Dr. Sarah Ahmed: ${detailStr}. The solver will enforce this constraint.`;
-    }
-    // Prof Kamran or teacher morning avoidance
-    else if (lower.includes('kamran') || (lower.includes('no morning') && lower.includes('class'))) {
+    } else if (lower.includes('kamran') || (lower.includes('no morning') && lower.includes('class'))) {
       createdRule = {
         id: `rule-${Date.now()}`,
         type: 'faculty_avoid',
@@ -247,9 +398,7 @@ export default function MindmapChatDrawer() {
       };
       botReply =
         'Noted! Added directive: 🚫 Prof. Kamran Siddiqui will not be assigned morning slots (08:30–10:10).';
-    }
-    // Slot duration change
-    else if (lower.includes('60 min') || lower.includes('60-minute') || lower.includes('slot duration')) {
+    } else if (lower.includes('60 min') || lower.includes('60-minute') || lower.includes('slot duration')) {
       const duration = lower.includes('60') ? 60 : lower.includes('45') ? 45 : 50;
       createdRule = {
         id: `rule-${Date.now()}`,
@@ -261,9 +410,7 @@ export default function MindmapChatDrawer() {
         timestamp: 'Just now',
       };
       botReply = `Configured! Academic slot duration set to ${duration} minutes with synchronized breaks.`;
-    }
-    // Lunch break adjustment
-    else if (lower.includes('lunch') || lower.includes('break')) {
+    } else if (lower.includes('lunch') || lower.includes('break')) {
       createdRule = {
         id: `rule-${Date.now()}`,
         type: 'timing',
@@ -275,10 +422,7 @@ export default function MindmapChatDrawer() {
       };
       botReply =
         'Protected lunch break recorded. The solver guarantees zero sessions overlap this interval across all rooms and faculty.';
-    }
-    // Add new course or subject
-    else if (lower.includes('add course') || lower.includes('new course') || lower.includes('credit hour')) {
-      // Extract course name if possible
+    } else if (lower.includes('add course') || lower.includes('new course') || lower.includes('credit hour')) {
       let cName = 'New Course';
       if (lower.includes('cloud computing')) cName = 'Cloud Computing';
       else if (lower.includes('computer vision')) cName = 'Computer Vision';
@@ -295,9 +439,7 @@ export default function MindmapChatDrawer() {
         timestamp: 'Just now',
       };
       botReply = `Great! Registered course directive: "${cName}" (3 Credit Hours). It will be scheduled across balanced sessions.`;
-    }
-    // Room / Venue allocation
-    else if (lower.includes('room') || lower.includes('lab') || lower.includes('venue')) {
+    } else if (lower.includes('room') || lower.includes('lab') || lower.includes('venue')) {
       createdRule = {
         id: `rule-${Date.now()}`,
         type: 'room_assignment',
@@ -309,11 +451,9 @@ export default function MindmapChatDrawer() {
       };
       botReply =
         'Room allocation policy registered. The solver will strictly match course format (Lecture vs Lab) with appropriate venue facilities.';
-    }
-    // General do/don't interpretation
-    else {
+    } else {
       const isDont =
-        lower.includes('don\'t') ||
+        lower.includes("don't") ||
         lower.includes('dont') ||
         lower.includes('never') ||
         lower.includes('avoid') ||
@@ -345,6 +485,7 @@ export default function MindmapChatDrawer() {
         ruleCreated: createdRule || undefined,
       },
     ]);
+    speakUtterance(botReply);
   };
 
   const handleSendMessage = async (textToSend?: string) => {
@@ -374,7 +515,6 @@ export default function MindmapChatDrawer() {
     setRescheduleNotice('Applying mindmap rules and solving timetable with Google OR-Tools CP-SAT...');
 
     try {
-      // 1. Attempt backend demo / simple generation with current rules
       const res = await fetch(`${API_BASE}/demo/run`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -383,19 +523,21 @@ export default function MindmapChatDrawer() {
       if (res.ok) {
         const data: TimetableResponse = await res.json();
         saveLocalSchedule(data);
+        const replyText = `Timetable successfully solved with ${rules.filter((r) => r.active).length} active mindmap directives! Zero conflicts found. Opening Schedule #${data.schedule_id}...`;
         setMessages((prev) => [
           ...prev,
           {
             id: `bot-${Date.now()}`,
             sender: 'bot',
-            text: `Timetable successfully solved with ${rules.filter((r) => r.active).length} active mindmap directives! Zero conflicts found. Opening Schedule #${data.schedule_id}...`,
+            text: replyText,
             actionTriggered: 'reschedule',
           },
         ]);
+        speakUtterance(replyText);
         setTimeout(() => {
           setIsOpen(false);
           router.push(`/schedule/${data.schedule_id}`);
-        }, 1000);
+        }, 1200);
         return;
       }
     } catch {
@@ -415,29 +557,33 @@ export default function MindmapChatDrawer() {
       });
       saveLocalSchedule(localResult);
 
+      const replyText = `Timetable rescheduled with ${rules.filter((r) => r.active).length} active mindmap directives! Routing to Schedule #${localResult.schedule_id}...`;
       setMessages((prev) => [
         ...prev,
         {
           id: `bot-${Date.now()}`,
           sender: 'bot',
-          text: `Timetable rescheduled with ${rules.filter((r) => r.active).length} active mindmap directives! Routing to Schedule #${localResult.schedule_id}...`,
+          text: replyText,
           actionTriggered: 'reschedule',
         },
       ]);
+      speakUtterance(replyText);
 
       setTimeout(() => {
         setIsOpen(false);
         router.push(`/schedule/${localResult.schedule_id}`);
-      }, 1000);
+      }, 1200);
     } catch {
+      const errReply = 'Unable to complete reschedule. Please ensure courses and faculty are defined.';
       setMessages((prev) => [
         ...prev,
         {
           id: `bot-${Date.now()}`,
           sender: 'bot',
-          text: 'Unable to complete reschedule. Please ensure courses and faculty are defined.',
+          text: errReply,
         },
       ]);
+      speakUtterance(errReply);
     } finally {
       setIsProcessing(false);
       setRescheduleNotice(null);
@@ -454,13 +600,31 @@ export default function MindmapChatDrawer() {
     setRules((prev) => prev.filter((r) => r.id !== id));
   };
 
-  const quickPrompts = [
-    'No classes on Friday after 12 PM',
-    'Dr. Sarah: Mon & Wed morning slots only',
-    'Prof. Kamran: Avoid early 8:30 AM classes',
-    'Protect 1-hour lunch break',
-    'Reschedule timetable now',
-  ];
+  // Quick Persona Prompts based on Slide 11
+  const personaPrompts: Record<PersonaMode, string[]> = {
+    mindmap: [
+      'No classes on Friday after 12 PM',
+      'Dr. Sarah: Mon & Wed morning slots only',
+      'Prof. Kamran: Avoid early 8:30 AM classes',
+      'Protect 1-hour lunch break',
+      'Reschedule timetable now',
+    ],
+    admin: [
+      'Move Artificial Intelligence to Room B-201',
+      'Shift Computer Vision to Room A-101',
+      'Reschedule Database Systems to Room B-201',
+    ],
+    faculty: [
+      'Am I free on Monday at 09:00 am?',
+      'Am I free on Monday at 2:00 pm?',
+      'What is my schedule for Monday?',
+    ],
+    student: [
+      'What is my next class?',
+      'Where is my next class?',
+      'What do I have next?',
+    ],
+  };
 
   return (
     <>
@@ -476,9 +640,9 @@ export default function MindmapChatDrawer() {
             <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-400 border-2 border-indigo-600 rounded-full animate-pulse" />
           </div>
           <div className="text-left">
-            <span className="block text-xs font-bold leading-tight">AI Mindmap &amp; Reschedule</span>
+            <span className="block text-xs font-bold leading-tight">AI Voice Copilot &amp; Mindmap</span>
             <span className="block text-[10px] text-indigo-200">
-              {rules.filter((r) => r.active).length} active directives &bull; Ctrl+K
+              Voice commands &bull; {rules.filter((r) => r.active).length} directives &bull; Ctrl+K
             </span>
           </div>
         </button>
@@ -494,7 +658,7 @@ export default function MindmapChatDrawer() {
 
       {/* Slide-In Drawer Panel */}
       <div
-        className={`fixed inset-y-0 right-0 z-50 w-full sm:w-[500px] bg-white shadow-2xl border-l border-slate-200 flex flex-col transform transition-transform duration-300 ease-in-out ${
+        className={`fixed inset-y-0 right-0 z-50 w-full sm:w-[520px] bg-white shadow-2xl border-l border-slate-200 flex flex-col transform transition-transform duration-300 ease-in-out ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
@@ -507,19 +671,33 @@ export default function MindmapChatDrawer() {
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-base font-extrabold text-slate-900">
-                  AI Mindmap Copilot
+                  AI Voice &amp; Mindmap Copilot
                 </h2>
                 <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">
-                  Interactive
+                  Slide 11 Voice AI
                 </span>
               </div>
               <p className="text-xs text-slate-500">
-                Define what to do &amp; what not to do before solving
+                Voice command personas &amp; conflict-free reschedule
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
+            {/* Audio Voice Output Mute/Unmute */}
+            <button
+              type="button"
+              onClick={toggleMute}
+              className={`p-2 rounded-lg transition ${
+                isMuted
+                  ? 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'
+                  : 'text-indigo-600 bg-indigo-50 hover:bg-indigo-100'
+              }`}
+              title={isMuted ? 'Voice Audio Muted (Click to Unmute)' : 'Voice Audio Enabled (Click to Mute)'}
+            >
+              {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+            </button>
+
             <button
               type="button"
               onClick={handleTriggerReschedule}
@@ -540,82 +718,132 @@ export default function MindmapChatDrawer() {
           </div>
         </div>
 
-        {/* Mindmap Active Directives Accordion */}
-        <div className="border-b border-slate-200 bg-slate-50/70 px-4 py-2.5">
-          <button
-            type="button"
-            onClick={() => setRulesExpanded(!rulesExpanded)}
-            className="w-full flex items-center justify-between text-xs font-semibold text-slate-700"
-          >
-            <div className="flex items-center gap-2">
-              <Sliders className="w-3.5 h-3.5 text-indigo-600" />
-              <span>Active Mindmap Directives ({rules.filter((r) => r.active).length})</span>
-            </div>
-            <div className="flex items-center gap-1.5 text-slate-400">
-              <span className="text-[10px] font-normal">
-                {rulesExpanded ? 'Hide rules' : 'Show details'}
-              </span>
-              {rulesExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-            </div>
-          </button>
+        {/* Persona Mode Switcher Tabs */}
+        <div className="px-4 py-2 border-b border-slate-200 bg-slate-50 flex items-center gap-1.5">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mr-1">Role:</span>
+          {(
+            [
+              { key: 'mindmap', label: 'Mindmap', icon: Sliders },
+              { key: 'admin', label: 'Admin', icon: ShieldCheck },
+              { key: 'faculty', label: 'Faculty', icon: UserCheck },
+              { key: 'student', label: 'Student', icon: GraduationCap },
+            ] as const
+          ).map((mode) => {
+            const Icon = mode.icon;
+            const isSelected = activePersona === mode.key;
+            return (
+              <button
+                key={mode.key}
+                type="button"
+                onClick={() => setActivePersona(mode.key)}
+                className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition ${
+                  isSelected
+                    ? 'bg-indigo-600 text-white shadow-xs'
+                    : 'bg-white text-slate-600 hover:bg-slate-200/70 border border-slate-200'
+                }`}
+              >
+                <Icon className="w-3.5 h-3.5" />
+                <span>{mode.label}</span>
+              </button>
+            );
+          })}
+        </div>
 
-          {rulesExpanded && (
-            <div className="pt-3 pb-1 space-y-2 max-h-48 overflow-y-auto">
-              {rules.map((rule) => (
-                <div
-                  key={rule.id}
-                  className={`p-2.5 rounded-xl border text-xs flex items-start justify-between gap-2 transition ${
-                    rule.active
-                      ? rule.category === 'dont'
-                        ? 'bg-rose-50/60 border-rose-200 text-rose-900'
-                        : 'bg-indigo-50/60 border-indigo-200 text-indigo-900'
-                      : 'bg-slate-100 border-slate-200 text-slate-400 opacity-60'
-                  }`}
-                >
-                  <div className="flex items-start gap-2">
+        {/* Mindmap Active Directives Accordion (If in Mindmap Mode) */}
+        {activePersona === 'mindmap' && (
+          <div className="border-b border-slate-200 bg-slate-50/70 px-4 py-2">
+            <button
+              type="button"
+              onClick={() => setRulesExpanded(!rulesExpanded)}
+              className="w-full flex items-center justify-between text-xs font-semibold text-slate-700"
+            >
+              <div className="flex items-center gap-2">
+                <Sliders className="w-3.5 h-3.5 text-indigo-600" />
+                <span>Active Mindmap Directives ({rules.filter((r) => r.active).length})</span>
+              </div>
+              <div className="flex items-center gap-1.5 text-slate-400">
+                <span className="text-[10px] font-normal">
+                  {rulesExpanded ? 'Hide rules' : 'Show details'}
+                </span>
+                {rulesExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+              </div>
+            </button>
+
+            {rulesExpanded && (
+              <div className="pt-2 pb-1 space-y-1.5 max-h-40 overflow-y-auto">
+                {rules.map((rule) => (
+                  <div
+                    key={rule.id}
+                    className={`p-2 rounded-lg border text-xs flex items-start justify-between gap-2 transition ${
+                      rule.active
+                        ? rule.category === 'dont'
+                          ? 'bg-rose-50/60 border-rose-200 text-rose-900'
+                          : 'bg-indigo-50/60 border-indigo-200 text-indigo-900'
+                        : 'bg-slate-100 border-slate-200 text-slate-400 opacity-60'
+                    }`}
+                  >
+                    <div className="flex items-start gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleToggleRule(rule.id)}
+                        className={`w-4 h-4 rounded border mt-0.5 flex items-center justify-center transition ${
+                          rule.active
+                            ? rule.category === 'dont'
+                              ? 'bg-rose-600 border-rose-600 text-white'
+                              : 'bg-indigo-600 border-indigo-600 text-white'
+                            : 'border-slate-300 bg-white'
+                        }`}
+                      >
+                        {rule.active && <Check className="w-3 h-3" />}
+                      </button>
+                      <div>
+                        <div className="font-bold flex items-center gap-1.5">
+                          <span>{rule.category === 'dont' ? '🚫' : '✅'}</span>
+                          <span>{rule.label}</span>
+                        </div>
+                        <p className="text-[11px] text-slate-600 mt-0.5 leading-snug">
+                          {rule.detail}
+                        </p>
+                      </div>
+                    </div>
+
                     <button
                       type="button"
-                      onClick={() => handleToggleRule(rule.id)}
-                      className={`w-4 h-4 rounded border mt-0.5 flex items-center justify-center transition ${
-                        rule.active
-                          ? rule.category === 'dont'
-                            ? 'bg-rose-600 border-rose-600 text-white'
-                            : 'bg-indigo-600 border-indigo-600 text-white'
-                          : 'border-slate-300 bg-white'
-                      }`}
+                      onClick={() => handleDeleteRule(rule.id)}
+                      className="text-slate-400 hover:text-rose-600 p-0.5"
+                      title="Delete rule"
                     >
-                      {rule.active && <Check className="w-3 h-3" />}
+                      <X className="w-3.5 h-3.5" />
                     </button>
-                    <div>
-                      <div className="font-bold flex items-center gap-1.5">
-                        <span>{rule.category === 'dont' ? '🚫' : '✅'}</span>
-                        <span>{rule.label}</span>
-                      </div>
-                      <p className="text-[11px] text-slate-600 mt-0.5 leading-snug">
-                        {rule.detail}
-                      </p>
-                    </div>
                   </div>
-
-                  <button
-                    type="button"
-                    onClick={() => handleDeleteRule(rule.id)}
-                    className="text-slate-400 hover:text-rose-600 p-0.5"
-                    title="Delete rule"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Reschedule progress banner if active */}
         {rescheduleNotice && (
           <div className="bg-indigo-600 text-white px-4 py-2 text-xs font-semibold flex items-center gap-2">
             <Clock className="w-4 h-4 animate-spin shrink-0" />
             <span>{rescheduleNotice}</span>
+          </div>
+        )}
+
+        {/* Listening Voice Indicator */}
+        {isListening && (
+          <div className="bg-emerald-50 border-b border-emerald-200 text-emerald-800 px-4 py-2 text-xs font-semibold flex items-center justify-between animate-pulse">
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
+              <span>Listening to voice command... speak now</span>
+            </div>
+            <button
+              type="button"
+              onClick={toggleListening}
+              className="text-emerald-700 underline text-[11px] hover:text-emerald-900"
+            >
+              Stop
+            </button>
           </div>
         )}
 
@@ -641,6 +869,28 @@ export default function MindmapChatDrawer() {
               >
                 <div className="whitespace-pre-line">{msg.text}</div>
 
+                {/* Intent Status Badge */}
+                {msg.intentStatus && (
+                  <div className="mt-2.5 pt-2 border-t border-slate-200 flex items-center gap-1.5 text-xs font-bold">
+                    {msg.intentStatus === 'success' || msg.intentStatus === 'free' ? (
+                      <span className="inline-flex items-center gap-1 text-emerald-700">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>Conflict-Free Verified</span>
+                      </span>
+                    ) : msg.intentStatus === 'clash' || msg.intentStatus === 'busy' ? (
+                      <span className="inline-flex items-center gap-1 text-rose-700">
+                        <AlertCircle className="w-3.5 h-3.5 text-rose-600" />
+                        <span>Clash Detected &bull; Integrity Protected</span>
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 text-indigo-700">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-indigo-600" />
+                        <span>Timetable Verified</span>
+                      </span>
+                    )}
+                  </div>
+                )}
+
                 {/* If this message created a rule, show badge */}
                 {msg.ruleCreated && (
                   <div className="mt-2.5 pt-2 border-t border-slate-200 flex items-center gap-1.5 text-xs text-indigo-700 font-bold">
@@ -659,7 +909,7 @@ export default function MindmapChatDrawer() {
               </div>
               <div className="bg-slate-50 border border-slate-200/80 rounded-2xl rounded-bl-none p-3 text-xs text-slate-500 flex items-center gap-2">
                 <Clock className="w-3.5 h-3.5 animate-spin text-indigo-600" />
-                <span>Interpreting mindmap directive...</span>
+                <span>Processing voice intent &amp; schedule verification...</span>
               </div>
             </div>
           )}
@@ -667,10 +917,12 @@ export default function MindmapChatDrawer() {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Suggested Quick Prompts */}
+        {/* Suggested Quick Prompts based on Active Persona */}
         <div className="p-2.5 bg-slate-50 border-t border-slate-100 flex items-center gap-1.5 overflow-x-auto scrollbar-hide text-xs">
-          <span className="text-slate-400 font-medium shrink-0 text-[11px]">Directives:</span>
-          {quickPrompts.map((prompt) => (
+          <span className="text-slate-400 font-medium shrink-0 text-[11px]">
+            {activePersona === 'admin' ? 'Admin Prompts:' : activePersona === 'faculty' ? 'Faculty Prompts:' : activePersona === 'student' ? 'Student Prompts:' : 'Directives:'}
+          </span>
+          {personaPrompts[activePersona].map((prompt) => (
             <button
               key={prompt}
               type="button"
@@ -682,7 +934,7 @@ export default function MindmapChatDrawer() {
           ))}
         </div>
 
-        {/* Input Form Bar */}
+        {/* Input Form Bar with Microphone Button */}
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -690,12 +942,36 @@ export default function MindmapChatDrawer() {
           }}
           className="p-3 sm:p-4 bg-white border-t border-slate-200 flex items-center gap-2"
         >
+          {/* Speech-to-Text Mic Toggle */}
+          {speechSupported && (
+            <button
+              type="button"
+              onClick={toggleListening}
+              className={`w-9 h-9 rounded-full flex items-center justify-center transition shrink-0 ${
+                isListening
+                  ? 'bg-rose-600 text-white animate-pulse shadow-md shadow-rose-200'
+                  : 'bg-slate-100 hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 border border-slate-200'
+              }`}
+              title={isListening ? 'Stop listening' : 'Speak command via microphone'}
+            >
+              {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+            </button>
+          )}
+
           <input
             ref={inputRef}
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Tell AI what to do or what not to do (e.g. 'No Friday classes')..."
+            placeholder={
+              activePersona === 'admin'
+                ? "Admin: 'Move Artificial Intelligence to Room B-201'..."
+                : activePersona === 'faculty'
+                ? "Faculty: 'Am I free on Monday at 10 AM?'..."
+                : activePersona === 'student'
+                ? "Student: 'What is my next class?'..."
+                : "Tell AI what to do or not do before rescheduling..."
+            }
             className="flex-1 bg-slate-50 border border-slate-300 rounded-full px-4 py-2.5 text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:bg-white transition"
           />
           <button

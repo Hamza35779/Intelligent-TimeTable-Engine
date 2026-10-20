@@ -12,6 +12,7 @@ from app.models.feedback import ChatSession
 from app.models.timetable import ScheduleRun
 from app.schemas.timetable import GenerateScheduleRequest
 from app.routers.schedule import generate_schedule
+from app.services.voice_assistant import handle_voice_intent
 from utils.csv_parser import parse_schedule_csv
 
 router = APIRouter(prefix="/chat", tags=["AI Conversational Assistant"])
@@ -42,6 +43,8 @@ class ChatMessageRequest(BaseModel):
     message: str
     views: Optional[List[str]] = None
     formats: Optional[List[str]] = None
+    persona: Optional[str] = None
+    user_name: Optional[str] = None
 
 
 class ChatGenerateRequest(BaseModel):
@@ -342,6 +345,49 @@ def send_chat_message(
             detail=f"Conversation '{conversation_id}' not found",
         )
 
+    # 1. Check for Slide 11 Voice Persona Intents (Admin room-move, Faculty availability, Student next-class)
+    voice_res = handle_voice_intent(
+        message=payload.message,
+        db=db,
+        schedule_id=session.schedule_id,
+        persona=payload.persona,
+        user_name=payload.user_name,
+    )
+    if voice_res is not None:
+        reply = voice_res["reply"]
+        speech_text = voice_res["speech_text"]
+        chat_status = voice_res.get("status", "completed")
+        history = list(session.messages or [])
+        history.append({"id": len(history) + 1, "sender": "user", "text": payload.message})
+        history.append(
+            {
+                "id": len(history) + 1,
+                "sender": "bot",
+                "text": reply,
+                "speech_text": speech_text,
+                "intent": voice_res,
+                "status": chat_status,
+                "mode": "voice_persona",
+            }
+        )
+        session.messages = history
+        session.status = chat_status
+        db.commit()
+
+        return {
+            "conversation_id": conversation_id,
+            "reply": reply,
+            "bot_response": reply,
+            "speech_text": speech_text,
+            "intent": voice_res,
+            "mode": "voice_persona",
+            "detected_views": session.detected_views or [],
+            "detected_formats": session.detected_formats or [],
+            "view_filters": session.preferences or {},
+            "preferences": session.preferences or {},
+            "status": chat_status,
+        }
+
     # Validate any explicitly passed views/formats and free-text unrecognized view/format tokens
     explicit_views, explicit_formats = validate_views_and_formats(payload.views, payload.formats)
     _check_unrecognized_view_or_format_in_text(payload.message)
@@ -402,6 +448,7 @@ def send_chat_message(
             "id": len(history) + 1,
             "sender": "bot",
             "text": reply,
+            "speech_text": reply,
             "detected_views": views,
             "detected_formats": formats,
             "status": chat_status,
@@ -416,6 +463,7 @@ def send_chat_message(
         "conversation_id": conversation_id,
         "reply": reply,
         "bot_response": reply,
+        "speech_text": reply,
         "mode": mode,
         "detected_views": views,
         "detected_formats": formats,
