@@ -1,28 +1,65 @@
-# University Timetable Generator
+# University Timetable Generator & Intelligent Engine
 
-A constraint-based timetable optimization engine for universities, powered by **Google OR-Tools CP-SAT** solver with a **Random Forest ML** preference learner.
+[![Build Android APK](https://github.com/Hamza35779/Intelligent-TimeTable-Engine/actions/workflows/build-apk.yml/badge.svg)](https://github.com/Hamza35779/Intelligent-TimeTable-Engine/actions/workflows/build-apk.yml)
+[![Release](https://img.shields.io/github/v/release/Hamza35779/Intelligent-TimeTable-Engine?color=emerald&label=Release)](https://github.com/Hamza35779/Intelligent-TimeTable-Engine/releases/tag/v1.0.0)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
+A constraint-based timetable optimization and university scheduling engine powered by **Google OR-Tools CP-SAT**, paired with **Random Forest ML** for faculty preference modeling, real-time visual drag-and-drop overrides, voice command control, and a native **Android APK** mobile app.
+
+---
+
+## 📱 Mobile App (Android APK)
+
+The project includes a native Android mobile application built with **Capacitor 8**, featuring responsive timetable exploration, native microphone access for voice scheduling, and offline asset loading.
+
+- **Direct Download**: [intelligent-timetable.apk (v1.0.0)](https://github.com/Hamza35779/Intelligent-TimeTable-Engine/releases/download/v1.0.0/intelligent-timetable.apk) (~3.93 MB)
+- **GitHub Release**: [v1.0.0 Release Notes](https://github.com/Hamza35779/Intelligent-TimeTable-Engine/releases/tag/v1.0.0)
+
+### Installing on Android
+1. Download `intelligent-timetable.apk` to your phone or tablet.
+2. Tap the file in your downloads folder.
+3. Enable *"Install from unknown sources"* if prompted.
+4. Open **Intelligent Timetable** to view master schedules, faculty rosters, and voice controls on the go.
+
+### Building the APK Yourself
+- **Cloud CI/CD (GitHub Actions)**: Pushing changes to `main` or pushing any version tag (`git tag v1.0.1 && git push origin v1.0.1`) automatically runs `.github/workflows/build-apk.yml`, compiles the debug APK, and attaches it to the release.
+- **Local Build**:
+  - Run `scripts/build-apk.bat` (requires JDK 21 and Android SDK).
+  - Or open `frontend/android` in **Android Studio** and click **Build → Build Bundle(s) / APK(s) → Build APK(s)**.
+
+---
 
 ## What It Does
 
-Upload a CSV of teachers and courses → the solver generates a conflict-free, fair schedule in under 5 seconds → view it as a university-style timetable sheet → export as CSV, XLSX, PDF, JSON, or HTML.
+Upload a CSV of teachers and courses → the solver generates a conflict-free, fair schedule in under 5 seconds → view it as an interactive university-style timetable grid → interact via voice or drag-and-drop → export as CSV, XLSX, PDF, JSON, or HTML.
+
+### Key Highlights
+- **Mathematical Zero Conflicts**: Hard mathematical constraints ensure no teacher, student cohort, or venue is ever double-booked.
+- **Interactive Visual Grid**: Real-time drag-and-drop slot manipulation with instant clash halo warnings if a registrar moves a class into a conflicting slot.
+- **Voice-Activated Scheduling**: Hands-free natural speech commands for room inquiries, teacher lookups, and schedule navigation.
+- **Multi-Role Perspectives**: Dedicated views for University Registrars (Master View), Faculty (Teacher View), and Students (Cohort View).
+- **Format Flexibility**: Instant export to Excel (.xlsx), CSV, printable PDF tables, and JSON.
+
+---
 
 ## Quick Start (Local Development)
 
-### Backend
+### 1. Backend
 
 ```bash
 cd backend
 python -m venv .venv
 .venv\Scripts\activate        # Windows
-# source .venv/bin/activate   # Linux/Mac
+# source .venv/bin/activate   # Linux / macOS
 
 pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8000
 ```
 
-Backend runs at `http://localhost:8000`. API docs at `http://localhost:8000/docs`.
+- API Base: `http://localhost:8000`
+- Interactive OpenAPI Docs: `http://localhost:8000/docs`
 
-### Frontend
+### 2. Frontend
 
 ```bash
 cd frontend
@@ -30,28 +67,27 @@ npm install
 npm run dev
 ```
 
-Frontend runs at `http://localhost:3000`.
+- Web App: `http://localhost:3000`
 
-### Docker (Both Services)
+### 3. Docker (Full Stack)
 
 ```bash
 docker compose up --build
 ```
 
+---
+
 ## How To Use
 
-1. **Go to /build** — the Easy Builder page
-2. **Add teachers** by typing names
-3. **Add courses** with credit hours, assigned teacher, and type (lecture/lab)
-4. **Click Generate** — OR-Tools CP-SAT finds the optimal schedule
-5. **View the result** — university-style 9-slot timetable sheet with course legend
-6. **Switch views** — Master, Teacher, Student perspectives
-7. **Export** — CSV, XLSX, PDF, JSON, HTML
+1. **Navigate to `/build`** (Easy Builder interface).
+2. **Add Faculty**: Type teacher names or import a batch roster.
+3. **Add Courses**: Specify credit hours (1–6), instructor, and delivery format (Lecture or Lab).
+4. **Set Schedule Parameters**: Choose working days (Mon–Fri), time slots, and room inventory.
+5. **Click Generate**: Google OR-Tools CP-SAT solves the exact constraint satisfaction problem in seconds.
+6. **Interact & Refine**: Use the drag-and-drop grid or voice commands to review or manually adjust assignments.
+7. **Export & Share**: Download ready-to-print PDFs or formatted Excel sheets.
 
-Or just **upload a CSV** with columns: `teacher_name, course_name, credit_hours`
-
-## CSV Format
-
+Alternatively, upload a CSV file with:
 ```csv
 teacher_name,course_name,credit_hours
 Dr. Sarah Ahmed,Artificial Intelligence,3
@@ -59,44 +95,26 @@ Dr. Sarah Ahmed,Deep Learning,3
 Prof. Kamran Siddiqui,Operating Systems,4
 Dr. Ayesha Tariq,Database Systems,4
 ```
+*Optional columns: `course_code`, `student_group`, `room_type`*
 
-Optional columns: `course_code`, `student_group`, `room_type`
+---
 
-## Architecture
+## Constraints Engine
 
-- **Backend**: Python, FastAPI, SQLAlchemy (SQLite), Google OR-Tools CP-SAT
-- **Frontend**: Next.js 14, React, TypeScript, TailwindCSS
-- **ML**: scikit-learn RandomForest for teacher preference learning
-- **Solver**: CP-SAT with hard constraints (no conflicts, lunch protection, max daily hours) and soft constraints (fairness, preferences)
+### Hard Constraints (Never Violated)
+- **Teacher Exclusivity**: No instructor can teach two sessions simultaneously.
+- **Venue Exclusivity**: No room or lab can host multiple sessions concurrently.
+- **Cohort Integrity**: No student group has simultaneous conflicting classes.
+- **Lunch Protection**: Reserved mid-day break periods (e.g., 12:00–13:30).
+- **Daily Workload Cap**: Maximum daily contact hours strictly enforced per teacher.
 
-## Credit Hours Mapping
+### Soft Constraints (Optimized via Objective Function)
+- **Workload Fairness**: Balanced distribution across days to prevent teacher burnout.
+- **Faculty Preferences**: Time-of-day affinity learned using scikit-learn Random Forest regression.
+- **Curriculum Compactness**: Minimized idle gaps between classes for students.
+- **Room Stability**: Minimized venue switches for consecutive sessions of the same course.
 
-- Each credit hour = 1 contact hour per week
-- Sessions split into max 2-hour blocks on different days
-- Example: 3-credit course → 2h session + 1h session on separate days
-
-## Constraints
-
-**Hard (never violated):**
-- No teacher teaches two classes at once
-- No room double-booked
-- No student group overlap
-- Lunch break protected (12:00–14:00)
-- Max 6 teaching hours per teacher per day
-
-**Soft (optimized):**
-- Fair workload distribution across days
-- Teacher time-of-day preferences (from ML model)
-- Minimize idle gaps
-
-## Tests
-
-```bash
-cd backend
-pytest -v
-```
-
-31 tests covering solver correctness, API endpoints, ML pipeline, exports, and performance.
+---
 
 ## Academic Benchmark (ITC-2007 Track 3 CB-CTT)
 
@@ -142,12 +160,31 @@ pytest benchmarks/itc2007/tests/ -v
 ## Tech Stack
 
 | Layer | Technology |
-|-------|-----------|
-| Solver | Google OR-Tools CP-SAT |
-| Backend | Python 3.11+, FastAPI, SQLAlchemy |
-| Database | SQLite (default), PostgreSQL (via DATABASE_URL) |
-| ML | scikit-learn RandomForest |
-| Benchmark | ITC-2007 Track 3 (CB-CTT) Parser, Adapter & Independent Checker |
-| Frontend | Next.js 14, React 18, TypeScript, TailwindCSS |
-| Export | CSV, XLSX (openpyxl), PDF (reportlab), JSON, HTML |
+|---|---|
+| **Optimization Solver** | Google OR-Tools CP-SAT (Constraint Programming) |
+| **Backend Framework** | Python 3.11+, FastAPI, Pydantic v2, SQLAlchemy |
+| **Machine Learning** | scikit-learn (Random Forest preference regression) |
+| **Frontend Web** | Next.js 14, React 18, TypeScript, TailwindCSS, Lucide Icons |
+| **Mobile Runtime** | Capacitor 8 (Android SDK 34, JDK 21) |
+| **Database** | SQLite (development), PostgreSQL / Supabase supported |
+| **Exports** | ReportLab (PDF), OpenPyXL (Excel), CSV, JSON, HTML |
+| **CI / CD** | GitHub Actions (Automated testing & APK releases) |
 
+---
+
+## Testing
+
+```bash
+# Backend test suite (31 tests covering solver, endpoints, ML pipeline, exports)
+cd backend
+pytest -v
+
+# ITC-2007 benchmark unit tests
+pytest benchmarks/itc2007/tests/ -v
+```
+
+---
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
