@@ -40,6 +40,10 @@ node_modules/
 out/
 !frontend/out/
 !frontend/out/**
+
+# Mobile Builds
+mobile-apk/*.apk
+*.apk
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
