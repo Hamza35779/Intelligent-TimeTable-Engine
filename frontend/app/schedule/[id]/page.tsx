@@ -14,10 +14,14 @@ import {
   Database,
   Layers,
   LayoutGrid,
+  Zap,
+  Radio,
 } from 'lucide-react';
 import MetricsPanel from '../../../components/MetricsPanel';
 import TimetableGrid from '../../../components/TimetableGrid';
 import ExportOptions from '../../../components/ExportOptions';
+import CalendarSyncModal from '../../../components/CalendarSyncModal';
+import InteractiveScheduleBoard from '../../../components/InteractiveScheduleBoard';
 import { TimetableEntry } from '../../../types';
 import {
   getLocalSchedule,
@@ -103,7 +107,8 @@ export default function ScheduleDetailPage() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [isFallback, setIsFallback] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState<'audience' | 'grid'>('audience');
+  const [activeTab, setActiveTab] = useState<'audience' | 'interactive' | 'grid'>('audience');
+  const [calendarModalOpen, setCalendarModalOpen] = useState<boolean>(false);
 
   const fetchSchedule = useCallback(async () => {
     if (!scheduleId || isNaN(scheduleId)) {
@@ -265,6 +270,17 @@ export default function ScheduleDetailPage() {
             <span>Multi-Audience Views</span>
           </button>
           <button
+            onClick={() => setActiveTab('interactive')}
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition ${
+              activeTab === 'interactive'
+                ? 'bg-indigo-600 text-white shadow-sm'
+                : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+            }`}
+          >
+            <Zap className="w-3.5 h-3.5 text-amber-300" />
+            <span>Interactive What-If Board</span>
+          </button>
+          <button
             onClick={() => setActiveTab('grid')}
             className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition ${
               activeTab === 'grid'
@@ -336,6 +352,16 @@ export default function ScheduleDetailPage() {
                 {Number(schedule.solver_time_ms || 0).toFixed(1)} ms
               </span>
             </div>
+
+            {/* Sync Calendar Button */}
+            <button
+              type="button"
+              onClick={() => setCalendarModalOpen(true)}
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-full text-xs font-bold transition shadow-2xs"
+            >
+              <Radio className="w-3.5 h-3.5 text-indigo-600 animate-pulse" />
+              <span>Sync Calendar</span>
+            </button>
           </div>
         </div>
       </div>
@@ -349,6 +375,15 @@ export default function ScheduleDetailPage() {
         />
       )}
 
+      {/* Interactive What-If Simulator with Live Clash Halos and Minimal Perturbation */}
+      {activeTab === 'interactive' && (
+        <InteractiveScheduleBoard
+          scheduleId={schedule.id}
+          entries={entries}
+          onScheduleUpdated={fetchSchedule}
+        />
+      )}
+
       {/* Alternative Printable Official Sheet View */}
       {activeTab === 'grid' && (
         <TimetableGrid
@@ -357,6 +392,13 @@ export default function ScheduleDetailPage() {
           scheduleId={schedule.id}
         />
       )}
+
+      {/* Live Calendar Subscription Modal */}
+      <CalendarSyncModal
+        scheduleId={schedule.id}
+        isOpen={calendarModalOpen}
+        onClose={() => setCalendarModalOpen(false)}
+      />
 
       {/* Export Section: Buttons for CSV, XLSX, PDF, JSON, HTML */}
       <div className="space-y-2 pt-4">

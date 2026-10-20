@@ -3,7 +3,7 @@ import html
 import io
 import json
 import textwrap
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from typing import List, Dict, Any, Tuple
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
@@ -106,6 +106,8 @@ class TimetableExporter:
             return self._export_json(), "application/json", f"{base_name}.json"
         elif fmt == "html":
             return self._export_html(), "text/html", f"{base_name}.html"
+        elif fmt in ("ics", "ical", "calendar"):
+            return self._export_ics(), "text/calendar", f"{base_name}.ics"
         else:
             raise ValueError(f"Unsupported export format: {format_type}")
 
@@ -564,6 +566,89 @@ class TimetableExporter:
             )
         html_lines.append("</tbody></table></body></html>")
         return "\n".join(html_lines).encode("utf-8")
+
+    def _export_ics(self) -> bytes:
+        """
+        Export schedule as standard RFC 5545 iCalendar (.ics) format.
+        Directly subscribable via webcal:// in Google Calendar, Outlook, and Apple iCal.
+        """
+        lines = [
+            "BEGIN:VCALENDAR",
+            "VERSION:2.0",
+            "PRODID:-//Intelligent Timetable Engine//EN",
+            "CALSCALE:GREGORIAN",
+            "METHOD:PUBLISH",
+            f"X-WR-CALNAME:{self.title}",
+            "X-WR-TIMEZONE:UTC",
+        ]
+
+        day_to_offset = {
+            "monday": 0,
+            "tuesday": 1,
+            "wednesday": 2,
+            "thursday": 3,
+            "friday": 4,
+            "saturday": 5,
+            "sunday": 6,
+        }
+
+        now = datetime.now(timezone.utc)
+        days_ahead = (7 - now.weekday()) % 7
+        if days_ahead == 0:
+            days_ahead = 7
+        next_monday = now.date() + timedelta(days=days_ahead)
+
+        for idx, entry in enumerate(self.entries):
+            d_name = str(entry.get("day_of_week") or "Monday").strip().lower()
+            offset = day_to_offset.get(d_name, 0)
+            lecture_date = next_monday + timedelta(days=offset)
+
+            start_t = str(entry.get("start_time") or "09:00").strip()
+            end_t = str(entry.get("end_time") or "10:00").strip()
+
+            try:
+                s_hour, s_min = [int(p) for p in start_t.split(":")[:2]]
+                e_hour, e_min = [int(p) for p in end_t.split(":")[:2]]
+            except Exception:
+                s_hour, s_min = 9, 0
+                e_hour, e_min = 10, 0
+
+            dt_start = datetime(lecture_date.year, lecture_date.month, lecture_date.day, s_hour, s_min, 0, tzinfo=timezone.utc)
+            dt_end = datetime(lecture_date.year, lecture_date.month, lecture_date.day, e_hour, e_min, 0, tzinfo=timezone.utc)
+
+            stamp = now.strftime("%Y%m%dT%H%M%SZ")
+            start_str = dt_start.strftime("%Y%m%dT%H%M%SZ")
+            end_str = dt_end.strftime("%Y%m%dT%H%M%SZ")
+            until_str = (dt_start + timedelta(weeks=16)).strftime("%Y%m%dT%H%M%SZ")
+
+            uid = f"sched_{self.schedule_id}_e{entry.get('id', idx)}_{idx}@timetable-engine"
+            c_name = entry.get("course_name") or "Course"
+            c_code = entry.get("course_code") or ""
+            f_name = entry.get("faculty_name") or "Faculty"
+            v_name = entry.get("venue_name") or "Room"
+            s_group = entry.get("student_group") or "General"
+            ch = entry.get("credit_hours") or 3
+
+            summary = f"{c_name} ({c_code})" if c_code else c_name
+            location = f"Room {v_name}"
+            desc = f"Faculty: {f_name}\\nStudent Cohort: {s_group}\\nCredit Hours: {ch}"
+
+            lines.extend([
+                "BEGIN:VEVENT",
+                f"UID:{uid}",
+                f"DTSTAMP:{stamp}",
+                f"DTSTART:{start_str}",
+                f"DTEND:{end_str}",
+                f"RRULE:FREQ=WEEKLY;UNTIL={until_str}",
+                f"SUMMARY:{summary}",
+                f"LOCATION:{location}",
+                f"DESCRIPTION:{desc}",
+                "STATUS:CONFIRMED",
+                "END:VEVENT",
+            ])
+
+        lines.append("END:VCALENDAR")
+        return "\r\n".join(lines).encode("utf-8")
 
 
 def export_to_csv(

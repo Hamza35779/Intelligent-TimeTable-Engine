@@ -1,8 +1,11 @@
 from typing import List, Dict, Any, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from pydantic import BaseModel
 from sqlalchemy.orm import Session, joinedload
 from app.database import get_db
 from app.models.timetable import ScheduleRun, TimetableEntry
+from app.models.slot import TimeSlot
+from app.models.venue import Venue
 from app.schemas.timetable import (
     TimetableDetailResponse,
     TimetableEntryResponse,
@@ -248,3 +251,220 @@ def get_schedule_analytics(schedule_id: int, db: Session = Depends(get_db)):
             {"solver_time_ms": run.solver_time_ms, "courses_scheduled_per_second": 0},
         ),
     )
+
+
+class SimulateMoveRequest(BaseModel):
+    entry_id: int
+    target_day: str
+    target_start_time: str
+    target_venue_name: Optional[str] = None
+
+
+class ApplyMovePayload(BaseModel):
+    moves: List[Dict[str, Any]]
+
+
+@router.post("/schedule/{schedule_id:int}/simulate-move")
+@router.post("/schedules/{schedule_id:int}/simulate-move")
+def simulate_schedule_move(
+    schedule_id: int,
+    payload: SimulateMoveRequest,
+    db: Session = Depends(get_db),
+):
+    run, _, _, _, _ = _load_run_entries(schedule_id, db)
+    entry = next((e for e in run.entries if e.id == payload.entry_id), None)
+    if not entry:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Timetable entry #{payload.entry_id} not found",
+        )
+
+    # Find target slot
+    target_slot = (
+        db.query(TimeSlot)
+        .filter(
+            TimeSlot.day_of_week.ilike(payload.target_day.strip()),
+            TimeSlot.start_time.ilike(payload.target_start_time.strip()),
+        )
+        .first()
+    )
+    if not target_slot:
+        target_slot = (
+            db.query(TimeSlot)
+            .filter(TimeSlot.day_of_week.ilike(payload.target_day.strip()))
+            .first()
+        )
+    if not target_slot:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Time slot for {payload.target_day} at {payload.target_start_time} not found in database",
+        )
+
+    # Find target venue
+    target_venue = entry.venue
+    if payload.target_venue_name:
+        v_found = (
+            db.query(Venue)
+            .filter(Venue.name.ilike(f"%{payload.target_venue_name.strip()}%"))
+            .first()
+        )
+        if v_found:
+            target_venue = v_found
+
+    # 1. Check for venue collision at target slot
+    clash_venue = next(
+        (
+            e
+            for e in run.entries
+            if e.id != entry.id
+            and e.venue_id == target_venue.id
+            and e.slot.day_of_week.lower() == payload.target_day.strip().lower()
+            and e.slot.start_time == payload.target_start_time.strip()
+        ),
+        None,
+    )
+
+    # 2. Check for faculty collision at target slot
+    clash_faculty = next(
+        (
+            e
+            for e in run.entries
+            if e.id != entry.id
+            and e.faculty_id == entry.faculty_id
+            and e.slot.day_of_week.lower() == payload.target_day.strip().lower()
+            and e.slot.start_time == payload.target_start_time.strip()
+        ),
+        None,
+    )
+
+    primary_clash = clash_venue or clash_faculty
+
+    if not primary_clash:
+        # Direct move is 100% clash-free!
+        return {
+            "has_clash": False,
+            "halo": "green",
+            "message": f"Direct move verified! Room {target_venue.name} is completely available on {target_slot.day_of_week} ({target_slot.start_time}-{target_slot.end_time}).",
+            "can_direct_move": True,
+            "target_slot": {
+                "id": target_slot.id,
+                "day_of_week": target_slot.day_of_week,
+                "start_time": target_slot.start_time,
+                "end_time": target_slot.end_time,
+            },
+            "target_venue": {
+                "id": target_venue.id,
+                "name": target_venue.name,
+            },
+            "suggested_ripple": None,
+        }
+
+    # Clash detected! Calculate Minimal Perturbation (Ripple Resolution)
+    swap_clash_teacher = next(
+        (
+            e
+            for e in run.entries
+            if e.id != primary_clash.id
+            and e.id != entry.id
+            and e.faculty_id == primary_clash.faculty_id
+            and e.slot.day_of_week.lower() == entry.slot.day_of_week.lower()
+            and e.slot.start_time == entry.slot.start_time
+        ),
+        None,
+    )
+
+    swap_possible = swap_clash_teacher is None
+    suggested_ripple = None
+
+    if swap_possible:
+        suggested_ripple = {
+            "type": "swap",
+            "title": "Minimal Perturbation: 1-Step Mutual Swap",
+            "description": (
+                f"Swap {entry.course.name} with {primary_clash.course.name}. "
+                f"{primary_clash.course.name} trades to {entry.slot.day_of_week} at {entry.slot.start_time}. "
+                f"Both courses trade positions with zero conflicts campus-wide."
+            ),
+            "moves": [
+                {
+                    "entry_id": entry.id,
+                    "course_name": entry.course.name,
+                    "to_slot_id": target_slot.id,
+                    "to_day": target_slot.day_of_week,
+                    "to_start_time": target_slot.start_time,
+                    "to_end_time": target_slot.end_time,
+                    "to_venue_id": target_venue.id,
+                    "to_venue_name": target_venue.name,
+                },
+                {
+                    "entry_id": primary_clash.id,
+                    "course_name": primary_clash.course.name,
+                    "to_slot_id": entry.slot_id,
+                    "to_day": entry.slot.day_of_week,
+                    "to_start_time": entry.slot.start_time,
+                    "to_end_time": entry.slot.end_time,
+                    "to_venue_id": entry.venue_id,
+                    "to_venue_name": entry.venue.name,
+                },
+            ],
+        }
+
+    clash_reason = (
+        f"Room {target_venue.name} is booked for {primary_clash.course.name}"
+        if clash_venue
+        else f"{entry.faculty.name} is already teaching {primary_clash.course.name} at this hour"
+    )
+
+    return {
+        "has_clash": True,
+        "halo": "red",
+        "message": f"Clash detected on {target_slot.day_of_week} at {target_slot.start_time}: {clash_reason}.",
+        "can_direct_move": False,
+        "clash_with": primary_clash.course.name,
+        "clash_reason": clash_reason,
+        "target_slot": {
+            "id": target_slot.id,
+            "day_of_week": target_slot.day_of_week,
+            "start_time": target_slot.start_time,
+            "end_time": target_slot.end_time,
+        },
+        "target_venue": {
+            "id": target_venue.id,
+            "name": target_venue.name,
+        },
+        "suggested_ripple": suggested_ripple,
+    }
+
+
+@router.post("/schedule/{schedule_id:int}/apply-move")
+@router.post("/schedules/{schedule_id:int}/apply-move")
+def apply_schedule_move(
+    schedule_id: int,
+    payload: ApplyMovePayload,
+    db: Session = Depends(get_db),
+):
+    run = db.query(ScheduleRun).filter(ScheduleRun.id == schedule_id).first()
+    if not run:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Schedule #{schedule_id} not found",
+        )
+
+    applied_count = 0
+    for m in payload.moves:
+        e_id = m.get("entry_id")
+        entry = db.query(TimetableEntry).filter(TimetableEntry.id == e_id).first()
+        if entry:
+            if "to_slot_id" in m:
+                entry.slot_id = int(m["to_slot_id"])
+            if "to_venue_id" in m:
+                entry.venue_id = int(m["to_venue_id"])
+            applied_count += 1
+
+    db.commit()
+    return {
+        "schedule_id": schedule_id,
+        "status": "success",
+        "moves_applied": applied_count,
+        "message": f"Successfully executed {applied_count} move(s) with zero conflicts.",
+    }

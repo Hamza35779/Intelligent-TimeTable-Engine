@@ -105,3 +105,28 @@ def export_schedule(
             "Content-Disposition": f'attachment; filename="{filename}"',
         },
     )
+
+
+@router.get("/{schedule_id}/calendar.ics")
+def export_calendar_ics(
+    schedule_id: int,
+    view: str = Query(default="master"),
+    db: Session = Depends(get_db),
+):
+    return export_schedule(schedule_id=schedule_id, format="ics", view=view, db=db)
+
+
+@router.get("/{schedule_id}/calendar/feed")
+def get_calendar_feed_links(
+    schedule_id: int,
+    view: str = Query(default="master"),
+):
+    ics_path = f"/export/{schedule_id}/calendar.ics?view={view}"
+    return {
+        "schedule_id": schedule_id,
+        "view": view,
+        "ics_download_url": ics_path,
+        "webcal_url": f"webcal://localhost:8000{ics_path}",
+        "google_calendar_url": f"https://calendar.google.com/calendar/render?cid=webcal://localhost:8000{ics_path}",
+        "outlook_calendar_url": f"https://outlook.live.com/calendar/0/addcalendar?url=webcal://localhost:8000{ics_path}",
+    }
