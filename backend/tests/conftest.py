@@ -18,8 +18,20 @@ FIXTURES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixture
 
 @pytest.fixture(autouse=True)
 def setup_database():
-    """Ensure all database tables exist before each test run."""
+    """Ensure all database tables exist and have up-to-date columns before each test run."""
+    import sqlalchemy as sa
     Base.metadata.create_all(bind=engine)
+    with engine.connect() as conn:
+        inspector = sa.inspect(conn)
+        if "schedule_runs" in inspector.get_table_names():
+            cols = {c["name"] for c in inspector.get_columns("schedule_runs")}
+            if "academic_term" not in cols:
+                conn.execute(sa.text("ALTER TABLE schedule_runs ADD COLUMN academic_term VARCHAR(50) DEFAULT 'General'"))
+            if "department" not in cols:
+                conn.execute(sa.text("ALTER TABLE schedule_runs ADD COLUMN department VARCHAR(100) DEFAULT 'All'"))
+            if "created_by" not in cols:
+                conn.execute(sa.text("ALTER TABLE schedule_runs ADD COLUMN created_by VARCHAR(100) DEFAULT 'System'"))
+            conn.commit()
     yield
 
 

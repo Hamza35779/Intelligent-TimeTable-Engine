@@ -32,8 +32,11 @@ class GenerateScheduleRequest(BaseModel):
     courses: List[CourseCreate]
     constraints: Optional[List[ConstraintCreate]] = Field(default_factory=list)
     config: Optional[GlobalScheduleConfig] = None
-    timeout_seconds: Optional[int] = Field(default=5, ge=1, le=30)
+    timeout_seconds: Optional[int] = Field(default=5, ge=1, le=60)
     random_seed: Optional[int] = None
+    academic_term: Optional[str] = "General"
+    department: Optional[str] = "All"
+    created_by: Optional[str] = "System"
 
 
 class RescheduleRequest(BaseModel):
@@ -115,7 +118,21 @@ class TimetableAnalyticsResponse(BaseModel):
     preference_satisfaction_percentage: float
     time_slot_fill_rate_percentage: float
     conflicts_resolved_count: int
-    solver_efficiency: Dict[str, Any]
+    solver_efficiency: Optional[Dict[str, Any]] = None
+
+
+class JobStatusResponse(BaseModel):
+    job_id: str
+    status: str
+    created_at: str
+    started_at: Optional[str] = None
+    completed_at: Optional[str] = None
+    progress: int
+    message: str
+    result: Optional[Dict[str, Any]] = None
+    error: Optional[str] = None
+    metadata: Optional[Dict[str, Any]] = None
+
 
 
 class TableRowInput(BaseModel):

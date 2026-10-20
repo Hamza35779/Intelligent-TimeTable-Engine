@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from typing import List, Dict, Any, Tuple
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status
 from sqlalchemy.orm import Session
-from app.database import get_db
+from app.database import get_db, SessionLocal
 from app.models.faculty import Faculty
 from app.models.venue import Venue
 from app.models.slot import TimeSlot
@@ -19,10 +19,12 @@ from app.schemas.timetable import (
     GenerateFromTableRequest,
     TableValidationResult,
     TableRowValidationError,
+    JobStatusResponse,
 )
 from app.services.validator import ConstraintValidator
 from app.services.solver import TimetableSolver
 from app.services.analytics import TimetableAnalytics
+from app.services.job_queue import job_queue, JobStatus
 from ml.predictor import PreferencePredictor
 from solver.fairness import calculate_fairness_score, calculate_preference_satisfaction
 from utils.csv_parser import parse_schedule_csv, parse_schedule_table, validate_table_rows
@@ -212,12 +214,19 @@ def generate_schedule(payload: GenerateScheduleRequest, db: Session = Depends(ge
             or f"Solver could not find a feasible conflict-free timetable ({solver_status})."
         )
         now_utc = datetime.now(timezone.utc)
+        term = getattr(payload, "academic_term", "General") or "General"
+        dept = getattr(payload, "department", "All") or "All"
+        author = getattr(payload, "created_by", "System") or "System"
+
         failed_run = ScheduleRun(
             generated_at=now_utc,
             started_at=now_utc,
             completed_at=now_utc,
             status=solver_status.lower(),
             solver_status=solver_status,
+            academic_term=term,
+            department=dept,
+            created_by=author,
             solver_time_ms=solver.solver_time_ms,
             total_time_ms=total_time_ms,
             total_courses_scheduled=0,
@@ -271,12 +280,19 @@ def generate_schedule(payload: GenerateScheduleRequest, db: Session = Depends(ge
 
     # 5. Persist ScheduleRun & TimetableEntries
     now_utc = datetime.now(timezone.utc)
+    term = getattr(payload, "academic_term", "General") or "General"
+    dept = getattr(payload, "department", "All") or "All"
+    author = getattr(payload, "created_by", "System") or "System"
+
     run = ScheduleRun(
         generated_at=now_utc,
         started_at=now_utc,
         completed_at=now_utc,
         status="completed",
         solver_status=solver_status,
+        academic_term=term,
+        department=dept,
+        created_by=author,
         solver_time_ms=solver.solver_time_ms,
         total_time_ms=total_time_ms,
         total_courses_scheduled=len(solution_entries),
@@ -688,6 +704,66 @@ def reschedule_conflicts(payload: RescheduleRequest, db: Session = Depends(get_d
         schedule=formatted_entries,
         analytics=analytics,
     )
+
+
+def _run_background_generation_task(payload_dict: Dict[str, Any], progress_callback=None) -> Dict[str, Any]:
+    db = SessionLocal()
+    try:
+        if progress_callback:
+            progress_callback(20, "Validating institutional constraints")
+        req = GenerateScheduleRequest(**payload_dict)
+        if progress_callback:
+            progress_callback(40, "Solving conflict-free timetable with CP-SAT")
+        result = generate_schedule(payload=req, db=db)
+        if progress_callback:
+            progress_callback(95, "Finalizing metrics and persisting schedule")
+        return result.model_dump()
+    finally:
+        db.close()
+
+
+@router.post("/jobs/generate", response_model=JobStatusResponse, status_code=status.HTTP_202_ACCEPTED)
+def submit_async_generation_job(payload: GenerateScheduleRequest):
+    """
+    Submits a schedule generation job to the background worker pool.
+    Returns 202 Accepted immediately with a job_id for non-blocking polling.
+    """
+    payload_dict = payload.model_dump()
+    metadata = {
+        "term": getattr(payload, "academic_term", "General"),
+        "department": getattr(payload, "department", "All"),
+        "total_courses": len(payload.courses),
+    }
+    job_id = job_queue.submit_job(
+        _run_background_generation_task,
+        payload_dict=payload_dict,
+        metadata=metadata,
+    )
+    job = job_queue.get_job(job_id)
+    return JobStatusResponse(**job.to_dict())
+
+
+@router.get("/jobs", response_model=List[JobStatusResponse])
+def list_async_jobs(limit: int = 20):
+    """
+    List recent solver background jobs and their execution states.
+    """
+    jobs = job_queue.list_recent_jobs(limit=limit)
+    return [JobStatusResponse(**j) for j in jobs]
+
+
+@router.get("/jobs/{job_id}", response_model=JobStatusResponse)
+def get_async_job_status(job_id: str):
+    """
+    Check status, progress, and result of an asynchronous schedule generation job.
+    """
+    job = job_queue.get_job(job_id)
+    if not job:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Job '{job_id}' not found.",
+        )
+    return JobStatusResponse(**job.to_dict())
 
 
 demo_router = APIRouter(prefix="/demo", tags=["Demo"])

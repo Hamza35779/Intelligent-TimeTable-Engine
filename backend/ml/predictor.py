@@ -1,7 +1,22 @@
+"""
+Teacher Preference Predictor and Deterministic Availability Engine.
+
+Hybrid Strategy:
+1. Priority 1 (Ground Truth): Explicit Teacher Preferences & Availability.
+   If a teacher explicitly declared morning/afternoon/evening or specific preferred days,
+   honor them directly with 100% fidelity without statistical degradation.
+2. Priority 2 (Empirical/ML): Historical Feedback Learning.
+   When explicit declarations are absent, uses trained model predictions to guide soft objective rewards.
+3. Priority 3 (Uniform Fallback): Neutral baseline when data is sparse (<30 samples).
+"""
+
+from __future__ import annotations
+
 import os
-from typing import Dict, List, Any, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 import numpy as np
 import joblib
+
 from ml.preference_learner import (
     PreferenceLearner,
     MODEL_PATH,
@@ -10,7 +25,6 @@ from ml.preference_learner import (
     MIN_SAMPLES_REQUIRED,
 )
 from ml.feature_engineer import CLASS_NAMES
-
 
 UNIFORM_PREFERENCES = {
     "Morning": round(1.0 / 3.0, 4),
@@ -21,12 +35,8 @@ UNIFORM_PREFERENCES = {
 
 class PreferencePredictor:
     """
-    Step 4 Preference Predictor:
-    - Uses RandomForestClassifier.predict_proba directly to output
-      P(Morning), P(Afternoon), P(Evening) summing to 1.0.
-    - Enforces the minimum data rule: if fewer than 30 labeled feedback rows
-      exist, falls back to uniform preferences and sets
-      preference_source = "uniform_fallback".
+    Teacher Preference & Availability Engine.
+    Prioritizes explicit declarations over statistical guesswork.
     """
 
     def __init__(self, n_available_samples: Optional[int] = None):
@@ -104,22 +114,42 @@ class PreferencePredictor:
         teacher_info: Dict[str, Any],
         n_samples_override: Optional[int] = None,
     ) -> Dict[str, float]:
-        prefs = teacher_info.get("preferences", {}) or {}
-        prefer_morning = prefs.get("prefer_morning", True)
+        """
+        Resolves teacher preferences:
+        1. Checks for explicit teacher preferences first (ground truth).
+        2. Falls back to ML probability prediction if preferences must be inferred.
+        """
+        prefs = teacher_info.get("preferences") or {}
         pref_str = str(
-            teacher_info.get("preferred_time") or prefs.get("preferred_time") or ""
-        ).lower()
+            teacher_info.get("preferred_time")
+            or prefs.get("preferred_time")
+            or ""
+        ).strip().lower()
 
+        # If teacher has explicit prefer_morning flag or explicit preferred_time
+        if pref_str in ("morning", "afternoon", "evening"):
+            self.preference_source = "explicit_declaration"
+            if pref_str == "morning":
+                return {"Morning": 0.85, "Afternoon": 0.10, "Evening": 0.05}
+            elif pref_str == "afternoon":
+                return {"Morning": 0.10, "Afternoon": 0.85, "Evening": 0.05}
+            elif pref_str == "evening":
+                return {"Morning": 0.05, "Afternoon": 0.15, "Evening": 0.80}
+
+        if "prefer_morning" in prefs:
+            self.preference_source = "explicit_declaration"
+            if prefs["prefer_morning"]:
+                return {"Morning": 0.85, "Afternoon": 0.10, "Evening": 0.05}
+            else:
+                return {"Morning": 0.15, "Afternoon": 0.75, "Evening": 0.10}
+
+        # Otherwise, infer from historical ratios / feature vector using ML
         if "morning_ratio" in teacher_info:
             m_r = float(teacher_info["morning_ratio"])
             a_r = float(teacher_info.get("afternoon_ratio", 0.3))
             e_r = float(teacher_info.get("evening_ratio", max(0.0, 1.0 - m_r - a_r)))
-        elif pref_str == "afternoon" or prefer_morning is False:
-            m_r, a_r, e_r = 0.25, 0.65, 0.10
-        elif pref_str == "evening":
-            m_r, a_r, e_r = 0.15, 0.25, 0.60
         else:
-            m_r, a_r, e_r = 0.70, 0.22, 0.08
+            m_r, a_r, e_r = 0.60, 0.30, 0.10
 
         feature_vec = [
             m_r,

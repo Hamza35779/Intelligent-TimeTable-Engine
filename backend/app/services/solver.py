@@ -154,6 +154,18 @@ class TimetableSolver:
                     f"Course '{c.get('name', 'Unknown')}' requires room capacity {req_cap}, "
                     f"but the largest available room only holds {max_venue_cap}."
                 )
+            c_type = str(c.get("room_type") or "").strip().lower()
+            if c_type and c_type not in ("lecture", "general", "theory"):
+                matching_type_venues = [
+                    v for v in avail_venues
+                    if c_type in str(v.get("room_type") or v.get("type") or "").lower()
+                    or (c_type == "lab" and "lab" in str(v.get("name") or "").lower())
+                ]
+                if not matching_type_venues:
+                    return (
+                        f"Course '{c.get('name', 'Unknown')}' requires a '{c_type.title()}' venue, "
+                        f"but no available rooms match this room type."
+                    )
 
         valid_slots = []
         for s_idx, sl in enumerate(self.slots):
@@ -342,12 +354,38 @@ class TimetableSolver:
                             (start_slot_idx, slot_tuple, d_idx, global_start_min, dur_min)
                         )
 
+            c_room_type = str(course.get("room_type") or "").strip().lower()
+            c_req_equip = set(course.get("required_equipment") or [])
+            strict_cap = bool(self.config.get("strict_capacity", True))
+
             valid_venues = []
             for v_idx, v in enumerate(venues):
                 if v.get("is_unavailable", False):
                     continue
-                if v.get("capacity", 0) >= req_cap:
-                    valid_venues.append(v_idx)
+                v_cap = int(v.get("capacity", 0))
+                if strict_cap and v_cap < req_cap:
+                    continue
+
+                # Room type verification (Lab, Lecture Hall, Seminar, etc.)
+                if c_room_type:
+                    v_room_type = str(v.get("room_type") or v.get("type") or "").strip().lower()
+                    v_name = str(v.get("name") or "").lower()
+                    type_match = (
+                        not v_room_type
+                        or c_room_type in v_room_type
+                        or (c_room_type == "lab" and "lab" in v_name)
+                        or (c_room_type == "lecture" and ("lecture" in v_name or "hall" in v_name or "room" in v_name))
+                    )
+                    if not type_match:
+                        continue
+
+                # Equipment matching (e.g. projector, computers)
+                if c_req_equip:
+                    v_equip = set(v.get("equipment") or [])
+                    if not c_req_equip.issubset(v_equip):
+                        continue
+
+                valid_venues.append(v_idx)
 
             # Filter placements by venue slot restrictions if any venue specifies available_slots
             has_venue_slot_restrictions = any(

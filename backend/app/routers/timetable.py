@@ -1,4 +1,4 @@
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session, joinedload
 from app.database import get_db
@@ -87,13 +87,25 @@ def _load_run_entries(schedule_id: int, db: Session):
 
 
 @router.get("/schedules", response_model=List[Dict[str, Any]])
-def list_schedules(db: Session = Depends(get_db)):
-    runs = db.query(ScheduleRun).order_by(ScheduleRun.id.desc()).limit(20).all()
+def list_schedules(
+    term: Optional[str] = Query(default=None, description="Filter by academic term (e.g. Fall 2024)"),
+    department: Optional[str] = Query(default=None, description="Filter by department"),
+    db: Session = Depends(get_db),
+):
+    query = db.query(ScheduleRun)
+    if term:
+        query = query.filter(ScheduleRun.academic_term == term)
+    if department:
+        query = query.filter(ScheduleRun.department == department)
+    runs = query.order_by(ScheduleRun.id.desc()).limit(50).all()
     return [
         {
             "id": r.id,
             "generated_at": r.generated_at,
             "status": r.status,
+            "academic_term": getattr(r, "academic_term", "General") or "General",
+            "department": getattr(r, "department", "All") or "All",
+            "created_by": getattr(r, "created_by", "System") or "System",
             "total_courses_scheduled": r.total_courses_scheduled,
             "solver_time_ms": r.solver_time_ms,
         }
@@ -101,7 +113,7 @@ def list_schedules(db: Session = Depends(get_db)):
     ]
 
 
-@router.get("/schedule/{schedule_id}", response_model=TimetableDetailResponse)
+@router.get("/schedule/{schedule_id:int}", response_model=TimetableDetailResponse)
 def get_schedule(schedule_id: int, db: Session = Depends(get_db)):
     run, formatted_entries, entry_dicts, _, prefs_map = _load_run_entries(schedule_id, db)
 

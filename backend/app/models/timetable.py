@@ -13,6 +13,9 @@ class ScheduleRun(Base):
     completed_at = Column(DateTime, nullable=True)
     status = Column(String(50), default="completed", nullable=False)  # completed, optimal, feasible, infeasible, timeout
     solver_status = Column(String(50), nullable=True)
+    academic_term = Column(String(50), nullable=True, default="General", index=True)
+    department = Column(String(100), nullable=True, default="All", index=True)
+    created_by = Column(String(100), nullable=True, default="System")
     solver_time_ms = Column(Float, default=0.0)
     total_time_ms = Column(Float, default=0.0)
     total_courses_scheduled = Column(Integer, default=0)
